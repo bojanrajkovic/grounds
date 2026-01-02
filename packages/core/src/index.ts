@@ -59,3 +59,6 @@ export {
 // Error types
 export { EncodeError, DecodeError } from "./errors.js";
 
+// Encoder
+export { encode, Encoder } from "./encoder.js";
+

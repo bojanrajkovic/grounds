@@ -12,6 +12,8 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - `TypeCode` - Constant object mapping type names to byte codes (0x00-0x13)
   - `RelishValue` - Discriminated union of all Relish value types
   - Value constructors: `Null`, `Bool`, `U8`...`Timestamp` (19 functions + 1 singleton)
+  - `encode(value: RelishValue) -> Result<Uint8Array, EncodeError>` - Encode a value to bytes
+  - `Encoder` class - Reusable encoder with pre-allocated buffer for performance
   - `EncodeError`, `DecodeError` - Error types with factory methods
   - `DecodedValue` - Union type for decoder output (raw JS values)
 - **Guarantees**:
@@ -19,14 +21,17 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - Array/Map constructors validate element types at runtime
   - 64-bit and 128-bit integers use BigInt
   - Timestamps use BigInt (Unix seconds); Luxon DateTime available via re-export
+  - Encoder produces wire-compatible output matching Rust reference implementation
+  - Struct fields encoded in ascending field ID order
 - **Expects**:
   - Callers provide correctly-typed values to constructors
   - BigInt for u64/u128/i64/i128/timestamp values
+  - Struct field IDs in range 0-127
 
 ## Dependencies
 
-- **Uses**: `luxon` (DateTime re-export for schema layer convenience)
-- **Used by**: Future encoder/decoder implementations, @grounds/schema
+- **Uses**: `luxon` (DateTime re-export for schema layer convenience), `neverthrow` (Result types)
+- **Used by**: @grounds/schema, future decoder implementation
 - **Boundary**: No I/O operations; pure functional core only
 
 ## Key Decisions
@@ -34,6 +39,8 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
 - Discriminated union over classes: Enables exhaustive pattern matching, smaller bundle
 - Runtime validation in Array_/Map_: Catches type mismatches early despite TypeScript erasure
 - Separate DecodedValue type: Decoder returns raw JS values, not wrapped RelishValue
+- Encoder class with reusable buffer: Avoids allocation overhead for repeated encoding
+- Tagged varint for lengths: Short form (1 byte) for <128, long form (4 bytes) otherwise
 
 ## Invariants
 
@@ -48,8 +55,12 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
 - `types.ts` - TypeCode constants and RelishValue type definitions
 - `values.ts` - Value constructor functions
 - `errors.ts` - EncodeError and DecodeError classes
+- `encoder.ts` - Encoder class and encode function
+- `encoding-helpers.ts` - Tagged varint encoding, type code mapping
 
 ## Gotchas
 
 - `String_`, `Array_`, `Map_` named with underscore to avoid shadowing globals
 - Composite types in arrays/maps hold RelishValue, primitives hold raw JS values
+- Encoder.encode() resets position; reuse same Encoder instance for performance
+- Array/Map elements encoded without type tag (type in container header)
