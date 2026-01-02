@@ -1,5 +1,7 @@
 # Grounds - Relish Serialization in TypeScript
 
+Last verified: 2026-01-02
+
 ## Project Overview
 
 TypeScript implementation of [Relish](https://github.com/alex/relish) binary serialization format.
