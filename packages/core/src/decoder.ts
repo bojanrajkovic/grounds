@@ -456,3 +456,8 @@ export class Decoder {
     return ok({ variantId, value: valueResult.value } as Readonly<{ variantId: number; value: DecodedValue }>);
   }
 }
+
+export function decode(bytes: Uint8Array): Result<DecodedValue, DecodeError> {
+  const decoder = new Decoder(bytes);
+  return decoder.decodeValue();
+}

@@ -1,6 +1,6 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
-import { Decoder } from "../src/decoder.js";
+import { Decoder, decode } from "../src/decoder.js";
 import { TypeCode, DateTime } from "../src/types.js";
 
 describe("Decoder", () => {
@@ -413,6 +413,24 @@ describe("Decoder Enum", () => {
       TypeCode.U8, 0x01
     ]));
     const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("decode() public API", () => {
+  it("decodes complete value as raw DecodedValue", () => {
+    const result = decode(new Uint8Array([TypeCode.U32, 0x2A, 0x00, 0x00, 0x00]));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe(42);
+  });
+
+  it("returns error for empty buffer", () => {
+    const result = decode(new Uint8Array([]));
+    expect(result.isErr()).toBe(true);
+  });
+
+  it("returns error for truncated value", () => {
+    const result = decode(new Uint8Array([TypeCode.U32, 0x2A])); // Missing 3 bytes
     expect(result.isErr()).toBe(true);
   });
 });

@@ -62,3 +62,6 @@ export { EncodeError, DecodeError } from "./errors.js";
 // Encoder
 export { encode, Encoder } from "./encoder.js";
 
+// Decoder
+export { decode, Decoder } from "./decoder.js";
+
