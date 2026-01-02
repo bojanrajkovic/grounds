@@ -43,6 +43,7 @@ Branches should be prefixed with username and conventional commit type:
 - Links to relevant documentation or ADRs
 - Test results and verification steps
 - Breaking changes highlighted
+- **Do not mention implementation phases** in PR titles or commit messages - describe what was built, not which phase it belongs to
 
 ## Commands
 
