@@ -18,8 +18,13 @@ import {
   F64,
   String_,
   Timestamp,
+  Array_,
+  Map_,
+  Struct,
+  Enum,
 } from "../src/values.js";
 import { TypeCode } from "../src/types.js";
+import type { RelishValue } from "../src/types.js";
 
 describe("encode primitives (Rust test vectors)", () => {
   describe("Null", () => {
@@ -146,5 +151,151 @@ describe("encode primitives (Rust test vectors)", () => {
       expect(bytes[0]).toBe(TypeCode.Timestamp);
       expect(bytes.length).toBe(9); // type + 8 bytes
     });
+  });
+});
+
+describe("encode structs (Rust test vectors)", () => {
+  // From Rust: Empty struct = [0x11, 0x00]
+  it("encodes empty struct", () => {
+    const result = encode(Struct(new Map()));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([TypeCode.Struct, 0x00])
+    );
+  });
+
+  // From Rust: Simple { value: 42 } where field_id=0
+  // = [0x11, 0x0C, 0x00, 0x04, 0x2A, 0x00, 0x00, 0x00]
+  // 0x0C = 12 = 6 << 1 (content length 6)
+  it("encodes struct with single u32 field", () => {
+    const fields = new Map<number, RelishValue>([[0, U32(42)]]);
+    const result = encode(Struct(fields));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([TypeCode.Struct, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00])
+    );
+  });
+
+  it("encodes struct with multiple fields in ascending order", () => {
+    const fields = new Map<number, RelishValue>([
+      [0, U8(1)],
+      [1, U8(2)],
+      [5, U8(3)],
+    ]);
+    const result = encode(Struct(fields));
+    expect(result.isOk()).toBe(true);
+    const bytes = result._unsafeUnwrap();
+    expect(bytes[0]).toBe(TypeCode.Struct);
+    // Content: field0 + field1 + field5
+  });
+
+  it("rejects struct with field ID > 127", () => {
+    const fields = new Map<number, RelishValue>([[128, U8(1)]]);
+    const result = encode(Struct(fields));
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr().message).toContain("field ID 128");
+  });
+});
+
+describe("encode enums (Rust test vectors)", () => {
+  // From Rust: SimpleEnum::A(42) where variant_id=0
+  // = [0x12, 0x0C, 0x00, 0x04, 0x2A, 0x00, 0x00, 0x00]
+  it("encodes enum variant with u32", () => {
+    const result = encode(Enum(0, U32(42)));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([TypeCode.Enum, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00])
+    );
+  });
+
+  it("encodes enum variant with string", () => {
+    const result = encode(Enum(1, String_("hello")));
+    expect(result.isOk()).toBe(true);
+    const bytes = result._unsafeUnwrap();
+    expect(bytes[0]).toBe(TypeCode.Enum);
+    // Content includes: variant_id + type + length + "hello"
+  });
+
+  it("rejects enum with variant ID > 127", () => {
+    const result = encode(Enum(128, Null));
+    expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("encode arrays (Rust test vectors)", () => {
+  // From Rust: Vec<u32> [1,2,3,4]
+  // = [0x0F, 0x22, 0x04, 0x01,0x00,0x00,0x00, 0x02,0x00,0x00,0x00, ...]
+  // 0x22 = 34 = 17 << 1 (content length 17: 1 type byte + 4*4 value bytes)
+  it("encodes array of u32 with raw number elements", () => {
+    // Elements are raw JS values, not wrapped RelishValue
+    const result = encode(Array_(TypeCode.U32, [1, 2, 3, 4]));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        TypeCode.Array, 0x22, TypeCode.U32,
+        0x01, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00,
+        0x03, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x00, 0x00,
+      ])
+    );
+  });
+
+  it("encodes array of strings with raw string elements", () => {
+    const result = encode(Array_(TypeCode.String, ["hi", "yo"]));
+    expect(result.isOk()).toBe(true);
+    const bytes = result._unsafeUnwrap();
+    expect(bytes[0]).toBe(TypeCode.Array);
+    // Content: type byte + "hi" (len + bytes) + "yo" (len + bytes)
+  });
+
+  it("encodes empty array", () => {
+    const result = encode(Array_(TypeCode.U8, []));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([TypeCode.Array, 0x02, TypeCode.U8])
+    );
+  });
+
+  it("encodes nested array with RelishValue elements", () => {
+    // Composite element types still use RelishValue
+    const inner1 = Array_(TypeCode.U8, [1, 2]);
+    const inner2 = Array_(TypeCode.U8, [3, 4]);
+    const result = encode(Array_(TypeCode.Array, [inner1, inner2]));
+    expect(result.isOk()).toBe(true);
+  });
+});
+
+describe("encode maps (Rust test vectors)", () => {
+  // From Rust: HashMap {1u32: 10u32}
+  // = [0x10, 0x14, 0x04, 0x04, 0x01,0x00,0x00,0x00, 0x0A,0x00,0x00,0x00]
+  // 0x14 = 20 = 10 << 1 (content length 10)
+  it("encodes map with raw u32 keys and values", () => {
+    // Entries hold raw JS values for primitive types
+    const entries = new Map<number, number>([[1, 10]]);
+    const result = encode(Map_(TypeCode.U32, TypeCode.U32, entries));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        TypeCode.Map, 0x14, TypeCode.U32, TypeCode.U32,
+        0x01, 0x00, 0x00, 0x00,
+        0x0a, 0x00, 0x00, 0x00,
+      ])
+    );
+  });
+
+  it("encodes map with string keys and u32 values", () => {
+    const result = encode(Map_(TypeCode.String, TypeCode.U32, {"key": 42}));
+    expect(result.isOk()).toBe(true);
+    const bytes = result._unsafeUnwrap();
+    expect(bytes[0]).toBe(TypeCode.Map);
+  });
+
+  it("encodes empty map", () => {
+    const result = encode(Map_(TypeCode.String, TypeCode.U32, {}));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([TypeCode.Map, 0x04, TypeCode.String, TypeCode.U32])
+    );
   });
 });
