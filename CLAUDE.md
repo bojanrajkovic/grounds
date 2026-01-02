@@ -58,9 +58,12 @@ pnpm --filter @grounds/core build  # Build specific package
 
 Every source file MUST have a pattern comment:
 ```typescript
-// pattern: Functional Core    # Pure functions, no I/O
-// pattern: Imperative Shell   # I/O orchestration
+// pattern: Functional Core
+// pattern: Imperative Shell
 ```
+
+- **Functional Core**: Pure functions, no I/O, returns Result types
+- **Imperative Shell**: I/O orchestration, may throw exceptions
 
 ### TypeScript Style
 
