@@ -263,3 +263,156 @@ describe("Decoder Array", () => {
     expect(arr).toEqual(["foo", "bar", "baz"]);
   });
 });
+
+describe("Decoder Map", () => {
+  it("decodes HashMap {1u32: 10u32} as ReadonlyMap from Rust test vectors", () => {
+    // From Rust: HashMap {1u32: 10u32} encodes to:
+    // [TypeCode.Map, 0x14, TypeCode.U32, TypeCode.U32, 0x01,0x00,0x00,0x00, 0x0A,0x00,0x00,0x00]
+    // 0x14 = (10 << 1) = 20, where 10 = 2 (key+value types) + 8 (one u32 key + one u32 value)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Map, 0x14, TypeCode.U32, TypeCode.U32,
+      0x01, 0x00, 0x00, 0x00,  // key: 1
+      0x0A, 0x00, 0x00, 0x00   // value: 10
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const map = result._unsafeUnwrap() as ReadonlyMap<number, number>;
+    expect(map instanceof Map).toBe(true);
+    expect(map.get(1)).toBe(10);
+    expect(map.size).toBe(1);
+  });
+
+  it("decodes empty HashMap<u32, u32> as ReadonlyMap from Rust test vectors", () => {
+    // From Rust: empty HashMap<u32, u32> encodes to:
+    // [TypeCode.Map, 0x04, TypeCode.U32, TypeCode.U32]
+    // 0x04 = (2 << 1) = 4, where 2 = 2 (key+value type bytes only)
+    const decoder = new Decoder(new Uint8Array([TypeCode.Map, 0x04, TypeCode.U32, TypeCode.U32]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const map = result._unsafeUnwrap() as ReadonlyMap<number, number>;
+    expect(map instanceof Map).toBe(true);
+    expect(map.size).toBe(0);
+  });
+
+  it("decodes HashMap {1u32: \"foo\"} as ReadonlyMap from Rust test vectors", () => {
+    // From Rust: HashMap {1u32: "foo"} encodes to:
+    // [TypeCode.Map, 0x14, TypeCode.U32, TypeCode.String, 0x01,0x00,0x00,0x00, 0x06, 'f','o','o']
+    // 0x14 = (10 << 1) = 20, where 10 = 2 (types) + 4 (u32) + 4 (length + "foo")
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Map, 0x14, TypeCode.U32, TypeCode.String,
+      0x01, 0x00, 0x00, 0x00,  // key: 1
+      0x06, 0x66, 0x6F, 0x6F   // value: "foo" (length=3)
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const map = result._unsafeUnwrap() as ReadonlyMap<number, string>;
+    expect(map instanceof Map).toBe(true);
+    expect(map.get(1)).toBe("foo");
+    expect(map.size).toBe(1);
+  });
+
+  it("rejects duplicate map keys", () => {
+    // Map with duplicate key 1
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Map, 0x24, TypeCode.U32, TypeCode.U32,
+      0x01, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00,  // key: 1, value: 10
+      0x01, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00   // key: 1 (duplicate!), value: 20
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("Decoder Struct", () => {
+  it("decodes struct with single field as plain object", () => {
+    // Struct with field 1 = u8(42):
+    // [TypeCode.Struct, length, field_id=1, TypeCode.U8, 42]
+    // length = (3 << 1) = 6 for 3 bytes content
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Struct, 0x06,  // length=3
+      0x01,                   // field_id=1
+      TypeCode.U8, 0x2A      // u8(42)
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as Readonly<{ [fieldId: number]: unknown }>;
+    expect(typeof struct).toBe("object");
+    expect(struct[1]).toBe(42);
+  });
+
+  it("decodes struct with multiple fields as plain object in ascending order", () => {
+    // Struct with field 1 = u8(1), field 2 = u8(2), field 5 = u8(5)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Struct, 0x12,  // length=9
+      0x01, TypeCode.U8, 0x01,  // field 1 = 1
+      0x02, TypeCode.U8, 0x02,  // field 2 = 2
+      0x05, TypeCode.U8, 0x05   // field 5 = 5
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as Readonly<{ [fieldId: number]: unknown }>;
+    expect(struct[1]).toBe(1);
+    expect(struct[2]).toBe(2);
+    expect(struct[5]).toBe(5);
+  });
+
+  it("rejects struct with non-ascending field IDs", () => {
+    // Struct with field 2 before field 1 (invalid)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Struct, 0x0C,  // length=6
+      0x02, TypeCode.U8, 0x02,  // field 2 first (wrong!)
+      0x01, TypeCode.U8, 0x01   // field 1 second
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+
+  it("rejects field ID with bit 7 set", () => {
+    // Field ID 0x80 is invalid
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Struct, 0x06,
+      0x80, TypeCode.U8, 0x01  // field 128 - bit 7 set
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("Decoder Enum", () => {
+  it("decodes enum variant with value as plain object", () => {
+    // Enum variant 1 with u8(42):
+    // [TypeCode.Enum, length, variant_id=1, TypeCode.U8, 42]
+    // length = (3 << 1) = 6 for 3 bytes (variant_id + T[L]V)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Enum, 0x06,   // length=3
+      0x01,                  // variant_id=1
+      TypeCode.U8, 0x2A     // u8(42)
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const enumVal = result._unsafeUnwrap() as Readonly<{ variantId: number; value: unknown }>;
+    expect(enumVal.variantId).toBe(1);
+    expect(enumVal.value).toBe(42);
+  });
+
+  it("rejects enum with length mismatch", () => {
+    // Enum claims length=2 but value is 2 bytes (u8)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Enum, 0x04,   // length=2 (too short!)
+      0x01,                  // variant_id=1
+      TypeCode.U8, 0x2A     // u8(42) - this won't fit
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+
+  it("rejects variant ID with bit 7 set", () => {
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Enum, 0x06,
+      0x80,                  // variant 128 - bit 7 set
+      TypeCode.U8, 0x01
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+});

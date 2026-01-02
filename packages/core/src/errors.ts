@@ -77,4 +77,12 @@ export class DecodeError extends Error {
       `enum variant content length ${actualLength} does not match declared length ${declaredLength}`
     );
   }
+
+  static invalidFieldId(fieldId: number): DecodeError {
+    return new DecodeError(`field ID ${fieldId} is invalid: bit 7 must not be set`);
+  }
+
+  static invalidVariantId(variantId: number): DecodeError {
+    return new DecodeError(`variant ID ${variantId} is invalid: bit 7 must not be set`);
+  }
 }

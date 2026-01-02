@@ -27,6 +27,9 @@ export class Decoder {
     [TypeCode.String]: (d) => d.decodeString(),
     [TypeCode.Timestamp]: (d) => d.decodeTimestamp(),
     [TypeCode.Array]: (d) => d.decodeArray(),
+    [TypeCode.Map]: (d) => d.decodeMap(),
+    [TypeCode.Struct]: (d) => d.decodeStruct(),
+    [TypeCode.Enum]: (d) => d.decodeEnum(),
   };
   private readonly buffer: Uint8Array;
   private readonly view: DataView;
@@ -316,5 +319,140 @@ export class Decoder {
       default:
         return err(DecodeError.unknownTypeCode(typeCode));
     }
+  }
+
+  private decodeMap(): Result<ReadonlyMap<DecodedValue, DecodedValue>, DecodeError> {
+    const lengthResult = this.decodeVarsizeLength();
+    if (lengthResult.isErr()) {
+      return err(lengthResult.error);
+    }
+
+    const contentLength = lengthResult.value;
+    if (contentLength < 2) {
+      return err(DecodeError.unexpectedEnd(2, contentLength));
+    }
+
+    if (this.remaining < 2) {
+      return err(DecodeError.unexpectedEnd(2, this.remaining));
+    }
+
+    const keyType = this.buffer[this.cursor]! as TypeCode;
+    const valueType = this.buffer[this.cursor + 1]! as TypeCode;
+    this.cursor += 2;
+
+    // Calculate remaining bytes for entries
+    const entriesLength = contentLength - 2;
+    const endPosition = this.cursor + entriesLength;
+
+    const entries = new Map<DecodedValue, DecodedValue>();
+    const seenKeys = new Set<string>();
+
+    while (this.cursor < endPosition) {
+      // Decode key value using known type
+      const keyResult = this.decodePrimitiveValue(keyType);
+      if (keyResult.isErr()) {
+        return err(keyResult.error);
+      }
+
+      // Check for duplicate keys using JSON serialization
+      const keyString = JSON.stringify(keyResult.value);
+      if (seenKeys.has(keyString)) {
+        return err(DecodeError.duplicateMapKey());
+      }
+      seenKeys.add(keyString);
+
+      // Decode value using known type
+      const valueResult = this.decodePrimitiveValue(valueType);
+      if (valueResult.isErr()) {
+        return err(valueResult.error);
+      }
+
+      entries.set(keyResult.value, valueResult.value);
+    }
+
+    return ok(entries as ReadonlyMap<DecodedValue, DecodedValue>);
+  }
+
+  private decodeStruct(): Result<Readonly<{ [fieldId: number]: DecodedValue }>, DecodeError> {
+    const lengthResult = this.decodeVarsizeLength();
+    if (lengthResult.isErr()) {
+      return err(lengthResult.error);
+    }
+
+    const contentLength = lengthResult.value;
+    const endPosition = this.cursor + contentLength;
+
+    const fields: { [fieldId: number]: DecodedValue } = {};
+    let lastFieldId = -1;
+
+    while (this.cursor < endPosition) {
+      if (this.remaining < 1) {
+        return err(DecodeError.unexpectedEnd(1, this.remaining));
+      }
+
+      const fieldId = this.buffer[this.cursor]!;
+      this.cursor += 1;
+
+      // Validate field ID (bit 7 must not be set)
+      if ((fieldId & 0x80) !== 0) {
+        return err(DecodeError.invalidFieldId(fieldId));
+      }
+
+      // Validate field IDs are strictly ascending
+      if (fieldId <= lastFieldId) {
+        return err(DecodeError.unsortedFields(lastFieldId, fieldId));
+      }
+      lastFieldId = fieldId;
+
+      // Recursively decode field value
+      const valueResult = this.decodeValue();
+      if (valueResult.isErr()) {
+        return err(valueResult.error);
+      }
+
+      fields[fieldId] = valueResult.value;
+    }
+
+    return ok(fields as Readonly<{ [fieldId: number]: DecodedValue }>);
+  }
+
+  private decodeEnum(): Result<Readonly<{ variantId: number; value: DecodedValue }>, DecodeError> {
+    const lengthResult = this.decodeVarsizeLength();
+    if (lengthResult.isErr()) {
+      return err(lengthResult.error);
+    }
+
+    const contentLength = lengthResult.value;
+    if (contentLength < 1) {
+      return err(DecodeError.unexpectedEnd(1, contentLength));
+    }
+
+    const startPosition = this.cursor;
+
+    if (this.remaining < 1) {
+      return err(DecodeError.unexpectedEnd(1, this.remaining));
+    }
+
+    const variantId = this.buffer[this.cursor]!;
+    this.cursor += 1;
+
+    // Validate variant ID (bit 7 must not be set)
+    if ((variantId & 0x80) !== 0) {
+      return err(DecodeError.invalidVariantId(variantId));
+    }
+
+    // Recursively decode the value
+    const valueResult = this.decodeValue();
+    if (valueResult.isErr()) {
+      return err(valueResult.error);
+    }
+
+    // Validate that decoded content matches declared length
+    const actualLength = this.cursor - startPosition;
+    if (actualLength !== contentLength) {
+      return err(DecodeError.enumLengthMismatch(contentLength, actualLength));
+    }
+
+    return ok({ variantId, value: valueResult.value } as Readonly<{ variantId: number; value: DecodedValue }>);
   }
 }
