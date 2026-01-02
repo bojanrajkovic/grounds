@@ -1,7 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { Decoder } from "../src/decoder.js";
-import { TypeCode } from "../src/types.js";
+import { TypeCode, DateTime } from "../src/types.js";
 
 describe("Decoder", () => {
   it("creates decoder instance with buffer", () => {
@@ -161,5 +161,56 @@ describe("Decoder primitives", () => {
       expect(result.isOk()).toBe(true);
       expect(result._unsafeUnwrap()).toBeCloseTo(1.0);
     });
+  });
+});
+
+describe("Decoder String", () => {
+  it("decodes empty string as raw string", () => {
+    // Empty string: [TypeCode.String, length=0 (0x00)]
+    const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x00]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe("");
+  });
+
+  it("decodes ASCII string as raw string", () => {
+    // "foo": [TypeCode.String, length=3 (0x06), 'f', 'o', 'o']
+    const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x06, 0x66, 0x6F, 0x6F]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe("foo");
+  });
+
+  it("decodes UTF-8 string as raw string", () => {
+    // "日本" in UTF-8: [0xE6, 0x97, 0xA5, 0xE6, 0x9C, 0xAC]
+    const utf8Bytes = new TextEncoder().encode("日本");
+    const buffer = new Uint8Array([TypeCode.String, utf8Bytes.length << 1, ...utf8Bytes]);
+    const decoder = new Decoder(buffer);
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe("日本");
+  });
+
+  it("rejects invalid UTF-8", () => {
+    // Invalid UTF-8 sequence: [0xFF, 0xFE]
+    const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x04, 0xFF, 0xFE]));
+    const result = decoder.decodeValue();
+    expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("Decoder Timestamp", () => {
+  it("decodes timestamp as Luxon DateTime", () => {
+    // Unix timestamp 1704067200 (2024-01-01 00:00:00 UTC)
+    // In little-endian 64-bit: [0x80, 0x00, 0x92, 0x65, 0x00, 0x00, 0x00, 0x00]
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Timestamp,
+      0x80, 0x00, 0x92, 0x65, 0x00, 0x00, 0x00, 0x00
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const decoded = result._unsafeUnwrap();
+    expect(DateTime.isDateTime(decoded)).toBe(true);
+    expect((decoded as DateTime).toSeconds()).toBe(1704067200);
   });
 });

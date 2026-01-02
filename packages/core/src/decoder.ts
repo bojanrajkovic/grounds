@@ -2,6 +2,7 @@
 // Decoder class with cursor management for Relish binary decoding
 
 import { Result, ok, err } from "neverthrow";
+import { DateTime } from "luxon";
 import { DecodeError } from "./errors.js";
 import { TypeCode, type DecodedValue } from "./types.js";
 
@@ -22,6 +23,8 @@ const TYPE_DECODERS: Partial<Record<TypeCode, DecoderMethod>> = {
   [TypeCode.I128]: (d) => d.decodeI128(),
   [TypeCode.F32]: (d) => d.decodeF32(),
   [TypeCode.F64]: (d) => d.decodeF64(),
+  [TypeCode.String]: (d) => d.decodeString(),
+  [TypeCode.Timestamp]: (d) => d.decodeTimestamp(),
 };
 
 export class Decoder {
@@ -204,5 +207,36 @@ export class Decoder {
     const value = this.view.getFloat64(this.cursor, true);
     this.cursor += 8;
     return ok(value);
+  }
+
+  private decodeString(): Result<string, DecodeError> {
+    const lengthResult = this.decodeVarsizeLength();
+    if (lengthResult.isErr()) {
+      return err(lengthResult.error);
+    }
+
+    const length = lengthResult.value;
+    if (this.remaining < length) {
+      return err(DecodeError.unexpectedEnd(length, this.remaining));
+    }
+
+    const bytes = this.buffer.subarray(this.cursor, this.cursor + length);
+    this.cursor += length;
+
+    try {
+      const decoder = new TextDecoder("utf-8", { fatal: true });
+      return ok(decoder.decode(bytes));
+    } catch {
+      return err(DecodeError.invalidUtf8());
+    }
+  }
+
+  private decodeTimestamp(): Result<DateTime, DecodeError> {
+    if (this.remaining < 8) {
+      return err(DecodeError.unexpectedEnd(8, this.remaining));
+    }
+    const unixSeconds = this.view.getBigInt64(this.cursor, true);
+    this.cursor += 8;
+    return ok(DateTime.fromSeconds(Number(unixSeconds), { zone: "utc" }));
   }
 }
