@@ -8,26 +8,26 @@ import { TypeCode, type DecodedValue } from "./types.js";
 
 type DecoderMethod = (decoder: Decoder) => Result<DecodedValue, DecodeError>;
 
-const TYPE_DECODERS: Partial<Record<TypeCode, DecoderMethod>> = {
-  [TypeCode.Null]: () => ok(null),
-  [TypeCode.Bool]: (d) => d.decodeBool(),
-  [TypeCode.U8]: (d) => d.decodeU8(),
-  [TypeCode.U16]: (d) => d.decodeU16(),
-  [TypeCode.U32]: (d) => d.decodeU32(),
-  [TypeCode.U64]: (d) => d.decodeU64(),
-  [TypeCode.U128]: (d) => d.decodeU128(),
-  [TypeCode.I8]: (d) => d.decodeI8(),
-  [TypeCode.I16]: (d) => d.decodeI16(),
-  [TypeCode.I32]: (d) => d.decodeI32(),
-  [TypeCode.I64]: (d) => d.decodeI64(),
-  [TypeCode.I128]: (d) => d.decodeI128(),
-  [TypeCode.F32]: (d) => d.decodeF32(),
-  [TypeCode.F64]: (d) => d.decodeF64(),
-  [TypeCode.String]: (d) => d.decodeString(),
-  [TypeCode.Timestamp]: (d) => d.decodeTimestamp(),
-};
-
 export class Decoder {
+  private static readonly TYPE_DECODERS: Partial<Record<TypeCode, DecoderMethod>> = {
+    [TypeCode.Null]: () => ok(null),
+    [TypeCode.Bool]: (d) => d.decodeBool(),
+    [TypeCode.U8]: (d) => d.decodeU8(),
+    [TypeCode.U16]: (d) => d.decodeU16(),
+    [TypeCode.U32]: (d) => d.decodeU32(),
+    [TypeCode.U64]: (d) => d.decodeU64(),
+    [TypeCode.U128]: (d) => d.decodeU128(),
+    [TypeCode.I8]: (d) => d.decodeI8(),
+    [TypeCode.I16]: (d) => d.decodeI16(),
+    [TypeCode.I32]: (d) => d.decodeI32(),
+    [TypeCode.I64]: (d) => d.decodeI64(),
+    [TypeCode.I128]: (d) => d.decodeI128(),
+    [TypeCode.F32]: (d) => d.decodeF32(),
+    [TypeCode.F64]: (d) => d.decodeF64(),
+    [TypeCode.String]: (d) => d.decodeString(),
+    [TypeCode.Timestamp]: (d) => d.decodeTimestamp(),
+    [TypeCode.Array]: (d) => d.decodeArray(),
+  };
   private readonly buffer: Uint8Array;
   private readonly view: DataView;
   private cursor: number = 0;
@@ -82,7 +82,7 @@ export class Decoder {
 
     this.cursor += 1;
 
-    const decoderMethod = TYPE_DECODERS[typeCode as TypeCode];
+    const decoderMethod = Decoder.TYPE_DECODERS[typeCode as TypeCode];
     if (decoderMethod === undefined) {
       return err(DecodeError.unknownTypeCode(typeCode));
     }
@@ -238,5 +238,83 @@ export class Decoder {
     const unixSeconds = this.view.getBigInt64(this.cursor, true);
     this.cursor += 8;
     return ok(DateTime.fromSeconds(Number(unixSeconds), { zone: "utc" }));
+  }
+
+  private decodeArray(): Result<DecodedValue, DecodeError> {
+    const lengthResult = this.decodeVarsizeLength();
+    if (lengthResult.isErr()) {
+      return err(lengthResult.error);
+    }
+
+    const contentLength = lengthResult.value;
+    if (contentLength < 1) {
+      return err(DecodeError.unexpectedEnd(1, contentLength));
+    }
+
+    if (this.remaining < 1) {
+      return err(DecodeError.unexpectedEnd(1, 0));
+    }
+
+    const elementType = this.buffer[this.cursor]! as TypeCode;
+    this.cursor += 1;
+
+    // Calculate remaining bytes for elements
+    const elementsLength = contentLength - 1;
+    const endPosition = this.cursor + elementsLength;
+
+    const elements: Array<DecodedValue> = [];
+
+    while (this.cursor < endPosition) {
+      // For primitive types, decode raw values without type codes
+      // For composite types, decode full values with type codes
+      const elementResult = this.decodePrimitiveValue(elementType);
+      if (elementResult.isErr()) {
+        return err(elementResult.error);
+      }
+      elements.push(elementResult.value);
+    }
+
+    // Return as ReadonlyArray (Array.isArray() still returns true for arrays)
+    return ok(elements as DecodedValue);
+  }
+
+  private decodePrimitiveValue(typeCode: TypeCode): Result<DecodedValue, DecodeError> {
+    // Decode raw value for a primitive type (without reading a type code from buffer)
+    switch (typeCode) {
+      case TypeCode.Null:
+        return ok(null);
+      case TypeCode.Bool:
+        return this.decodeBool();
+      case TypeCode.U8:
+        return this.decodeU8();
+      case TypeCode.U16:
+        return this.decodeU16();
+      case TypeCode.U32:
+        return this.decodeU32();
+      case TypeCode.U64:
+        return this.decodeU64();
+      case TypeCode.U128:
+        return this.decodeU128();
+      case TypeCode.I8:
+        return this.decodeI8();
+      case TypeCode.I16:
+        return this.decodeI16();
+      case TypeCode.I32:
+        return this.decodeI32();
+      case TypeCode.I64:
+        return this.decodeI64();
+      case TypeCode.I128:
+        return this.decodeI128();
+      case TypeCode.F32:
+        return this.decodeF32();
+      case TypeCode.F64:
+        return this.decodeF64();
+      case TypeCode.String:
+        return this.decodeString();
+      case TypeCode.Timestamp:
+        return this.decodeTimestamp();
+      default:
+        return err(DecodeError.unknownTypeCode(typeCode));
+    }
   }
 }

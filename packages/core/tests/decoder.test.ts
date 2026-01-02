@@ -214,3 +214,52 @@ describe("Decoder Timestamp", () => {
     expect((decoded as DateTime).toSeconds()).toBe(1704067200);
   });
 });
+
+describe("Decoder Array", () => {
+  it("decodes vec![1u32, 2, 3, 4] as ReadonlyArray from Rust test vectors", () => {
+    // From Rust: vec![1u32, 2, 3, 4] encodes to:
+    // [TypeCode.Array, 0x22, TypeCode.U32, 0x01,0x00,0x00,0x00, 0x02,0x00,0x00,0x00, 0x03,0x00,0x00,0x00, 0x04,0x00,0x00,0x00]
+    // 0x22 = (17 << 1) = 34, where 17 = 1 (element type) + 16 (4 u32s)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Array, 0x22, TypeCode.U32,
+      0x01, 0x00, 0x00, 0x00,
+      0x02, 0x00, 0x00, 0x00,
+      0x03, 0x00, 0x00, 0x00,
+      0x04, 0x00, 0x00, 0x00
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const arr = result._unsafeUnwrap() as ReadonlyArray<number>;
+    expect(Array.isArray(arr)).toBe(true);
+    expect(arr).toEqual([1, 2, 3, 4]);
+  });
+
+  it("decodes empty vec![] as ReadonlyArray from Rust test vectors", () => {
+    // From Rust: empty Vec<u32> encodes to:
+    // [TypeCode.Array, 0x02, TypeCode.U32]
+    // 0x02 = (1 << 1) = 2, where 1 = 1 (element type byte only)
+    const decoder = new Decoder(new Uint8Array([TypeCode.Array, 0x02, TypeCode.U32]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const arr = result._unsafeUnwrap() as ReadonlyArray<unknown>;
+    expect(Array.isArray(arr)).toBe(true);
+    expect(arr).toEqual([]);
+  });
+
+  it("decodes vec![\"foo\", \"bar\", \"baz\"] as ReadonlyArray from Rust test vectors", () => {
+    // From Rust: vec!["foo", "bar", "baz"] encodes to:
+    // [TypeCode.Array, 0x1A, TypeCode.String, 0x06, 'f','o','o', 0x06, 'b','a','r', 0x06, 'b','a','z']
+    // 0x1A = (13 << 1) = 26, where 13 = 1 (element type) + 12 (3 strings: 2+3 each)
+    const decoder = new Decoder(new Uint8Array([
+      TypeCode.Array, 0x1A, TypeCode.String,
+      0x06, 0x66, 0x6F, 0x6F,  // length=3 "foo"
+      0x06, 0x62, 0x61, 0x72,  // length=3 "bar"
+      0x06, 0x62, 0x61, 0x7A   // length=3 "baz"
+    ]));
+    const result = decoder.decodeValue();
+    expect(result.isOk()).toBe(true);
+    const arr = result._unsafeUnwrap() as ReadonlyArray<string>;
+    expect(Array.isArray(arr)).toBe(true);
+    expect(arr).toEqual(["foo", "bar", "baz"]);
+  });
+});
