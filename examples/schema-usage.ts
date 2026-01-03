@@ -62,8 +62,9 @@ userCodec.encode(user)
 // Encode messages using match for exhaustive handling
 console.log("\n=== Encoding messages ===");
 
-const textMessage = { text: { content: "Hello!", sender: "Alice" } };
-const imageMessage = { image: { url: "https://example.com/img.png", width: 800, height: 600 } };
+// Enum values use { variant: "name", value: data } format
+const textMessage = { variant: "text", value: { content: "Hello!", sender: "Alice" } };
+const imageMessage = { variant: "image", value: { url: "https://example.com/img.png", width: 800, height: 600 } };
 
 // Roundtrip text message
 messageCodec.encode(textMessage)
