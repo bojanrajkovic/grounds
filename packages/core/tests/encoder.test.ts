@@ -189,6 +189,23 @@ describe("encode structs (Rust test vectors)", () => {
     expect(result.isErr()).toBe(true);
     expect(result._unsafeUnwrapErr().message).toContain("field ID 128");
   });
+
+  it('encodes Person { name: "Eve", age: 42 } correctly', () => {
+    const fields = new Map<number, RelishValue>([
+      [0, String_("Eve")],
+      [1, U32(42)],
+    ]);
+    const result = encode(Struct(fields));
+    expect(result.isOk()).toBe(true);
+
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        0x11, 0x18,                              // Struct, length=12 bytes
+        0x00, 0x0e, 0x06, 0x45, 0x76, 0x65,      // Field 0: String "Eve"
+        0x01, 0x04, 0x2a, 0x00, 0x00, 0x00,      // Field 1: U32 42
+      ])
+    );
+  });
 });
 
 describe("encode enums (Rust test vectors)", () => {
@@ -251,12 +268,42 @@ describe("encode arrays (Rust test vectors)", () => {
     );
   });
 
-  it("encodes nested array with RelishValue elements", () => {
-    // Composite element types still use RelishValue
+  it("encodes nested array without repeating type codes for composite elements", () => {
+    // Array of arrays: outer declares element type = Array once
+    // Each inner array encodes as [L]V without redundant type code
     const inner1 = Array_(TypeCode.U8, [1, 2]);
     const inner2 = Array_(TypeCode.U8, [3, 4]);
     const result = encode(Array_(TypeCode.Array, [inner1, inner2]));
     expect(result.isOk()).toBe(true);
+
+    // Expected encoding:
+    // 0x0f = outer array type
+    // 0x12 = length 9 bytes (1 element type + 4 inner1 + 4 inner2)
+    // 0x0f = element type (Array)
+    // Inner1: 0x06, 0x02, 0x01, 0x02 (length=3 bytes, type=U8, values 1,2)
+    // Inner2: 0x06, 0x02, 0x03, 0x04 (length=3 bytes, type=U8, values 3,4)
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        TypeCode.Array, 0x12, TypeCode.Array,
+        0x06, TypeCode.U8, 0x01, 0x02,
+        0x06, TypeCode.U8, 0x03, 0x04,
+      ])
+    );
+  });
+
+  it("encodes [[9,10],[1,2]] correctly", () => {
+    const inner1 = Array_(TypeCode.U8, [9, 10]);
+    const inner2 = Array_(TypeCode.U8, [1, 2]);
+    const result = encode(Array_(TypeCode.Array, [inner1, inner2]));
+    expect(result.isOk()).toBe(true);
+
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        0x0f, 0x12, 0x0f,           // Outer: Array, length=9, element type=Array
+        0x06, 0x02, 0x09, 0x0a,     // Inner1: length=3, U8, [9, 10]
+        0x06, 0x02, 0x01, 0x02,     // Inner2: length=3, U8, [1, 2]
+      ])
+    );
   });
 });
 
@@ -290,6 +337,19 @@ describe("encode maps (Rust test vectors)", () => {
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual(
       new Uint8Array([TypeCode.Map, 0x04, TypeCode.String, TypeCode.U32])
+    );
+  });
+
+  it('encodes {"a": 1, "b": 2} correctly', () => {
+    const result = encode(Map_(TypeCode.String, TypeCode.U8, {"a": 1, "b": 2}));
+    expect(result.isOk()).toBe(true);
+
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        0x10, 0x10, 0x0e, 0x02,  // Map, length=8, key type=String, value type=U8
+        0x02, 0x61, 0x01,        // "a" (length=1 as 0x02, char 'a'=0x61), value=1
+        0x02, 0x62, 0x02,        // "b" (length=1 as 0x02, char 'b'=0x62), value=2
+      ])
     );
   });
 });

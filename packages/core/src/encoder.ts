@@ -333,11 +333,14 @@ export class Encoder {
         this.encodeBigIntLE(value as bigint, 8);
         return ok(undefined);
       case TypeCode.Array:
+        // Composite types: encode [L]V without type code (already in container header)
+        return this.encodeArray(value as RelishArray);
       case TypeCode.Map:
+        return this.encodeMap(value as RelishMap);
       case TypeCode.Struct:
+        return this.encodeStruct(value as RelishStruct);
       case TypeCode.Enum:
-        // Composite types are passed as RelishValue, use full encoding
-        return this.encodeValue(value as RelishValue);
+        return this.encodeEnum(value as RelishEnum);
       default:
         return err(EncodeError.invalidTypeCode(typeCode));
     }
