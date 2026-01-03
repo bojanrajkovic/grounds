@@ -1,6 +1,6 @@
 # @grounds/core
 
-Last verified: 2026-01-02
+Last verified: 2026-01-03
 
 ## Purpose
 
@@ -17,7 +17,8 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - `decode(bytes: Uint8Array) -> Result<DecodedValue, DecodeError>` - Decode bytes to raw JS values
   - `Decoder` class - Cursor-based binary decoder with validation
   - `EncodeError` - Error type with factory methods: `unsortedFields()`, `invalidFieldId()`, `invalidTypeCode()`, `unsupportedType()`, `unknownVariant()`
-  - `DecodeError` - Error type with factory methods: `unexpectedEnd()`, `unknownTypeCode()`, `invalidTypeCode()`, `unsortedFields()`, `duplicateMapKey()`, `invalidUtf8()`, `enumLengthMismatch()`, `invalidFieldId()`, `invalidVariantId()`, `missingRequiredField()`, `unknownVariantId()`, `unsupportedType()`
+  - `DecodeError` - Error type with `code` property and factory methods: `unexpectedEnd()`, `unknownTypeCode()`, `invalidTypeCode()`, `unsortedFields()`, `duplicateMapKey()`, `invalidUtf8()`, `enumLengthMismatch()`, `invalidFieldId()`, `invalidVariantId()`, `missingRequiredField()`, `unknownVariantId()`, `unsupportedType()`, `truncatedStream()`
+  - `DecodeErrorCode` - Discriminated union type for error classification: "UNEXPECTED_EOF" | "INVALID_TYPE_CODE" | "INVALID_LENGTH" | "INVALID_UTF8" | "INTEGER_OVERFLOW" | "TRUNCATED_STREAM" | "UNSORTED_FIELDS" | "DUPLICATE_MAP_KEY" | "ENUM_LENGTH_MISMATCH" | "INVALID_FIELD_ID" | "INVALID_VARIANT_ID" | "MISSING_REQUIRED_FIELD" | "UNKNOWN_VARIANT_ID" | "UNSUPPORTED_TYPE"
   - `DecodedValue` - Union type for decoder output (raw JS values: number | bigint | boolean | null | string | DateTime | ReadonlyArray | ReadonlyMap | object)
 - **Guarantees**:
   - All RelishValue types are readonly/immutable

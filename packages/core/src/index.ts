@@ -57,7 +57,7 @@ export {
 } from "./values.js";
 
 // Error types
-export { EncodeError, DecodeError } from "./errors.js";
+export { EncodeError, DecodeError, type DecodeErrorCode } from "./errors.js";
 
 // Encoder
 export { encode, Encoder } from "./encoder.js";
