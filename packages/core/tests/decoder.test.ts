@@ -1,7 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { Decoder, decode } from "../src/decoder.js";
-import { TypeCode, DateTime } from "../src/types.js";
+import { TypeCode } from "../src/types.js";
 import { expectOk, expectErr, expectArray, expectMap, expectDateTime, expectStruct, expectEnum } from "@grounds/test-utils";
 
 describe("Decoder", () => {

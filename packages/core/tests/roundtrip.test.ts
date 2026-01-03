@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import { encode, decode, Null, Bool, U8, U16, U32, U64, I8, I32, I64, F64, String_ as Str, Timestamp, Array_, Map_, TypeCode, DateTime } from "../src/index.js";
-import { expectOk, expectDateTime, expectArray, expectMap } from "@grounds/test-utils";
+import { expectOk } from "@grounds/test-utils";
 
 describe("Roundtrip encode/decode", () => {
   it("roundtrips Null", () => {

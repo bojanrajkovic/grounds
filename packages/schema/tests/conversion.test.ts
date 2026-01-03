@@ -23,7 +23,7 @@ import {
   DecodeError,
 } from "@grounds/core";
 import { DateTime } from "luxon";
-import { expectOk, expectErr, expectDateTime, expectMap } from "@grounds/test-utils";
+import { expectOk, expectDateTime, expectMap } from "@grounds/test-utils";
 
 describe("toRelish primitives", () => {
   it("converts null to bytes and round-trips", () => {
