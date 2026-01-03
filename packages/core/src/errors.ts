@@ -27,6 +27,14 @@ export class EncodeError extends Error {
       `type code 0x${typeCode.toString(16)} is invalid: bit 7 must not be set`
     );
   }
+
+  static unsupportedType(typeName: string): EncodeError {
+    return new EncodeError(`unsupported schema type: ${typeName}`);
+  }
+
+  static unknownVariant(variantName: string): EncodeError {
+    return new EncodeError(`unknown enum variant: ${variantName}`);
+  }
 }
 
 /**
@@ -84,5 +92,17 @@ export class DecodeError extends Error {
 
   static invalidVariantId(variantId: number): DecodeError {
     return new DecodeError(`variant ID ${variantId} is invalid: bit 7 must not be set`);
+  }
+
+  static missingRequiredField(fieldId: number): DecodeError {
+    return new DecodeError(`missing required field with ID ${fieldId}`);
+  }
+
+  static unknownVariantId(variantId: number): DecodeError {
+    return new DecodeError(`unknown variant ID ${variantId}`);
+  }
+
+  static unsupportedType(typeName: string): DecodeError {
+    return new DecodeError(`unsupported schema type: ${typeName}`);
   }
 }

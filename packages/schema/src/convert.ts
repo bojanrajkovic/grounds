@@ -26,6 +26,7 @@ import {
   Struct,
   Enum,
   EncodeError,
+  DecodeError,
 } from "@grounds/core";
 import { DateTime } from "luxon";
 import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishValueType } from "./symbols.js";
@@ -257,5 +258,149 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
 
     default:
       return err(new EncodeError(`unsupported schema type: ${kind as string}`));
+  }
+}
+
+/**
+ * Convert decoded values (from core decoder) to schema-aware typed values.
+ *
+ * The decoder returns raw JavaScript types (number, bigint, string, etc.).
+ * This function transforms them to schema-aware types:
+ * - Struct field IDs → property names
+ * - Enum variant IDs → variant names
+ * - Primitives → passed through (decoder already returns raw JS)
+ * - Missing optional struct fields → null
+ *
+ * @param value - Decoded value from core decoder
+ * @param schema - The Relish schema
+ * @returns Schema-aware typed value
+ */
+export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result<T, DecodeError> {
+  const kind = schema[RelishKind];
+
+  switch (kind) {
+    case "RNull":
+      return ok(null as T);
+
+    case "RBool":
+    case "RU8":
+    case "RU16":
+    case "RU32":
+    case "RU64":
+    case "RU128":
+    case "RI8":
+    case "RI16":
+    case "RI32":
+    case "RI64":
+    case "RI128":
+    case "RF32":
+    case "RF64":
+    case "RString":
+      // Decoder already returns raw primitives - pass through
+      return ok(value as T);
+
+    case "RTimestamp":
+      // Decoder already returns Luxon DateTime - pass through
+      return ok(value as T);
+
+    case "RArray": {
+      const arraySchema = schema as TRArray<TRelishSchema>;
+      const elementSchema = arraySchema[RelishElementType];
+      const decodedArr = value as ReadonlyArray<unknown>;
+      const jsArray: Array<unknown> = [];
+
+      for (const elem of decodedArr) {
+        const elemResult = decodedToTyped(elem, elementSchema);
+        if (elemResult.isErr()) {
+          return err(elemResult.error);
+        }
+        jsArray.push(elemResult.value);
+      }
+
+      return ok(jsArray as T);
+    }
+
+    case "RMap": {
+      const mapSchema = schema as TRMap<TRelishSchema, TRelishSchema>;
+      const valueSchema = mapSchema[RelishValueType];
+      const decodedMap = value as ReadonlyMap<unknown, unknown>;
+      const jsMap = new Map<unknown, unknown>();
+
+      for (const [k, v] of decodedMap) {
+        const valueResult = decodedToTyped(v, valueSchema);
+        if (valueResult.isErr()) {
+          return err(valueResult.error);
+        }
+        jsMap.set(k, valueResult.value);
+      }
+
+      return ok(jsMap as T);
+    }
+
+    case "RStruct": {
+      const structSchema = schema as TRStruct<Record<string, TStructField>>;
+      const decodedStruct = value as Readonly<{ [fieldId: number]: unknown }>;
+      const jsObj: Record<string, unknown> = {};
+
+      for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
+        const fieldId = (fieldSchema as { fieldId: number }).fieldId;
+        const fieldValue = decodedStruct[fieldId];
+
+        if (fieldValue === undefined) {
+          // Missing field - set to null for optional, error for required
+          const fieldKind = (fieldSchema as { [RelishKind]?: string })[RelishKind];
+          if (fieldKind === "ROptional") {
+            jsObj[name] = null;
+          } else {
+            return err(DecodeError.missingRequiredField(fieldId));
+          }
+        } else {
+          let actualSchema = fieldSchema as unknown as TRelishSchema;
+          const fieldKind = (fieldSchema as { [RelishKind]?: string })[RelishKind];
+          if (fieldKind === "ROptional") {
+            actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
+          }
+          const valueResult = decodedToTyped(fieldValue, actualSchema);
+          if (valueResult.isErr()) {
+            return err(valueResult.error);
+          }
+          jsObj[name] = valueResult.value;
+        }
+      }
+
+      return ok(jsObj as T);
+    }
+
+    case "REnum": {
+      const enumSchema = schema as TREnum<Record<string, TEnumVariant>>;
+      const decodedEnum = value as Readonly<{ variantId: number; value: unknown }>;
+      const variantId = decodedEnum.variantId;
+      const enumValue = decodedEnum.value;
+
+      // Find variant by ID and convert to named variant
+      for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
+        const vid = (variantSchema as { variantId: number }).variantId;
+        if (vid === variantId) {
+          const valueResult = decodedToTyped(enumValue, variantSchema as unknown as TRelishSchema);
+          if (valueResult.isErr()) {
+            return err(valueResult.error);
+          }
+          return ok({ variant: variantName, value: valueResult.value } as T);
+        }
+      }
+
+      return err(DecodeError.unknownVariantId(variantId));
+    }
+
+    case "ROptional": {
+      const optionalSchema = schema as TROptional<TRelishSchema>;
+      if (value === null) {
+        return ok(null as T);
+      }
+      return decodedToTyped(value, optionalSchema.inner);
+    }
+
+    default:
+      return err(DecodeError.unsupportedType(kind as string));
   }
 }

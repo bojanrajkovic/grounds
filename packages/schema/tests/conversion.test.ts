@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { jsToRelish } from "../src/convert.js";
+import { jsToRelish, decodedToTyped } from "../src/convert.js";
 import {
   RNull,
   RBool,
@@ -237,5 +237,109 @@ describe("jsToRelish Enum", () => {
     });
     const result = jsToRelish({ variant: "unknown", value: "x" }, schema);
     expect(result.isErr()).toBe(true);
+  });
+});
+
+describe("decodedToTyped", () => {
+  it("converts null (pass through)", () => {
+    const result = decodedToTyped(null, RNull());
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBeNull();
+  });
+
+  it("converts boolean (pass through)", () => {
+    const result = decodedToTyped(true, RBool());
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe(true);
+  });
+
+  it("converts u32 (pass through)", () => {
+    const result = decodedToTyped(42, RU32());
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe(42);
+  });
+
+  it("converts u64 bigint (pass through)", () => {
+    const result = decodedToTyped(123n, RU64());
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe(123n);
+  });
+
+  it("converts string (pass through)", () => {
+    const result = decodedToTyped("hello", RString());
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe("hello");
+  });
+
+  it("converts DateTime (pass through from decoder)", () => {
+    const dt = DateTime.fromSeconds(1704067200, { zone: "UTC" }); // 2024-01-01 00:00:00 UTC
+    const result = decodedToTyped(dt, RTimestamp());
+    expect(result.isOk()).toBe(true);
+    const resultDt = result._unsafeUnwrap() as DateTime;
+    expect(DateTime.isDateTime(resultDt)).toBe(true);
+    expect(resultDt.toUnixInteger()).toBe(1704067200);
+  });
+
+  it("converts Array<number> (already decoded)", () => {
+    const decodedArr: ReadonlyArray<number> = [1, 2, 3];
+    const result = decodedToTyped(decodedArr, RArray(RU32()));
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toEqual([1, 2, 3]);
+  });
+
+  it("converts Map<number, string> (already decoded)", () => {
+    const decodedMap = new Map<number, string>([[1, "one"], [2, "two"]]);
+    const result = decodedToTyped(decodedMap, RMap(RU32(), RString()));
+    expect(result.isOk()).toBe(true);
+    const jsMap = result._unsafeUnwrap() as Map<number, string>;
+    expect(jsMap.get(1)).toBe("one");
+    expect(jsMap.get(2)).toBe("two");
+  });
+
+  it("converts Struct from field IDs to property names", () => {
+    const decodedStruct: Readonly<{ [fieldId: number]: unknown }> = {
+      1: "Alice",
+      2: 30,
+    };
+    const schema = RStruct({
+      name: field(1, RString()),
+      age: field(2, RU32()),
+    });
+    const result = decodedToTyped(decodedStruct, schema);
+    expect(result.isOk()).toBe(true);
+    const obj = result._unsafeUnwrap() as { name: string; age: number };
+    expect(obj.name).toBe("Alice");
+    expect(obj.age).toBe(30);
+  });
+
+  it("converts Struct with missing optional field to null", () => {
+    const decodedStruct: Readonly<{ [fieldId: number]: unknown }> = {
+      1: "Alice",
+    };
+    const schema = RStruct({
+      name: field(1, RString()),
+      nickname: field(2, ROptional(RString())),
+    });
+    const result = decodedToTyped(decodedStruct, schema);
+    expect(result.isOk()).toBe(true);
+    const obj = result._unsafeUnwrap() as { name: string; nickname: string | null };
+    expect(obj.name).toBe("Alice");
+    expect(obj.nickname).toBeNull();
+  });
+
+  it("converts Enum from variant ID to variant name", () => {
+    const decodedEnum: Readonly<{ variantId: number; value: unknown }> = {
+      variantId: 1,
+      value: "ok",
+    };
+    const schema = REnum({
+      success: variant(1, RString()),
+      failure: variant(2, RU32()),
+    });
+    const result = decodedToTyped(decodedEnum, schema);
+    expect(result.isOk()).toBe(true);
+    const enumVal = result._unsafeUnwrap() as { variant: string; value: unknown };
+    expect(enumVal.variant).toBe("success");
+    expect(enumVal.value).toBe("ok");
   });
 });
