@@ -1,6 +1,6 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
-import { TypeCode, type RelishValue } from "../src/types.js";
+import { TypeCode, isPrimitiveTypeCode, type RelishValue } from "../src/types.js";
 
 describe("TypeCode", () => {
   it("has correct values for all 20 Relish types", () => {
@@ -31,6 +31,37 @@ describe("TypeCode", () => {
       (v) => typeof v === "number"
     );
     expect(values.length).toBe(20);
+  });
+});
+
+describe("isPrimitiveTypeCode", () => {
+  it("returns true for all primitive types (0x00-0x0e)", () => {
+    expect(isPrimitiveTypeCode(TypeCode.Null)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.Bool)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.U8)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.U16)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.U32)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.U64)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.U128)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.I8)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.I16)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.I32)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.I64)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.I128)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.F32)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.F64)).toBe(true);
+    expect(isPrimitiveTypeCode(TypeCode.String)).toBe(true);
+  });
+
+  it("returns true for Timestamp (0x13)", () => {
+    expect(isPrimitiveTypeCode(TypeCode.Timestamp)).toBe(true);
+  });
+
+  it("returns false for composite types (0x0f-0x12)", () => {
+    expect(isPrimitiveTypeCode(TypeCode.Array)).toBe(false);
+    expect(isPrimitiveTypeCode(TypeCode.Map)).toBe(false);
+    expect(isPrimitiveTypeCode(TypeCode.Struct)).toBe(false);
+    expect(isPrimitiveTypeCode(TypeCode.Enum)).toBe(false);
   });
 });
 

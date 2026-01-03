@@ -2,7 +2,7 @@
 // @grounds/core - Low-level Relish wire format implementation
 
 // Types and type codes
-export { TypeCode, DateTime } from "./types.js";
+export { TypeCode, DateTime, isPrimitiveTypeCode } from "./types.js";
 export type {
   RelishValue,
   RelishNull,

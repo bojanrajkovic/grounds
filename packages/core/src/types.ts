@@ -32,6 +32,21 @@ export const TypeCode = {
 export type TypeCode = (typeof TypeCode)[keyof typeof TypeCode];
 
 /**
+ * Determines if a type code represents a primitive type.
+ *
+ * Primitive types (0x00-0x0e, 0x13) have a `.value` property and map to raw JS values.
+ * Composite types (0x0f-0x12) are complex structures (Array, Map, Struct, Enum).
+ *
+ * @param typeCode - The type code to check
+ * @returns true if the type is primitive, false if composite
+ */
+export function isPrimitiveTypeCode(typeCode: number): boolean {
+  // Primitives: 0x00-0x0e (Null through String) and 0x13 (Timestamp)
+  // Composites: 0x0f-0x12 (Array, Map, Struct, Enum)
+  return typeCode <= TypeCode.String || typeCode === TypeCode.Timestamp;
+}
+
+/**
  * Discriminated union representing all possible Relish values.
  * Each variant corresponds to a Relish type code.
  */

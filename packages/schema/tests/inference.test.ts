@@ -24,10 +24,12 @@ import {
   RArray,
   RMap,
   ROptional,
+} from "../src/index.js";
+import {
   RelishElementType,
   RelishKeyType,
   RelishValueType,
-} from "../src/index.js";
+} from "../src/symbols.js";
 import { field, RStruct } from "../src/struct.js";
 import { variant, REnum } from "../src/enum.js";
 import { DateTime } from "luxon";

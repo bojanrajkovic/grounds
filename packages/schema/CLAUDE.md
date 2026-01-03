@@ -1,6 +1,6 @@
 # @grounds/schema
 
-Last verified: 2026-01-02
+Last verified: 2026-01-03
 
 ## Purpose
 
@@ -13,8 +13,8 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Container constructors: `RArray(element)`, `RMap(key, value)`, `ROptional(inner)`
   - Composite constructors: `RStruct(fields)`, `REnum(variants)`
   - Field/variant helpers: `field(id, schema)`, `variant(id, schema)`
-  - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType`
-  - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`
+  - Codec: `createCodec(schema)` returns `Codec<T>` with `encode(value): Result<Uint8Array, EncodeError>` and `decode(bytes): Result<T, DecodeError>`
+  - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`, `Codec<T>`
 - **Guarantees**:
   - All schema constructors return TypeBox-compatible schemas
   - Every schema has `[RelishKind]` and `[RelishTypeCode]` symbol properties
@@ -28,9 +28,9 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 
 ## Dependencies
 
-- **Uses**: `@sinclair/typebox` (schema construction), `@grounds/core` (TypeCode constants)
-- **Used by**: Future codec implementation, user applications
-- **Boundary**: No encoding/decoding logic; schemas only
+- **Uses**: `@sinclair/typebox` (schema construction), `@grounds/core` (TypeCode constants, encode/decode functions, error types), `luxon` (DateTime in conversion)
+- **Used by**: Codec implementation, user applications
+- **Boundary**: Conversion logic bridges between schema-aware types and Relish wire format
 
 ## Key Decisions
 
@@ -38,6 +38,16 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - TypeBox integration: Enables runtime validation via TypeBox's `Value` module
 - Field/variant ID on schema: Allows codec to extract IDs without separate mapping
 - ROptional preserves inner TypeCode: Enables codec to know underlying type
+
+## API Surface
+
+Following project-wide API design principles (see root CLAUDE.md), this package exports a minimal public API.
+
+**Not exported (internal implementation details)**:
+- Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType` (schema introspection)
+- Conversion functions: `jsToRelish`, `decodedToTyped` (Codec wraps these; users don't need intermediate RelishValue forms)
+
+If users request these for advanced use cases, we can design a better API or export the existing one. But we won't export speculatively.
 
 ## Invariants
 
@@ -53,6 +63,8 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - `symbols.ts` - Symbol definitions for metadata keys
 - `struct.ts` - Struct schema support with field tagging
 - `enum.ts` - Enum schema support with variant tagging
+- `convert.ts` - Bidirectional conversion: `jsToRelish` (JS → RelishValue) and `decodedToTyped` (DecodedValue → schema-aware typed JS)
+- `codec.ts` - Type-safe codec: `createCodec` function and `Codec<T>` type for end-to-end encoding/decoding
 
 ## Gotchas
 
