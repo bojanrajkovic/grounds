@@ -7,9 +7,10 @@ import {
   RString, RU32, RU64, RBool, RTimestamp,
   field, variant, createCodec,
 } from "@grounds/schema";
+import type { Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
 
-// Define a User schema
+// Define a User schema and infer its TypeScript type
 const UserSchema = RStruct({
   id: field(0, RU64()),
   name: field(1, RString()),
@@ -18,7 +19,11 @@ const UserSchema = RStruct({
   createdAt: field(4, RTimestamp()),
 });
 
-// Define a Message enum
+// Static<typeof Schema> extracts the TypeScript type from a schema
+type User = Static<typeof UserSchema>;
+// User = { id: bigint; name: string; email: string | null; active: boolean; createdAt: DateTime }
+
+// Define a Message enum with struct variants
 const MessageSchema = REnum({
   text: variant(0, RStruct({
     content: field(0, RString()),
@@ -31,6 +36,21 @@ const MessageSchema = REnum({
   })),
 });
 
+// The inferred type is a discriminated union: { text: TextMessage } | { image: ImageMessage }
+type Message = Static<typeof MessageSchema>;
+
+// Helper function to process messages with type-safe variant discrimination
+function processMessage(message: Message): string {
+  // Use "in" operator to discriminate between variants
+  if ("text" in message) {
+    // TypeScript knows message.text exists and has { content, sender }
+    return `Text from ${message.text.sender}: "${message.text.content}"`;
+  } else {
+    // TypeScript knows message.image exists and has { url, width, height }
+    return `Image: ${message.image.url} (${message.image.width}x${message.image.height})`;
+  }
+}
+
 // Create codecs
 const userCodec = createCodec(UserSchema);
 const messageCodec = createCodec(MessageSchema);
@@ -38,7 +58,8 @@ const messageCodec = createCodec(MessageSchema);
 // Encode and decode a user using andThen for chaining
 console.log("=== User roundtrip ===");
 
-const user = {
+// The User type ensures our object matches the schema
+const user: User = {
   id: 12345n,
   name: "Alice",
   email: "alice@example.com",
@@ -66,15 +87,15 @@ console.log("\n=== Encoding messages ===");
 const textMessage = { content: "Hello!", sender: "Alice" };
 const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
 
-// Roundtrip text message
+// Roundtrip text message and process with type-safe discrimination
 messageCodec.encode(textMessage)
   .andThen((bytes) => {
     console.log("Text message:", bytes.length, "bytes");
     return messageCodec.decode(bytes);
   })
   .match(
-    // Decoded as { text: { content, sender } }
-    (decoded) => console.log("Decoded text:", decoded),
+    // Decoded as { text: { content, sender } } - use processMessage for type-safe handling
+    (decoded) => console.log("Processed:", processMessage(decoded)),
     (err) => console.log("Text failed:", err.message),
   );
 
@@ -86,7 +107,7 @@ messageCodec.encode(imageMessage)
   })
   .match(
     // Decoded as { image: { url, width, height } }
-    (decoded) => console.log("Decoded image:", decoded),
+    (decoded) => console.log("Processed:", processMessage(decoded)),
     (err) => console.log("Image failed:", err.message),
   );
 
@@ -96,7 +117,7 @@ console.log("\n=== Array of users ===");
 const UsersSchema = RArray(UserSchema);
 const usersCodec = createCodec(UsersSchema);
 
-const users = [
+const users: Array<User> = [
   { id: 1n, name: "Alice", email: null, active: true, createdAt: DateTime.now() },
   { id: 2n, name: "Bob", email: "bob@example.com", active: false, createdAt: DateTime.now() },
 ];
