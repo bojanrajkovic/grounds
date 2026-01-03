@@ -19,8 +19,10 @@ import {
   F32,
   F64,
   String_,
+  Timestamp,
   EncodeError,
 } from "@grounds/core";
+import { DateTime } from "luxon";
 import { RelishKind } from "./symbols.js";
 import type { TRelishSchema } from "./types.js";
 
@@ -72,6 +74,11 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
 
     case "RString":
       return ok(String_(value as string));
+
+    case "RTimestamp": {
+      const dt = value as DateTime;
+      return ok(Timestamp(BigInt(dt.toUnixInteger())));
+    }
 
     default:
       return err(new EncodeError(`unsupported schema type: ${kind as string}`));

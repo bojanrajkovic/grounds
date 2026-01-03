@@ -1,7 +1,8 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { jsToRelish } from "../src/convert.js";
-import { RNull, RBool, RU8, RU32, RU64, RI32, RF64, RString } from "../src/types.js";
+import { RNull, RBool, RU8, RU32, RU64, RI32, RF64, RString, RTimestamp } from "../src/types.js";
+import { DateTime } from "luxon";
 
 describe("jsToRelish primitives", () => {
   it("converts null", () => {
@@ -58,5 +59,24 @@ describe("jsToRelish primitives", () => {
     const result = jsToRelish("hello", RString());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "string", value: "hello" });
+  });
+});
+
+describe("jsToRelish Timestamp", () => {
+  it("converts DateTime to Timestamp bigint", () => {
+    const dt = DateTime.fromObject({ year: 2024, month: 1, day: 1 }, { zone: "UTC" });
+    const result = jsToRelish(dt, RTimestamp());
+    expect(result.isOk()).toBe(true);
+    const value = result._unsafeUnwrap();
+    expect(value.type).toBe("timestamp");
+    expect((value as { unixSeconds: bigint }).unixSeconds).toBe(BigInt(dt.toUnixInteger()));
+  });
+
+  it("converts DateTime.now()", () => {
+    const dt = DateTime.now();
+    const result = jsToRelish(dt, RTimestamp());
+    expect(result.isOk()).toBe(true);
+    const value = result._unsafeUnwrap();
+    expect((value as { unixSeconds: bigint }).unixSeconds).toBe(BigInt(dt.toUnixInteger()));
   });
 });
