@@ -200,19 +200,20 @@ describe("Type Inference (compile-time)", () => {
   });
 
   describe("Enum Types", () => {
-    it("infers discriminated union type", () => {
+    it("infers unwrapped union type", () => {
       const ResultSchema = REnum({
         success: variant(1, RString()),
         error: variant(2, RU32()),
       });
 
+      // Static infers string | number (unwrapped variant types)
       type Result = Static<typeof ResultSchema>;
 
-      const okResult: Result = { success: "ok" };
-      const errorResult: Result = { error: 404 };
+      const okResult: Result = "ok";
+      const errorResult: Result = 404;
 
-      expect(okResult).toEqual({ success: "ok" });
-      expect(errorResult).toEqual({ error: 404 });
+      expect(okResult).toBe("ok");
+      expect(errorResult).toBe(404);
     });
 
     it("stores variant definitions in .variants property", () => {

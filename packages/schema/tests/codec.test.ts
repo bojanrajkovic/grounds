@@ -76,14 +76,42 @@ describe("Codec", () => {
       error: variant(2, RU32()),
     });
 
-    type Result = Static<typeof ResultSchema>;
     const codec = createCodec(ResultSchema);
 
-    const okResult: Result = { variant: "ok", value: "success" };
-    const encoded = expectOk(codec.encode(okResult));
+    // Encode: pass just the value, variant inferred from schema matching
+    const encoded = expectOk(codec.encode("success"));
 
+    // Decode: returns unwrapped value directly
     const decoded = expectOk(codec.decode(encoded));
-    expect(decoded).toEqual(okResult);
+    expect(decoded).toBe("success");
+  });
+
+  it("encodes and decodes enum with struct variants", () => {
+    const MessageSchema = REnum({
+      text: variant(0, RStruct({
+        content: field(0, RString()),
+        sender: field(1, RString()),
+      })),
+      image: variant(1, RStruct({
+        url: field(0, RString()),
+        width: field(1, RU32()),
+        height: field(2, RU32()),
+      })),
+    });
+
+    const codec = createCodec(MessageSchema);
+
+    // Roundtrip text message - decode returns unwrapped struct
+    const textMessage = { content: "Hello!", sender: "Alice" };
+    const textEncoded = expectOk(codec.encode(textMessage));
+    const textDecoded = expectOk(codec.decode(textEncoded));
+    expect(textDecoded).toEqual(textMessage);
+
+    // Roundtrip image message - decode returns unwrapped struct
+    const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
+    const imageEncoded = expectOk(codec.encode(imageMessage));
+    const imageDecoded = expectOk(codec.decode(imageEncoded));
+    expect(imageDecoded).toEqual(imageMessage);
   });
 
   it("encodes and decodes map", () => {

@@ -28,13 +28,11 @@ export function variant<T extends TSchema>(
 
 /**
  * Schema type for a Relish enum (discriminated union)
- * The inferred type is a union of { variantName: valueType }
+ * The inferred type is a union of the variant inner types (unwrapped)
  */
 export type TREnum<
   T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>,
-> = TRelishSchema<{
-  [K in keyof T]: { [P in K]: Static<T[K]> }
-}[keyof T]> & {
+> = TRelishSchema<Static<T[keyof T]>> & {
   [RelishKind]: "REnum";
   variants: T;
 };
@@ -45,23 +43,17 @@ export type TREnum<
 export function REnum<T extends Record<string, TEnumVariant>>(
   variants: T,
 ): TREnum<T> {
-  // Build a discriminated union schema from variant definitions
-  const properties: Record<string, TSchema> = {};
-  for (const [key, variantSchema] of Object.entries(variants)) {
+  // Build a union of the variant inner schemas (unwrapped)
+  const innerSchemas: Array<TSchema> = [];
+  for (const variantSchema of Object.values(variants)) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { variantId: _variantId, ...innerSchema } = variantSchema as TEnumVariant;
-    properties[key] = innerSchema as TSchema;
+    innerSchemas.push(innerSchema as TSchema);
   }
 
-  // Use TypeBox Union to create discriminated union
-  const unionSchemas = Object.entries(properties).map(([key, schema]) =>
-    Type.Object({
-      [key]: schema,
-    }),
-  );
-
+  // Use TypeBox Union of the inner schemas directly
   return {
-    ...Type.Union(unionSchemas),
+    ...Type.Union(innerSchemas),
     [RelishKind]: "REnum",
     [RelishTypeCode]: TypeCode.Enum,
     variants,

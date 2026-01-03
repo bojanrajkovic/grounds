@@ -1,7 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import { encode, decode, Null, Bool, U8, U16, U32, U64, I8, I32, I64, F64, String_ as Str, Timestamp, Array_, Map_, TypeCode, DateTime } from "../src/index.js";
+import { encode, decode, Null, Bool, U8, U16, U32, U64, U128, I8, I32, I64, I128, F64, String_ as Str, Timestamp, Array_, Map_, TypeCode, DateTime } from "../src/index.js";
 import { expectOk } from "@grounds/test-utils";
 
 describe("Roundtrip encode/decode", () => {
@@ -78,6 +78,27 @@ describe("Roundtrip encode/decode", () => {
     );
   });
 
+  it("roundtrips u128", () => {
+    fc.assert(
+      fc.property(fc.bigInt({ min: 0n, max: (1n << 64n) - 1n }), (bign) => {
+        const value = U128(bign);
+        const encoded = encode(value);
+        if (encoded.isErr()) return false;
+        const decoded = decode(encoded.value);
+        if (decoded.isErr()) return false;
+        return decoded.value === bign;
+      })
+    );
+  });
+
+  it("roundtrips u128 max value", () => {
+    const max = (1n << 128n) - 1n;
+    const value = U128(max);
+    const encoded = expectOk(encode(value));
+    const decoded = expectOk(decode(encoded));
+    expect(decoded).toBe(max);
+  });
+
   it("roundtrips i8", () => {
     fc.assert(
       fc.property(fc.integer({ min: -128, max: 127 }), (n) => {
@@ -116,6 +137,35 @@ describe("Roundtrip encode/decode", () => {
         return decoded.value === bign;
       })
     );
+  });
+
+  it("roundtrips i128", () => {
+    fc.assert(
+      fc.property(fc.bigInt({ min: -(1n << 63n), max: (1n << 63n) - 1n }), (bign) => {
+        const value = I128(bign);
+        const encoded = encode(value);
+        if (encoded.isErr()) return false;
+        const decoded = decode(encoded.value);
+        if (decoded.isErr()) return false;
+        return decoded.value === bign;
+      })
+    );
+  });
+
+  it("roundtrips i128 min value", () => {
+    const min = -(1n << 127n);
+    const value = I128(min);
+    const encoded = expectOk(encode(value));
+    const decoded = expectOk(decode(encoded));
+    expect(decoded).toBe(min);
+  });
+
+  it("roundtrips i128 max value", () => {
+    const max = (1n << 127n) - 1n;
+    const value = I128(max);
+    const encoded = expectOk(encode(value));
+    const decoded = expectOk(decode(encoded));
+    expect(decoded).toBe(max);
   });
 
   it("roundtrips f64", () => {

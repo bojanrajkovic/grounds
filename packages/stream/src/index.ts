@@ -2,7 +2,7 @@
 // @grounds/stream - Streaming encode/decode utilities
 
 // AsyncGenerator streaming
-export { encodeIterable, encodeIterableBytes } from "./encode.js";
+export { encodeIterable } from "./encode.js";
 export { decodeIterable } from "./decode.js";
 
 // Web Streams API
