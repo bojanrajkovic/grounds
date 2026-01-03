@@ -46,7 +46,7 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 - StreamBuffer never discards data until explicitly consumed
 - `tryDecodeOne()` consumes exactly the bytes for one complete value
 - Web Streams error on first decode failure (no partial error recovery)
-- Schema streams use codec for encoding, decodedToTyped for decoding
+- Schema streams use codec for encoding, fromRelish for decoding
 
 ## Key Files
 

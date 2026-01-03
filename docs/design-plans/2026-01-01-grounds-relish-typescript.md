@@ -285,8 +285,8 @@ This is a greenfield project. No existing codebase patterns to follow.
 
 **Components:**
 - Create: `packages/schema/src/convert.ts`
-  - `jsToRelish(value, schema): Result<RelishValue, EncodeError>`
-  - `relishToJs(value, schema): Result<T, DecodeError>`
+  - `toRelish(value, schema): Result<RelishValue, EncodeError>`
+  - `fromRelish(value, schema): Result<T, DecodeError>`
   - DateTime <-> Timestamp conversion
 - Create: `packages/schema/src/codec.ts`
   - `createCodec(schema): Codec<T>`
