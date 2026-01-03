@@ -1,6 +1,14 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
-import { RelishKind, RelishTypeCode, RelishFieldId, RelishVariantId } from "../src/symbols.js";
+import {
+  RelishKind,
+  RelishTypeCode,
+  RelishFieldId,
+  RelishVariantId,
+  RelishElementType,
+  RelishKeyType,
+  RelishValueType,
+} from "../src/symbols.js";
 
 describe("Relish Symbols", () => {
   it("exports unique symbols for metadata", () => {
@@ -8,10 +16,22 @@ describe("Relish Symbols", () => {
     expect(typeof RelishTypeCode).toBe("symbol");
     expect(typeof RelishFieldId).toBe("symbol");
     expect(typeof RelishVariantId).toBe("symbol");
+    expect(typeof RelishElementType).toBe("symbol");
+    expect(typeof RelishKeyType).toBe("symbol");
+    expect(typeof RelishValueType).toBe("symbol");
   });
 
   it("symbols are unique", () => {
-    expect(RelishKind).not.toBe(RelishTypeCode);
-    expect(RelishFieldId).not.toBe(RelishVariantId);
+    const allSymbols = [
+      RelishKind,
+      RelishTypeCode,
+      RelishFieldId,
+      RelishVariantId,
+      RelishElementType,
+      RelishKeyType,
+      RelishValueType,
+    ];
+    const uniqueSymbols = new Set(allSymbols);
+    expect(uniqueSymbols.size).toBe(allSymbols.length);
   });
 });
