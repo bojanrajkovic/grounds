@@ -76,14 +76,14 @@ describe("Codec", () => {
       error: variant(2, RU32()),
     });
 
-    type Result = Static<typeof ResultSchema>;
     const codec = createCodec(ResultSchema);
 
-    const okResult: Result = { variant: "ok", value: "success" };
-    const encoded = expectOk(codec.encode(okResult));
+    // Encode: pass just the value, variant inferred from schema matching
+    const encoded = expectOk(codec.encode("success"));
 
+    // Decode: returns { variantName: value }
     const decoded = expectOk(codec.decode(encoded));
-    expect(decoded).toEqual(okResult);
+    expect(decoded).toEqual({ ok: "success" });
   });
 
   it("encodes and decodes map", () => {

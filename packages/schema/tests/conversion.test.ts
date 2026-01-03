@@ -233,13 +233,13 @@ describe("toRelish Enum", () => {
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const original = { variant: "success", value: "ok" };
-    const encoded = expectOk(toRelish(original, schema));
+    // Encode: pass just the value, variant is inferred from schema matching
+    const encoded = expectOk(toRelish("ok", schema));
     expect(encoded).toBeInstanceOf(Uint8Array);
 
+    // Decode: returns { variantName: value } format
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal.variant).toBe("success");
-    expect(enumVal.value).toBe("ok");
+    expect(enumVal).toEqual({ success: "ok" });
   });
 
   it("converts different variant to bytes and round-trips", () => {
@@ -247,19 +247,19 @@ describe("toRelish Enum", () => {
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const original = { variant: "failure", value: 404 };
-    const encoded = expectOk(toRelish(original, schema));
+    // Pass just the value - infers "failure" variant since 404 is a number
+    const encoded = expectOk(toRelish(404, schema));
 
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal.variant).toBe("failure");
-    expect(enumVal.value).toBe(404);
+    expect(enumVal).toEqual({ failure: 404 });
   });
 
   it("returns error for unknown variant", () => {
     const schema = REnum({
       success: variant(1, RString()),
     });
-    const result = toRelish({ variant: "unknown", value: "x" }, schema);
+    // Value doesn't match any variant schema (object doesn't match RString)
+    const result = toRelish({ foo: "bar" }, schema);
     expect(result.isErr()).toBe(true);
   });
 });
@@ -370,11 +370,12 @@ describe("fromRelish", () => {
       failure: variant(2, RU32()),
     });
     const codec = createCodec(schema);
-    const encoded = expectOk(codec.encode({ variant: "success", value: "ok" }));
+    // Encode: pass just the value
+    const encoded = expectOk(codec.encode("ok"));
 
+    // Decode: returns { variantName: value }
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal.variant).toBe("success");
-    expect(enumVal.value).toBe("ok");
+    expect(enumVal).toEqual({ success: "ok" });
   });
 });
 

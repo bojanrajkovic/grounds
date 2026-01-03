@@ -59,12 +59,12 @@ userCodec.encode(user)
     (err) => console.log("Failed:", err.message),
   );
 
-// Encode messages using match for exhaustive handling
+// Encode messages - just pass the value, variant is inferred
 console.log("\n=== Encoding messages ===");
 
-// Enum values use { variant: "name", value: data } format
-const textMessage = { variant: "text", value: { content: "Hello!", sender: "Alice" } };
-const imageMessage = { variant: "image", value: { url: "https://example.com/img.png", width: 800, height: 600 } };
+// Pass the struct that matches a variant - encoder infers which variant
+const textMessage = { content: "Hello!", sender: "Alice" };
+const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
 
 // Roundtrip text message
 messageCodec.encode(textMessage)
@@ -73,6 +73,7 @@ messageCodec.encode(textMessage)
     return messageCodec.decode(bytes);
   })
   .match(
+    // Decoded as { text: { content, sender } }
     (decoded) => console.log("Decoded text:", decoded),
     (err) => console.log("Text failed:", err.message),
   );
@@ -84,6 +85,7 @@ messageCodec.encode(imageMessage)
     return messageCodec.decode(bytes);
   })
   .match(
+    // Decoded as { image: { url, width, height } }
     (decoded) => console.log("Decoded image:", decoded),
     (err) => console.log("Image failed:", err.message),
   );

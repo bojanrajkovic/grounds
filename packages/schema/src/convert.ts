@@ -32,6 +32,7 @@ import {
   encode,
 } from "@grounds/core";
 import { DateTime } from "luxon";
+import { Value } from "@sinclair/typebox/value";
 import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishValueType } from "./symbols.js";
 import type { TRelishSchema, TRArray, TRMap, TROptional } from "./types.js";
 import type { TRStruct, TStructField } from "./struct.js";
@@ -279,19 +280,21 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
 
     case "REnum": {
       const enumSchema = schema as TREnum<Record<string, TEnumVariant>>;
-      const jsEnum = value as { variant: string; value: unknown };
-      const variantSchema = (enumSchema.variants as Record<string, TEnumVariant | undefined>)[jsEnum.variant];
 
-      if (variantSchema === undefined) {
-        return err(EncodeError.unknownVariant(jsEnum.variant));
+      // Find the variant whose schema the value satisfies
+      for (const [_variantName, variantSchema] of Object.entries(enumSchema.variants)) {
+        if (Value.Check(variantSchema, value)) {
+          const valueResult = _toRelishValue(value, variantSchema as unknown as TRelishSchema);
+          if (valueResult.isErr()) {
+            return err(valueResult.error);
+          }
+          return ok(Enum(getVariantId(variantSchema), valueResult.value));
+        }
       }
 
-      const valueResult = _toRelishValue(jsEnum.value, variantSchema as unknown as TRelishSchema);
-      if (valueResult.isErr()) {
-        return err(valueResult.error);
-      }
-
-      return ok(Enum(getVariantId(variantSchema), valueResult.value));
+      // No variant matched - provide helpful error
+      const variantNames = Object.keys(enumSchema.variants).join(", ");
+      return err(EncodeError.unknownVariant(`value did not match any variant (${variantNames})`));
     }
 
     default:
@@ -464,13 +467,14 @@ function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T
       const variantId = decodedEnum.variantId;
 
       // Find variant by ID and convert to named variant
+      // Returns { variantName: value } format for ergonomic destructuring
       for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
         if (getVariantId(variantSchema) === variantId) {
           const valueResult = _decodeValueToTyped(decodedEnum.value, variantSchema as unknown as TRelishSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
-          return ok({ variant: variantName, value: valueResult.value } as T);
+          return ok({ [variantName]: valueResult.value } as T);
         }
       }
 
