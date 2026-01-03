@@ -24,6 +24,8 @@ import {
   type RelishMap,
   type RelishStruct,
   type RelishEnum,
+  EncodeError,
+  DecodeError,
 } from "@grounds/core";
 import { DateTime } from "luxon";
 
@@ -341,5 +343,46 @@ describe("decodedToTyped", () => {
     const enumVal = result._unsafeUnwrap() as { variant: string; value: unknown };
     expect(enumVal.variant).toBe("success");
     expect(enumVal.value).toBe("ok");
+  });
+});
+
+describe("Error factory methods", () => {
+  describe("EncodeError factories", () => {
+    it("creates unsupportedType encode error", () => {
+      const error = EncodeError.unsupportedType("FooSchema");
+      expect(error).toBeInstanceOf(EncodeError);
+      expect(error.message).toContain("unsupported schema type");
+      expect(error.message).toContain("FooSchema");
+    });
+
+    it("creates unknownVariant encode error", () => {
+      const error = EncodeError.unknownVariant("badVariant");
+      expect(error).toBeInstanceOf(EncodeError);
+      expect(error.message).toContain("unknown enum variant");
+      expect(error.message).toContain("badVariant");
+    });
+  });
+
+  describe("DecodeError factories", () => {
+    it("creates missingRequiredField decode error", () => {
+      const error = DecodeError.missingRequiredField(5);
+      expect(error).toBeInstanceOf(DecodeError);
+      expect(error.message).toContain("missing required field");
+      expect(error.message).toContain("5");
+    });
+
+    it("creates unknownVariantId decode error", () => {
+      const error = DecodeError.unknownVariantId(99);
+      expect(error).toBeInstanceOf(DecodeError);
+      expect(error.message).toContain("unknown variant ID");
+      expect(error.message).toContain("99");
+    });
+
+    it("creates unsupportedType decode error", () => {
+      const error = DecodeError.unsupportedType("BarSchema");
+      expect(error).toBeInstanceOf(DecodeError);
+      expect(error.message).toContain("unsupported schema type");
+      expect(error.message).toContain("BarSchema");
+    });
   });
 });
