@@ -246,28 +246,28 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
       const fields = new Map<number, RelishValue>();
 
       // Collect field entries with their IDs for sorting
-      const fieldEntries: Array<{ name: string; fieldId: number; schema: TRelishSchema }> = [];
+      const fieldEntries: Array<{ name: string; fieldId: number; fieldSchema: TStructField; innerSchema: TRelishSchema }> = [];
       for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
         fieldEntries.push({
           name,
           fieldId: getFieldId(fieldSchema),
-          schema: getInnerSchema(fieldSchema),
+          fieldSchema,
+          innerSchema: getInnerSchema(fieldSchema),
         });
       }
 
       // Sort by field ID (ascending)
       fieldEntries.sort((a, b) => a.fieldId - b.fieldId);
 
-      for (const { name, fieldId, schema: fieldSchema } of fieldEntries) {
+      for (const { name, fieldId, fieldSchema, innerSchema } of fieldEntries) {
         const fieldValue = jsObj[name];
-        const fieldSchemaObj = structSchema.fields[name];
 
         // Skip null values for optional fields
-        if (fieldValue === null && isOptionalField(fieldSchemaObj)) {
+        if (fieldValue === null && isOptionalField(fieldSchema)) {
           continue;
         }
 
-        const valueResult = _toRelishValue(fieldValue, fieldSchema);
+        const valueResult = _toRelishValue(fieldValue, innerSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
