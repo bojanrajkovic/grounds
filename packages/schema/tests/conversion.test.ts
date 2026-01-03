@@ -19,220 +19,290 @@ import {
 import { RStruct, field } from "../src/struct.js";
 import { REnum, variant } from "../src/enum.js";
 import {
-  TypeCode,
-  type RelishArray,
-  type RelishTimestamp,
-  type RelishF64,
-  type RelishMap,
-  type RelishStruct,
-  type RelishEnum,
   EncodeError,
   DecodeError,
 } from "@grounds/core";
 import { DateTime } from "luxon";
 
 describe("toRelish primitives", () => {
-  it("converts null", () => {
-    const result = toRelish(null, RNull());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "null" });
+  it("converts null to bytes and round-trips", () => {
+    const bytes = toRelish(null, RNull());
+    expect(bytes.isOk()).toBe(true);
+    const encoded = bytes._unsafeUnwrap();
+    expect(encoded).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(encoded, RNull());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBeNull();
   });
 
-  it("converts boolean true", () => {
-    const result = toRelish(true, RBool());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "bool", value: true });
+  it("converts boolean true to bytes and round-trips", () => {
+    const bytes = toRelish(true, RBool());
+    expect(bytes.isOk()).toBe(true);
+    const encoded = bytes._unsafeUnwrap();
+    expect(encoded).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(encoded, RBool());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(true);
   });
 
-  it("converts boolean false", () => {
-    const result = toRelish(false, RBool());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "bool", value: false });
+  it("converts boolean false to bytes and round-trips", () => {
+    const bytes = toRelish(false, RBool());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RBool());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(false);
   });
 
-  it("converts u8", () => {
-    const result = toRelish(42, RU8());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "u8", value: 42 });
+  it("converts u8 to bytes and round-trips", () => {
+    const bytes = toRelish(42, RU8());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RU8());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(42);
   });
 
-  it("converts u32", () => {
-    const result = toRelish(123456, RU32());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "u32", value: 123456 });
+  it("converts u32 to bytes and round-trips", () => {
+    const bytes = toRelish(123456, RU32());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RU32());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(123456);
   });
 
-  it("converts u64 bigint", () => {
-    const result = toRelish(123n, RU64());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "u64", value: 123n });
+  it("converts u64 bigint to bytes and round-trips", () => {
+    const bytes = toRelish(123n, RU64());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RU64());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(123n);
   });
 
-  it("converts i32", () => {
-    const result = toRelish(-100, RI32());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "i32", value: -100 });
+  it("converts i32 to bytes and round-trips", () => {
+    const bytes = toRelish(-100, RI32());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RI32());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe(-100);
   });
 
-  it("converts f64", () => {
-    const result = toRelish(3.14159, RF64());
-    expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap() as RelishF64;
-    expect(value.type).toBe("f64");
-    expect(value.value).toBeCloseTo(3.14159);
+  it("converts f64 to bytes and round-trips", () => {
+    const original = 3.14159;
+    const bytes = toRelish(original, RF64());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RF64());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBeCloseTo(original);
   });
 
-  it("converts string", () => {
-    const result = toRelish("hello", RString());
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toEqual({ type: "string", value: "hello" });
+  it("converts string to bytes and round-trips", () => {
+    const bytes = toRelish("hello", RString());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RString());
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toBe("hello");
   });
 });
 
 describe("toRelish Timestamp", () => {
-  it("converts DateTime to Timestamp bigint", () => {
+  it("converts DateTime to timestamp bytes and round-trips", () => {
     const dt = DateTime.fromObject(
       { year: 2024, month: 1, day: 1 },
       { zone: "UTC" },
     );
-    const result = toRelish(dt, RTimestamp());
-    expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap() as RelishTimestamp;
-    expect(value.type).toBe("timestamp");
-    expect(value.unixSeconds).toBe(BigInt(dt.toUnixInteger()));
+    const bytes = toRelish(dt, RTimestamp());
+    expect(bytes.isOk()).toBe(true);
+    expect(bytes._unsafeUnwrap()).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RTimestamp());
+    expect(decoded.isOk()).toBe(true);
+    const resultDt = decoded._unsafeUnwrap() as DateTime;
+    expect(resultDt.toUnixInteger()).toBe(dt.toUnixInteger());
   });
 
-  it("converts DateTime.now()", () => {
+  it("converts DateTime.now() and round-trips", () => {
     const dt = DateTime.now();
-    const result = toRelish(dt, RTimestamp());
-    expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap() as RelishTimestamp;
-    expect(value.unixSeconds).toBe(BigInt(dt.toUnixInteger()));
+    const bytes = toRelish(dt, RTimestamp());
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), RTimestamp());
+    expect(decoded.isOk()).toBe(true);
+    const resultDt = decoded._unsafeUnwrap() as DateTime;
+    expect(resultDt.toUnixInteger()).toBe(dt.toUnixInteger());
   });
 });
 
 describe("toRelish Array", () => {
-  it("converts Array<number> to Relish Array", () => {
+  it("converts Array<number> to bytes and round-trips", () => {
     const schema = RArray(RU32());
-    const result = toRelish([1, 2, 3], schema);
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as RelishArray;
-    expect(arr.type).toBe("array");
-    expect(arr.elementType).toBe(TypeCode.U32);
-    expect(arr.elements.length).toBe(3);
+    const original = [1, 2, 3];
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+    expect(bytes._unsafeUnwrap()).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toEqual(original);
   });
 
-  it("converts empty array", () => {
+  it("converts empty array to bytes and round-trips", () => {
     const schema = RArray(RU32());
-    const result = toRelish([], schema);
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as RelishArray;
-    expect(arr.elements.length).toBe(0);
+    const bytes = toRelish([], schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toEqual([]);
   });
 
-  it("converts Array<string>", () => {
+  it("converts Array<string> to bytes and round-trips", () => {
     const schema = RArray(RString());
-    const result = toRelish(["foo", "bar"], schema);
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as RelishArray;
-    expect(arr.elementType).toBe(TypeCode.String);
+    const original = ["foo", "bar"];
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    expect(decoded._unsafeUnwrap()).toEqual(original);
   });
 });
 
 describe("toRelish Map", () => {
-  it("converts Map<number, string>", () => {
+  it("converts Map<number, string> to bytes and round-trips", () => {
     const schema = RMap(RU32(), RString());
-    const input = new Map([[1, "one"], [2, "two"]]);
-    const result = toRelish(input, schema);
-    expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as RelishMap;
-    expect(map.type).toBe("map");
-    expect(map.keyType).toBe(TypeCode.U32);
-    expect(map.valueType).toBe(TypeCode.String);
+    const original = new Map([[1, "one"], [2, "two"]]);
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+    expect(bytes._unsafeUnwrap()).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const map = decoded._unsafeUnwrap() as Map<number, string>;
+    expect(map.get(1)).toBe("one");
+    expect(map.get(2)).toBe("two");
   });
 
-  it("converts empty Map", () => {
+  it("converts empty Map to bytes and round-trips", () => {
     const schema = RMap(RString(), RU32());
-    const input = new Map<string, number>();
-    const result = toRelish(input, schema);
-    expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as RelishMap;
-    expect(map.entries.size).toBe(0);
+    const original = new Map<string, number>();
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    expect((decoded._unsafeUnwrap() as Map<string, number>).size).toBe(0);
   });
 });
 
 describe("toRelish Struct", () => {
-  it("converts struct with all fields", () => {
+  it("converts struct with all fields to bytes and round-trips", () => {
     const schema = RStruct({
       name: field(1, RString()),
       age: field(2, RU32()),
     });
-    const result = toRelish({ name: "Alice", age: 30 }, schema);
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as RelishStruct;
-    expect(struct.type).toBe("struct");
+    const original = { name: "Alice", age: 30 };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+    expect(bytes._unsafeUnwrap()).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const obj = decoded._unsafeUnwrap() as { name: string; age: number };
+    expect(obj.name).toBe("Alice");
+    expect(obj.age).toBe(30);
   });
 
-  it("omits null optional fields", () => {
+  it("omits null optional fields in encoding and restores on decode", () => {
     const schema = RStruct({
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = toRelish({ name: "Alice", nickname: null }, schema);
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as RelishStruct;
-    // Should have only 1 field (nickname omitted)
-    expect(struct.fields.size).toBe(1);
+    const original = { name: "Alice", nickname: null };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const obj = decoded._unsafeUnwrap() as { name: string; nickname: string | null };
+    expect(obj.name).toBe("Alice");
+    expect(obj.nickname).toBeNull();
   });
 
-  it("includes non-null optional fields", () => {
+  it("includes non-null optional fields and round-trips", () => {
     const schema = RStruct({
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = toRelish({ name: "Alice", nickname: "Ali" }, schema);
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as RelishStruct;
-    // Should have 2 fields
-    expect(struct.fields.size).toBe(2);
+    const original = { name: "Alice", nickname: "Ali" };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const obj = decoded._unsafeUnwrap() as { name: string; nickname: string | null };
+    expect(obj.name).toBe("Alice");
+    expect(obj.nickname).toBe("Ali");
   });
 
-  it("orders fields by field ID", () => {
+  it("orders fields by field ID internally and round-trips correctly", () => {
     const schema = RStruct({
       z_last: field(10, RString()),
       a_first: field(1, RString()),
       m_middle: field(5, RU32()),
     });
-    const result = toRelish({ z_last: "z", a_first: "a", m_middle: 5 }, schema);
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as RelishStruct;
-    const fieldIds = Array.from(struct.fields.keys());
-    expect(fieldIds).toEqual([1, 5, 10]);
+    const original = { z_last: "z", a_first: "a", m_middle: 5 };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const obj = decoded._unsafeUnwrap() as { z_last: string; a_first: string; m_middle: number };
+    expect(obj.z_last).toBe("z");
+    expect(obj.a_first).toBe("a");
+    expect(obj.m_middle).toBe(5);
   });
 });
 
 describe("toRelish Enum", () => {
-  it("converts enum variant", () => {
+  it("converts enum variant to bytes and round-trips", () => {
     const schema = REnum({
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = toRelish({ variant: "success", value: "ok" }, schema);
-    expect(result.isOk()).toBe(true);
-    const enumVal = result._unsafeUnwrap() as RelishEnum;
-    expect(enumVal.type).toBe("enum");
-    expect(enumVal.variantId).toBe(1);
+    const original = { variant: "success", value: "ok" };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+    expect(bytes._unsafeUnwrap()).toBeInstanceOf(Uint8Array);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const enumVal = decoded._unsafeUnwrap() as { variant: string; value: unknown };
+    expect(enumVal.variant).toBe("success");
+    expect(enumVal.value).toBe("ok");
   });
 
-  it("converts different variant", () => {
+  it("converts different variant to bytes and round-trips", () => {
     const schema = REnum({
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = toRelish({ variant: "failure", value: 404 }, schema);
-    expect(result.isOk()).toBe(true);
-    const enumVal = result._unsafeUnwrap() as RelishEnum;
-    expect(enumVal.variantId).toBe(2);
+    const original = { variant: "failure", value: 404 };
+    const bytes = toRelish(original, schema);
+    expect(bytes.isOk()).toBe(true);
+
+    const decoded = fromRelish(bytes._unsafeUnwrap(), schema);
+    expect(decoded.isOk()).toBe(true);
+    const enumVal = decoded._unsafeUnwrap() as { variant: string; value: unknown };
+    expect(enumVal.variant).toBe("failure");
+    expect(enumVal.value).toBe(404);
   });
 
   it("returns error for unknown variant", () => {

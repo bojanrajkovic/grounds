@@ -29,6 +29,7 @@ import {
   EncodeError,
   DecodeError,
   Decoder,
+  encode,
 } from "@grounds/core";
 import { DateTime } from "luxon";
 import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishValueType } from "./symbols.js";
@@ -68,7 +69,21 @@ function extractRawValue(
   }
 }
 
-export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
+/**
+ * Internal helper: Convert JavaScript value to RelishValue.
+ *
+ * WARNING: This is an internal helper. Do not export or use in public APIs.
+ * Use the public toRelish function instead, which returns encoded bytes.
+ *
+ * This helper is used by:
+ * - toRelish: Converts to RelishValue, then encodes to bytes
+ * - Possibly other internal operations
+ *
+ * @param value - JavaScript value to convert
+ * @param schema - The Relish schema
+ * @returns RelishValue suitable for encoding
+ */
+function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
   const kind = schema[RelishKind];
 
   switch (kind) {
@@ -130,7 +145,7 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
       const elements: Array<string | number | bigint | boolean | RelishValue | null> = [];
 
       for (const item of jsArray) {
-        const elementResult = toRelish(item, elementSchema);
+        const elementResult = _toRelishValue(item, elementSchema);
         if (elementResult.isErr()) {
           return err(elementResult.error);
         }
@@ -155,11 +170,11 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
       const entries = new Map<unknown, unknown>();
 
       for (const [k, v] of jsMap) {
-        const keyResult = toRelish(k, keySchema);
+        const keyResult = _toRelishValue(k, keySchema);
         if (keyResult.isErr()) {
           return err(keyResult.error);
         }
-        const valueResult = toRelish(v, valueSchema);
+        const valueResult = _toRelishValue(v, valueSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -218,7 +233,7 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
           continue;
         }
 
-        const valueResult = toRelish(fieldValue, fieldSchema);
+        const valueResult = _toRelishValue(fieldValue, fieldSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -244,7 +259,7 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
       const variantId = (variantSchema as { variantId: number }).variantId;
       // Type assertion through unknown needed: TEnumVariant extends TSchema but TypeScript
       // doesn't see it as compatible with TRelishSchema which has symbol properties
-      const valueResult = toRelish(jsEnum.value, variantSchema as unknown as TRelishSchema);
+      const valueResult = _toRelishValue(jsEnum.value, variantSchema as unknown as TRelishSchema);
       if (valueResult.isErr()) {
         return err(valueResult.error);
       }
@@ -255,6 +270,23 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
     default:
       return err(new EncodeError(`unsupported schema type: ${kind as string}`));
   }
+}
+
+/**
+ * Convert JavaScript value to Relish binary format.
+ *
+ * This makes the API symmetric with fromRelish:
+ * - toRelish: JavaScript value → Relish bytes
+ * - fromRelish: Relish bytes → JavaScript value
+ *
+ * Implementation: Converts the value to RelishValue, then encodes it to bytes.
+ *
+ * @param value - JavaScript value matching the schema
+ * @param schema - The Relish schema
+ * @returns Encoded binary data suitable for transmission or storage
+ */
+export function toRelish(value: unknown, schema: TRelishSchema): Result<Uint8Array, EncodeError> {
+  return _toRelishValue(value, schema).andThen(relishValue => encode(relishValue));
 }
 
 /**

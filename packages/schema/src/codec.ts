@@ -2,7 +2,7 @@
 // Type-safe codec for schema-driven encoding/decoding
 
 import { Result } from "neverthrow";
-import { encode, EncodeError, DecodeError } from "@grounds/core";
+import { EncodeError, DecodeError } from "@grounds/core";
 import type { Static } from "@sinclair/typebox";
 import { toRelish, fromRelish } from "./convert.js";
 import type { TRelishSchema } from "./types.js";
@@ -18,11 +18,12 @@ export function createCodec<T extends TRelishSchema>(schema: T): Codec<Static<T>
     schema,
 
     encode(value: Static<T>): Result<Uint8Array, EncodeError> {
-      return toRelish(value, schema).andThen(relishValue => encode(relishValue));
+      // toRelish now returns bytes directly (truly symmetric with fromRelish)
+      return toRelish(value, schema);
     },
 
     decode(bytes: Uint8Array): Result<Static<T>, DecodeError> {
-      // fromRelish now handles both decoding and conversion in one step
+      // fromRelish handles both decoding and conversion
       return fromRelish<Static<T>>(bytes, schema);
     },
   };

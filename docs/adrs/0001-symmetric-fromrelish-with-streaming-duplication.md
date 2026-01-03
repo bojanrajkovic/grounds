@@ -6,19 +6,24 @@
 
 ## Context
 
-The `toRelish` function takes JavaScript values and produces Relish binary format:
+Previously, the conversion functions were asymmetric:
+
+**Old encoding flow:**
 ```typescript
-toRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError>
+value → toRelish → RelishValue → encode → bytes
+// toRelish returned intermediate RelishValue form, not final bytes
 ```
 
-Previously, `fromRelish` took already-decoded values from the core decoder:
+**Old decoding flow:**
 ```typescript
-fromRelish(decoded: DecodedValue, schema: TRelishSchema): Result<T, DecodeError>
+bytes → Decoder → DecodedValue → fromRelish → value
+// fromRelish took decoded values, not raw bytes
 ```
 
-This asymmetry creates friction in the API:
-- Encoding: `value` → `toRelish` → bytes → ready to use
-- Decoding: bytes → decode → `fromRelish` → value (two-step, hidden intermediate)
+This created API friction:
+- Encoding: `value` → `toRelish` → RelishValue (intermediate!) → codec wraps it
+- Decoding: bytes → decode → `fromRelish` → value (two operations, hidden intermediate)
+- Not symmetric: encode path has intermediate RelishValue, decode path hides the decoder
 
 The streaming layer (`@grounds/stream`) needs to:
 1. Accumulate incomplete chunks without throwing
@@ -33,35 +38,47 @@ This creates a tension: making `fromRelish` take raw bytes (for symmetric API) w
 
 ## Decision
 
-Make `fromRelish` take `Uint8Array` directly, achieving symmetric API:
+Achieve true API symmetry by changing BOTH functions:
+
+**New encoding:**
 ```typescript
-fromRelish(bytes: Uint8Array, schema: TRelishSchema): Result<T, DecodeError>
+toRelish(value: unknown, schema): Result<Uint8Array, EncodeError>
+// Returns bytes directly (no intermediate RelishValue)
+```
+
+**New decoding:**
+```typescript
+fromRelish(bytes: Uint8Array, schema): Result<T, DecodeError>
+// Takes bytes directly (no need for pre-decoded DecodedValue)
 ```
 
 Accept intentional duplication of conversion logic in `@grounds/stream`:
-- `@grounds/schema` provides `_decodeValueToTyped` (internal helper)
-- `@grounds/stream` duplicates this logic in `schema-streams.ts`
-- Both use the same conversion algorithm, but stream layer needs byte tracking
+- `@grounds/schema` provides internal `_toRelishValue` and `_decodeValueToTyped` helpers
+- `@grounds/stream` duplicates this logic in `schema-streams.ts` for byte tracking
+- Both use identical conversion algorithms
 
 This gives us:
-- **Symmetric API**: `toRelish(value) ↔ fromRelish(bytes)`
+- **True symmetric API**: `toRelish(value) → bytes` ↔ `fromRelish(bytes) → value`
 - **Self-contained streaming**: No internal imports coupling packages
-- **Clean public API**: Users see `toRelish` and `fromRelish` as matching operations
+- **Clean public API**: Users never see RelishValue or DecodedValue intermediates
+- **Simplified codec**: `encode` just calls `toRelish` directly (no more `.andThen`)
 - **Intentional, documented duplication**: Not a hidden implementation detail
 
 ## Consequences
 
 ### Positive
-- Codec is now trivial: `encode(value) = toRelish(value).andThen(encode)` and `decode(bytes) = fromRelish(bytes)`
-- API is symmetric and predictable: both take raw values/bytes, not intermediates
-- Streaming layer is self-contained: can evolve independently
-- Implementation details stay internal: `DecodedValue` type stays in core
-- Minimal public API: Users don't see `DecodedValue` or internal conversion steps
+- **Codec is now trivial**: `encode(value) = toRelish(value)` and `decode(bytes) = fromRelish(bytes)` (both one-liners!)
+- **API is truly symmetric**: `toRelish(value) → bytes` ↔ `fromRelish(bytes) → value` - matching operations
+- **Users never see intermediates**: No `RelishValue` or `DecodedValue` in public API
+- **Streaming layer is self-contained**: Can evolve independently, no cross-package imports
+- **Implementation details stay internal**: Users work with values and bytes only
+- **Minimal public API**: Simple mental model - encode value to bytes, decode bytes to value
 
 ### Negative
 - Conversion logic appears in two places (schema and stream packages)
-- If the conversion algorithm changes, both copies must be updated
-- Slightly higher maintenance burden
+- If the conversion algorithm changes, both internal `_decodeValueToTyped` copies must be updated
+- Slightly higher maintenance burden (but documented and intentional)
+- RelishValue construction now hidden as internal implementation detail
 
 ## Alternatives Considered
 
@@ -124,9 +141,11 @@ Don't change `fromRelish`, keep it taking `DecodedValue`:
 ## Validation
 
 After implementation:
-- `toRelish(value, schema)` returns `Result<RelishValue>`
-- `fromRelish(bytes, schema)` returns `Result<T>`
-- Symmetric signatures: one takes value, one takes bytes
-- All tests pass (301 tests)
+- `toRelish(value, schema)` returns `Result<Uint8Array, EncodeError>` - takes values, returns bytes
+- `fromRelish(bytes, schema)` returns `Result<T, DecodeError>` - takes bytes, returns values
+- **Truly symmetric signatures**: One takes value→bytes, other takes bytes→value
+- All tests pass (301+ tests)
+- Tests verify round-tripping: `toRelish → fromRelish` produces original value
+- Codec simplified: `encode(v)` = `toRelish(v)` directly (one line!)
 - Stream tests verify streaming conversion works correctly
-- No new API surface for `DecodedValue` or intermediate conversion
+- No intermediate types exposed in public API (RelishValue and DecodedValue stay internal)

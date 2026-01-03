@@ -14,7 +14,7 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Composite constructors: `RStruct(fields)`, `REnum(variants)`
   - Field/variant helpers: `field(id, schema)`, `variant(id, schema)`
   - Codec: `createCodec(schema)` returns `Codec<T>` with `encode(value): Result<Uint8Array, EncodeError>` and `decode(bytes): Result<T, DecodeError>`
-  - Conversion: `fromRelish(value, schema)` converts raw `DecodedValue` to schema-typed value (for streaming)
+  - Conversion: `toRelish(value, schema)` converts JS value to Relish bytes; `fromRelish(bytes, schema)` converts bytes to schema-typed value
   - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`, `Codec<T>`
 - **Guarantees**:
   - All schema constructors return TypeBox-compatible schemas
@@ -39,24 +39,27 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - TypeBox integration: Enables runtime validation via TypeBox's `Value` module
 - Field/variant ID on schema: Allows codec to extract IDs without separate mapping
 - ROptional preserves inner TypeCode: Enables codec to know underlying type
-- **Symmetric fromRelish API with intentional streaming duplication** (ADR 0001):
-  - `fromRelish` takes `Uint8Array` directly (not `DecodedValue`)
-  - Makes API symmetric: `toRelish(value) ↔ fromRelish(bytes)`
-  - Conversion logic duplicated in `@grounds/stream` for byte-aware streaming
-  - Both packages have internal `_decodeValueToTyped` helpers with identical logic
-  - This keeps packages self-contained and independent
+- **True API symmetry** (ADR 0001):
+  - `toRelish(value, schema)` now returns `Result<Uint8Array, EncodeError>` (not `RelishValue`)
+  - `fromRelish(bytes, schema)` returns `Result<T, DecodeError>`
+  - Both functions take/return the same format (bytes) and opposites (value ↔ bytes)
+  - Codec.encode simplified: just calls toRelish directly (no more .andThen(encode))
+  - Codec.decode calls fromRelish (which handles decoding + conversion)
+  - Conversion logic internally uses `_toRelishValue` helper (not exported)
+  - This keeps public API minimal and truly symmetric
   - See `docs/adrs/0001-symmetric-fromrelish-with-streaming-duplication.md` for full context
 
 ## API Surface
 
 Following project-wide API design principles (see root CLAUDE.md), this package exports a minimal public API.
 
-**Exported for streaming integration**:
-- `fromRelish(value, schema)`: Converts raw `DecodedValue` from core decoder to schema-typed value. Needed by `@grounds/stream` for schema-aware streaming where `buffer.tryDecodeOne()` returns raw values that must be converted.
+**Core conversion functions**:
+- `toRelish(value, schema)`: Converts JS value to Relish binary bytes. Returns `Result<Uint8Array, EncodeError>`.
+- `fromRelish(bytes, schema)`: Converts Relish binary bytes to schema-typed JS value. Returns `Result<T, DecodeError>`. Needed by `@grounds/stream` for schema-aware streaming.
 
 **Not exported (internal implementation details)**:
 - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType` (schema introspection)
-- Conversion function: `toRelish` (Codec wraps this; users don't need intermediate RelishValue forms)
+- Internal helper: `_toRelishValue` (Codec uses this internally; users work with bytes instead of intermediate RelishValue forms)
 
 If users request these for advanced use cases, we can design a better API or export the existing one. But we won't export speculatively.
 
