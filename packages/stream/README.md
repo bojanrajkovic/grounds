@@ -14,6 +14,7 @@ npm install @grounds/stream
 
 ```typescript
 import { encodeIterable, decodeIterable } from "@grounds/stream";
+import { TypeCode } from "@grounds/core";
 
 // Encode values from async iterable
 async function* values() {
@@ -96,10 +97,6 @@ for await (const result of decodeIterable(chunks())) {
 - `createDecoderStream()` - TransformStream<Uint8Array, RelishValue>
 - `createSchemaEncoderStream(schema)` - Type-safe encoder
 - `createSchemaDecoderStream(schema)` - Type-safe decoder
-
-### Utilities
-
-- `StreamBuffer` - Chunk accumulation with boundary handling
 
 ## License
 

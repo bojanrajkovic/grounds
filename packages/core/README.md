@@ -71,6 +71,7 @@ if (result.isErr()) {
 ### Types
 
 - `RelishValue` - Tagged union of all Relish value types
+- `DecodedValue` - Union type for decoder output (raw JS values)
 - `TypeCode` - Enum of type codes (0x00-0x13)
 - `EncodeError` - Error type for encoding failures
 - `DecodeError` - Error type for decoding failures
@@ -78,7 +79,7 @@ if (result.isErr()) {
 ### Functions
 
 - `encode(value: RelishValue): Result<Uint8Array, EncodeError>`
-- `decode(bytes: Uint8Array): Result<RelishValue, DecodeError>`
+- `decode(bytes: Uint8Array): Result<DecodedValue, DecodeError>`
 
 ## License
 
