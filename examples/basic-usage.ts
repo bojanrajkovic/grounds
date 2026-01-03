@@ -5,22 +5,34 @@
 import { encode, decode, TypeCode } from "@grounds/core";
 
 // Encode primitive values
-console.log("=== Encoding Primitives ===");
+console.log("=== Encoding primitives ===");
 
 const nullResult = encode({ type: TypeCode.Null, value: null });
-console.log("Null:", nullResult.isOk() ? nullResult.value : nullResult.error);
+console.log("Null:", nullResult.match(
+  (bytes) => bytes,
+  (err) => err.message,
+));
 
 const boolResult = encode({ type: TypeCode.Bool, value: true });
-console.log("Bool:", boolResult.isOk() ? boolResult.value : boolResult.error);
+console.log("Bool:", boolResult.match(
+  (bytes) => bytes,
+  (err) => err.message,
+));
 
 const u32Result = encode({ type: TypeCode.U32, value: 12345 });
-console.log("U32:", u32Result.isOk() ? u32Result.value : u32Result.error);
+console.log("U32:", u32Result.match(
+  (bytes) => bytes,
+  (err) => err.message,
+));
 
 const stringResult = encode({ type: TypeCode.String, value: "hello world" });
-console.log("String:", stringResult.isOk() ? stringResult.value : stringResult.error);
+console.log("String:", stringResult.match(
+  (bytes) => bytes,
+  (err) => err.message,
+));
 
 // Encode an array
-console.log("\n=== Encoding Array ===");
+console.log("\n=== Encoding array ===");
 
 const arrayResult = encode({
   type: TypeCode.Array,
@@ -30,30 +42,54 @@ const arrayResult = encode({
     { type: TypeCode.U8, value: 3 },
   ],
 });
-console.log("Array:", arrayResult.isOk() ? arrayResult.value : arrayResult.error);
+console.log("Array:", arrayResult.match(
+  (bytes) => bytes,
+  (err) => err.message,
+));
 
-// Decode values
+// Decode values using andThen for chaining
 console.log("\n=== Decoding ===");
 
-if (stringResult.isOk()) {
-  const decoded = decode(stringResult.value);
-  if (decoded.isOk()) {
-    console.log("Decoded string:", decoded.value);
-  }
-}
+// Chain encode -> decode using andThen
+const stringRoundtrip = encode({ type: TypeCode.String, value: "hello world" })
+  .andThen((bytes) => decode(bytes));
 
-if (arrayResult.isOk()) {
-  const decoded = decode(arrayResult.value);
-  if (decoded.isOk()) {
-    console.log("Decoded array:", decoded.value);
-  }
-}
+console.log("String roundtrip:", stringRoundtrip.match(
+  (value) => value,
+  (err) => `Failed: ${err.message}`,
+));
 
-// Error handling
-console.log("\n=== Error Handling ===");
+const arrayRoundtrip = encode({
+  type: TypeCode.Array,
+  value: [
+    { type: TypeCode.U8, value: 1 },
+    { type: TypeCode.U8, value: 2 },
+    { type: TypeCode.U8, value: 3 },
+  ],
+}).andThen((bytes) => decode(bytes));
+
+console.log("Array roundtrip:", arrayRoundtrip.match(
+  (value) => value,
+  (err) => `Failed: ${err.message}`,
+));
+
+// Error handling with match
+console.log("\n=== Error handling ===");
 
 const overflowResult = encode({ type: TypeCode.U8, value: 300 });
-if (overflowResult.isErr()) {
-  console.log("Error code:", overflowResult.error.code);
-  console.log("Error message:", overflowResult.error.message);
-}
+overflowResult.match(
+  (bytes) => console.log("Unexpected success:", bytes),
+  (err) => {
+    console.log("Error code:", err.code);
+    console.log("Error message:", err.message);
+  },
+);
+
+// Using map to transform successful results
+console.log("\n=== Transforming results ===");
+
+const hexString = encode({ type: TypeCode.U32, value: 42 })
+  .map((bytes) => Buffer.from(bytes).toString("hex"))
+  .unwrapOr("encoding failed");
+
+console.log("Hex encoding of 42:", hexString);

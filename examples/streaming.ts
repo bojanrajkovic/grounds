@@ -5,8 +5,8 @@
 import { createEncoderStream, createDecoderStream, encodeIterable, decodeIterable } from "@grounds/stream";
 import { TypeCode, type RelishValue } from "@grounds/core";
 
-// AsyncGenerator example
-console.log("=== AsyncGenerator Streaming ===");
+// AsyncGenerator example using match for each result
+console.log("=== AsyncGenerator streaming ===");
 
 async function asyncGeneratorExample(): Promise<void> {
   // Generate values
@@ -17,14 +17,20 @@ async function asyncGeneratorExample(): Promise<void> {
     }
   }
 
-  // Encode to chunks
+  // Encode to chunks, using match to handle each result
   const chunks: Array<Uint8Array> = [];
+  let encodeErrors = 0;
+
   for await (const result of encodeIterable(generateValues())) {
-    if (result.isOk()) {
-      chunks.push(result.value);
-    }
+    result.match(
+      (bytes) => chunks.push(bytes),
+      (err) => {
+        console.log("Encode error:", err.message);
+        encodeErrors++;
+      },
+    );
   }
-  console.log("Encoded", chunks.length, "chunks");
+  console.log("Encoded", chunks.length, "chunks with", encodeErrors, "errors");
 
   // Decode from chunks
   async function* yieldChunks(): AsyncGenerator<Uint8Array> {
@@ -34,15 +40,21 @@ async function asyncGeneratorExample(): Promise<void> {
   }
 
   const values: Array<RelishValue> = [];
+  let decodeErrors = 0;
+
   for await (const result of decodeIterable(yieldChunks())) {
-    if (result.isOk()) {
-      values.push(result.value);
-    }
+    result.match(
+      (value) => values.push(value),
+      (err) => {
+        console.log("Decode error:", err.message);
+        decodeErrors++;
+      },
+    );
   }
-  console.log("Decoded", values.length, "values");
+  console.log("Decoded", values.length, "values with", decodeErrors, "errors");
 }
 
-// Web Streams example
+// Web Streams example - streams handle errors internally
 console.log("\n=== Web Streams API ===");
 
 async function webStreamsExample(): Promise<void> {

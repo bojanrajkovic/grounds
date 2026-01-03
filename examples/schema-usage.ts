@@ -35,8 +35,8 @@ const MessageSchema = REnum({
 const userCodec = createCodec(UserSchema);
 const messageCodec = createCodec(MessageSchema);
 
-// Encode a user
-console.log("=== Encoding User ===");
+// Encode and decode a user using andThen for chaining
+console.log("=== User roundtrip ===");
 
 const user = {
   id: 12345n,
@@ -46,41 +46,49 @@ const user = {
   createdAt: DateTime.now(),
 };
 
-const encodedUser = userCodec.encode(user);
-if (encodedUser.isOk()) {
-  console.log("Encoded bytes:", encodedUser.value.length, "bytes");
-  console.log("Hex:", Buffer.from(encodedUser.value).toString("hex"));
+// Chain encode -> decode, then log the result
+userCodec.encode(user)
+  .map((bytes) => {
+    console.log("Encoded bytes:", bytes.length, "bytes");
+    console.log("Hex:", Buffer.from(bytes).toString("hex"));
+    return bytes;
+  })
+  .andThen((bytes) => userCodec.decode(bytes))
+  .match(
+    (decoded) => console.log("Decoded user:", decoded),
+    (err) => console.log("Failed:", err.message),
+  );
 
-  // Decode it back
-  const decodedUser = userCodec.decode(encodedUser.value);
-  if (decodedUser.isOk()) {
-    console.log("Decoded user:", decodedUser.value);
-  }
-}
-
-// Encode messages
-console.log("\n=== Encoding Messages ===");
+// Encode messages using match for exhaustive handling
+console.log("\n=== Encoding messages ===");
 
 const textMessage = { text: { content: "Hello!", sender: "Alice" } };
 const imageMessage = { image: { url: "https://example.com/img.png", width: 800, height: 600 } };
 
-const encodedText = messageCodec.encode(textMessage);
-const encodedImage = messageCodec.encode(imageMessage);
+// Roundtrip text message
+messageCodec.encode(textMessage)
+  .andThen((bytes) => {
+    console.log("Text message:", bytes.length, "bytes");
+    return messageCodec.decode(bytes);
+  })
+  .match(
+    (decoded) => console.log("Decoded text:", decoded),
+    (err) => console.log("Text failed:", err.message),
+  );
 
-if (encodedText.isOk()) {
-  console.log("Text message:", encodedText.value.length, "bytes");
-  const decoded = messageCodec.decode(encodedText.value);
-  console.log("Decoded:", decoded.isOk() ? decoded.value : decoded.error);
-}
+// Roundtrip image message
+messageCodec.encode(imageMessage)
+  .andThen((bytes) => {
+    console.log("Image message:", bytes.length, "bytes");
+    return messageCodec.decode(bytes);
+  })
+  .match(
+    (decoded) => console.log("Decoded image:", decoded),
+    (err) => console.log("Image failed:", err.message),
+  );
 
-if (encodedImage.isOk()) {
-  console.log("Image message:", encodedImage.value.length, "bytes");
-  const decoded = messageCodec.decode(encodedImage.value);
-  console.log("Decoded:", decoded.isOk() ? decoded.value : decoded.error);
-}
-
-// Arrays of structs
-console.log("\n=== Array of Users ===");
+// Arrays of structs using map and unwrapOr
+console.log("\n=== Array of users ===");
 
 const UsersSchema = RArray(UserSchema);
 const usersCodec = createCodec(UsersSchema);
@@ -90,7 +98,24 @@ const users = [
   { id: 2n, name: "Bob", email: "bob@example.com", active: false, createdAt: DateTime.now() },
 ];
 
-const encodedUsers = usersCodec.encode(users);
-if (encodedUsers.isOk()) {
-  console.log("Encoded users array:", encodedUsers.value.length, "bytes");
-}
+const byteCount = usersCodec.encode(users)
+  .map((bytes) => bytes.length)
+  .unwrapOr(0);
+
+console.log("Encoded users array:", byteCount, "bytes");
+
+// Demonstrate mapErr for error transformation
+console.log("\n=== Error transformation ===");
+
+// This would fail with a type mismatch - demonstrating mapErr
+const badUser = { id: "not-a-bigint" as unknown as bigint, name: "Bad", email: null, active: true, createdAt: DateTime.now() };
+
+userCodec.encode(badUser)
+  .mapErr((err) => ({
+    ...err,
+    context: "Failed while encoding user for storage",
+  }))
+  .match(
+    (bytes) => console.log("Encoded:", bytes.length, "bytes"),
+    (err) => console.log("Error with context:", err.context, "-", err.message),
+  );
