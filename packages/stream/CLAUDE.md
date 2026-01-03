@@ -71,3 +71,7 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 - Web Streams stop processing on first error (no continuation)
 - `tryDecodeOne()` returns `needMore` for empty buffer (not an error)
 - Schema decoder uses `fromRelish`, not full codec decode (avoids double-decode)
+- **Error handling asymmetry between encode/decode iterables**:
+  - `encodeIterable`: Yields error Result and **continues** to next value (errors are isolated per-value)
+  - `decodeIterable`: Yields error Result and **stops** (stream corruption makes remaining data unreliable)
+  - This difference is intentional: encoding errors are independent (bad value doesn't affect others), but decoding errors indicate stream corruption (byte boundaries are lost)

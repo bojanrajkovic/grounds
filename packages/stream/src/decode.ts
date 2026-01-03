@@ -7,6 +7,14 @@ import {
 } from "@grounds/core";
 import { StreamBuffer } from "./buffer.js";
 
+/**
+ * Decode values from chunked binary data, yielding Result per value.
+ *
+ * Error handling: Yields error Result and **stops** iteration.
+ * Unlike encodeIterable which continues on error, decode errors indicate
+ * stream corruption - byte boundaries are lost and remaining data is
+ * unreliable. This matches Web Streams behavior (stop on first error).
+ */
 export async function* decodeIterable(
   chunks: AsyncIterable<Uint8Array>
 ): AsyncGenerator<Result<DecodedValue, DecodeError>> {
@@ -26,7 +34,9 @@ export async function* decodeIterable(
 
       if (result.status === "error") {
         yield err(result.error);
-        return; // Stop on decode error
+        // Stop iteration: decode error means stream is corrupted,
+        // byte boundaries are lost, remaining data is unreliable
+        return;
       }
 
       if (result.status === "ok") {

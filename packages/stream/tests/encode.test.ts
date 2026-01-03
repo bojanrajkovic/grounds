@@ -1,4 +1,4 @@
-// pattern: Test
+// pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { encodeIterable, encodeIterableBytes } from "../src/encode.js";
 import {

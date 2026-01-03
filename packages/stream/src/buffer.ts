@@ -1,4 +1,7 @@
-// pattern: Functional Core
+// pattern: Imperative Shell
+// Note: StreamBuffer has mutable internal state (chunks array, position tracking).
+// While it doesn't perform I/O, the stateful class design fits Imperative Shell
+// pattern better than Functional Core which expects pure functions.
 import { type Result, ok } from "neverthrow";
 import { Decoder, type DecodedValue, type DecodeError } from "@grounds/core";
 

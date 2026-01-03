@@ -14,7 +14,13 @@ const RelishKind = Symbol.for("@grounds/schema/Kind");
 const RelishElementType = Symbol.for("@grounds/schema/ElementType");
 const RelishValueType = Symbol.for("@grounds/schema/ValueType");
 
-// Type aliases for schema introspection
+// Type alias for schema introspection via Symbol-based properties.
+// Using `any` is necessary because:
+// 1. The symbols (RelishKind, etc.) are internal to @grounds/schema and not exported
+//    per the minimal API surface principle - we recreate them here via Symbol.for()
+// 2. Schema structure is dynamic (different shapes for structs, enums, arrays, etc.)
+// 3. TypeScript cannot track Symbol-keyed properties across package boundaries
+// All accesses are validated at runtime by the switch on RelishKind.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SchemaValue = any;
 
@@ -38,6 +44,10 @@ type SchemaValue = any;
  * @param schema - The Relish schema
  * @returns Schema-aware typed value
  */
+// Type assertions throughout this function are necessary because:
+// - Schema types use Symbol-keyed properties that TypeScript cannot track statically
+// - We access dynamic properties like .fields, .variants, .inner based on RelishKind
+// - The switch on RelishKind provides runtime type safety; assertions satisfy compiler
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _decodeValueToTyped<T>(decoded: unknown, schema: SchemaValue): Result<T, DecodeError> {
   const kind = schema[RelishKind];
