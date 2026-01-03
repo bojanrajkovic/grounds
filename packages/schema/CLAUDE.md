@@ -39,6 +39,13 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - TypeBox integration: Enables runtime validation via TypeBox's `Value` module
 - Field/variant ID on schema: Allows codec to extract IDs without separate mapping
 - ROptional preserves inner TypeCode: Enables codec to know underlying type
+- **Symmetric fromRelish API with intentional streaming duplication** (ADR 0001):
+  - `fromRelish` takes `Uint8Array` directly (not `DecodedValue`)
+  - Makes API symmetric: `toRelish(value) ↔ fromRelish(bytes)`
+  - Conversion logic duplicated in `@grounds/stream` for byte-aware streaming
+  - Both packages have internal `_decodeValueToTyped` helpers with identical logic
+  - This keeps packages self-contained and independent
+  - See `docs/adrs/0001-symmetric-fromrelish-with-streaming-duplication.md` for full context
 
 ## API Surface
 

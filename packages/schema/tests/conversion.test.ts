@@ -1,6 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { toRelish, fromRelish } from "../src/convert.js";
+import { createCodec } from "../src/codec.js";
 import {
   RNull,
   RBool,
@@ -244,102 +245,139 @@ describe("toRelish Enum", () => {
 });
 
 describe("fromRelish", () => {
-  it("converts null (pass through)", () => {
-    const result = fromRelish(null, RNull());
+  it("converts null from bytes", () => {
+    // Get the codec to properly encode
+    const codec = createCodec(RNull());
+    const encoded = codec.encode(null);
+    expect(encoded.isOk()).toBe(true);
+    const bytes = encoded._unsafeUnwrap();
+
+    // Now decode using fromRelish
+    const result = fromRelish(bytes, RNull());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBeNull();
   });
 
-  it("converts boolean (pass through)", () => {
-    const result = fromRelish(true, RBool());
+  it("converts boolean from bytes", () => {
+    const codec = createCodec(RBool());
+    const encoded = codec.encode(true);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), RBool());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(true);
   });
 
-  it("converts u32 (pass through)", () => {
-    const result = fromRelish(42, RU32());
+  it("converts u32 from bytes", () => {
+    const codec = createCodec(RU32());
+    const encoded = codec.encode(42);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), RU32());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(42);
   });
 
-  it("converts u64 bigint (pass through)", () => {
-    const result = fromRelish(123n, RU64());
+  it("converts u64 bigint from bytes", () => {
+    const codec = createCodec(RU64());
+    const encoded = codec.encode(123n);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), RU64());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(123n);
   });
 
-  it("converts string (pass through)", () => {
-    const result = fromRelish("hello", RString());
+  it("converts string from bytes", () => {
+    const codec = createCodec(RString());
+    const encoded = codec.encode("hello");
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), RString());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe("hello");
   });
 
-  it("converts DateTime (pass through from decoder)", () => {
+  it("converts DateTime from bytes", () => {
     const dt = DateTime.fromSeconds(1704067200, { zone: "UTC" }); // 2024-01-01 00:00:00 UTC
-    const result = fromRelish(dt, RTimestamp());
+    const codec = createCodec(RTimestamp());
+    const encoded = codec.encode(dt);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), RTimestamp());
     expect(result.isOk()).toBe(true);
     const resultDt = result._unsafeUnwrap() as DateTime;
     expect(DateTime.isDateTime(resultDt)).toBe(true);
     expect(resultDt.toUnixInteger()).toBe(1704067200);
   });
 
-  it("converts Array<number> (already decoded)", () => {
-    const decodedArr: ReadonlyArray<number> = [1, 2, 3];
-    const result = fromRelish(decodedArr, RArray(RU32()));
+  it("converts Array<number> from bytes", () => {
+    const schema = RArray(RU32());
+    const codec = createCodec(schema);
+    const encoded = codec.encode([1, 2, 3]);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), schema);
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual([1, 2, 3]);
   });
 
-  it("converts Map<number, string> (already decoded)", () => {
-    const decodedMap = new Map<number, string>([[1, "one"], [2, "two"]]);
-    const result = fromRelish(decodedMap, RMap(RU32(), RString()));
+  it("converts Map<number, string> from bytes", () => {
+    const schema = RMap(RU32(), RString());
+    const codec = createCodec(schema);
+    const map = new Map([[1, "one"], [2, "two"]]);
+    const encoded = codec.encode(map);
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), schema);
     expect(result.isOk()).toBe(true);
     const jsMap = result._unsafeUnwrap() as Map<number, string>;
     expect(jsMap.get(1)).toBe("one");
     expect(jsMap.get(2)).toBe("two");
   });
 
-  it("converts Struct from field IDs to property names", () => {
-    const decodedStruct: Readonly<{ [fieldId: number]: unknown }> = {
-      1: "Alice",
-      2: 30,
-    };
+  it("converts Struct from bytes", () => {
     const schema = RStruct({
       name: field(1, RString()),
       age: field(2, RU32()),
     });
-    const result = fromRelish(decodedStruct, schema);
+    const codec = createCodec(schema);
+    const encoded = codec.encode({ name: "Alice", age: 30 });
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), schema);
     expect(result.isOk()).toBe(true);
     const obj = result._unsafeUnwrap() as { name: string; age: number };
     expect(obj.name).toBe("Alice");
     expect(obj.age).toBe(30);
   });
 
-  it("converts Struct with missing optional field to null", () => {
-    const decodedStruct: Readonly<{ [fieldId: number]: unknown }> = {
-      1: "Alice",
-    };
+  it("converts Struct with missing optional field to null from bytes", () => {
     const schema = RStruct({
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = fromRelish(decodedStruct, schema);
+    const codec = createCodec(schema);
+    const encoded = codec.encode({ name: "Alice", nickname: null });
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), schema);
     expect(result.isOk()).toBe(true);
     const obj = result._unsafeUnwrap() as { name: string; nickname: string | null };
     expect(obj.name).toBe("Alice");
     expect(obj.nickname).toBeNull();
   });
 
-  it("converts Enum from variant ID to variant name", () => {
-    const decodedEnum: Readonly<{ variantId: number; value: unknown }> = {
-      variantId: 1,
-      value: "ok",
-    };
+  it("converts Enum from bytes", () => {
     const schema = REnum({
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = fromRelish(decodedEnum, schema);
+    const codec = createCodec(schema);
+    const encoded = codec.encode({ variant: "success", value: "ok" });
+    expect(encoded.isOk()).toBe(true);
+
+    const result = fromRelish(encoded._unsafeUnwrap(), schema);
     expect(result.isOk()).toBe(true);
     const enumVal = result._unsafeUnwrap() as { variant: string; value: unknown };
     expect(enumVal.variant).toBe("success");

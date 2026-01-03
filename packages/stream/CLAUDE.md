@@ -40,6 +40,13 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 - StreamBuffer class: Accumulates chunks, handles partial message boundaries
 - Separate raw and schema streams: Raw streams work with `RelishValue`/`DecodedValue`, schema streams work with TypeScript-typed values
 - TRUNCATED_STREAM error code: Distinguishes incomplete data at end-of-stream from mid-stream UNEXPECTED_EOF
+- **Intentional duplication of conversion logic** (ADR 0001):
+  - `_decodeValueToTyped` in this package duplicates logic from `@grounds/schema`
+  - Streaming layer needs direct Decoder access for byte tracking
+  - Both packages implement identical conversion algorithm independently
+  - This keeps packages self-contained and avoids inter-package coupling
+  - See `docs/adrs/0001-symmetric-fromrelish-with-streaming-duplication.md` for context
+  - **Maintenance note:** If conversion algorithm changes in schema package, update `_decodeValueToTyped` here
 
 ## Invariants
 

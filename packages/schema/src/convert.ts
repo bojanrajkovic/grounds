@@ -28,6 +28,7 @@ import {
   Enum,
   EncodeError,
   DecodeError,
+  Decoder,
 } from "@grounds/core";
 import { DateTime } from "luxon";
 import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishValueType } from "./symbols.js";
@@ -257,7 +258,42 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
 }
 
 /**
- * Convert decoded values (from core decoder) to schema-aware typed values.
+ * Convert bytes to schema-aware typed values.
+ *
+ * This function makes the API symmetric with toRelish:
+ * - toRelish: JavaScript value → Relish bytes
+ * - fromRelish: Relish bytes → JavaScript value
+ *
+ * Implementation: Decodes bytes using the core Decoder, then converts
+ * the raw DecodedValue to schema-aware types using internal conversion logic.
+ *
+ * WARNING: Conversion logic is duplicated in @grounds/stream for byte tracking.
+ * If you change the conversion algorithm here, update _decodeValueToTyped in
+ * schema-streams.ts with the same changes. This duplication is intentional
+ * to keep packages self-contained (see ADR 0001).
+ *
+ * @param bytes - Raw Relish binary data
+ * @param schema - The Relish schema
+ * @returns Schema-aware typed value
+ */
+export function fromRelish<T>(bytes: Uint8Array, schema: TRelishSchema): Result<T, DecodeError> {
+  // Decode raw bytes to get the core DecodedValue
+  const decoder = new Decoder(bytes);
+  const decodeResult = decoder.decodeValue();
+  if (decodeResult.isErr()) {
+    return err(decodeResult.error);
+  }
+
+  // Convert raw DecodedValue to schema-aware typed value
+  return _decodeValueToTyped(decodeResult.value, schema);
+}
+
+/**
+ * Internal helper: Convert decoded values (from core decoder) to schema-aware typed values.
+ *
+ * This is the conversion algorithm used by both:
+ * - fromRelish in this package (takes bytes and decodes them)
+ * - schema-streams.ts in @grounds/stream (has byte tracking via Decoder)
  *
  * The decoder returns raw JavaScript types (number, bigint, string, etc.).
  * This function transforms them to schema-aware types:
@@ -266,11 +302,14 @@ export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishVa
  * - Primitives → passed through (decoder already returns raw JS)
  * - Missing optional struct fields → null
  *
+ * WARNING: This function must keep the same conversion logic as
+ * _decodeValueToTyped in schema-streams.ts. Keep them in sync.
+ *
  * @param value - Decoded value from core decoder
  * @param schema - The Relish schema
  * @returns Schema-aware typed value
  */
-export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, DecodeError> {
+function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T, DecodeError> {
   const kind = schema[RelishKind];
 
   switch (kind) {
@@ -305,7 +344,7 @@ export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, 
       const jsArray: Array<unknown> = [];
 
       for (const elem of decodedArr) {
-        const elemResult = fromRelish(elem, elementSchema);
+        const elemResult = _decodeValueToTyped(elem, elementSchema);
         if (elemResult.isErr()) {
           return err(elemResult.error);
         }
@@ -322,7 +361,7 @@ export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, 
       const jsMap = new Map<unknown, unknown>();
 
       for (const [k, v] of decodedMap) {
-        const valueResult = fromRelish(v, valueSchema);
+        const valueResult = _decodeValueToTyped(v, valueSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -355,7 +394,7 @@ export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, 
           if (fieldKind === "ROptional") {
             actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
           }
-          const valueResult = fromRelish(fieldValue, actualSchema);
+          const valueResult = _decodeValueToTyped(fieldValue, actualSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
@@ -376,7 +415,7 @@ export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, 
       for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
         const vid = (variantSchema as { variantId: number }).variantId;
         if (vid === variantId) {
-          const valueResult = fromRelish(enumValue, variantSchema as unknown as TRelishSchema);
+          const valueResult = _decodeValueToTyped(enumValue, variantSchema as unknown as TRelishSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
@@ -392,7 +431,7 @@ export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, 
       if (value === null) {
         return ok(null as T);
       }
-      return fromRelish(value, optionalSchema.inner);
+      return _decodeValueToTyped(value, optionalSchema.inner);
     }
 
     default:
