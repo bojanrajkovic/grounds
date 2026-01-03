@@ -1,9 +1,6 @@
 // pattern: Imperative Shell
 // @grounds/stream - Streaming encode/decode utilities
 
-// Buffer utilities
-export { StreamBuffer, type TryDecodeResult } from "./buffer.js";
-
 // AsyncGenerator streaming
 export { encodeIterable, encodeIterableBytes } from "./encode.js";
 export { decodeIterable } from "./decode.js";

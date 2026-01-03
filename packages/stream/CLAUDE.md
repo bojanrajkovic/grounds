@@ -9,8 +9,6 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 ## Contracts
 
 - **Exposes**:
-  - `StreamBuffer` class - Accumulates chunks, exposes `tryDecodeOne()` for incremental decoding
-  - `TryDecodeResult` type - Discriminated union: `{ status: "ok" | "needMore" | "error" }`
   - `encodeIterable(values)` - AsyncGenerator yielding `Result<Uint8Array, EncodeError>` per value
   - `encodeIterableBytes(values)` - AsyncGenerator yielding `Uint8Array`, throws on error
   - `decodeIterable(chunks)` - AsyncGenerator yielding `Result<DecodedValue, DecodeError>`
@@ -18,6 +16,9 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
   - `createDecoderStream()` - Web TransformStream: `Uint8Array` to `DecodedValue`
   - `createSchemaEncoderStream(schema)` - Web TransformStream: `Static<T>` to `Uint8Array`
   - `createSchemaDecoderStream(schema)` - Web TransformStream: `Uint8Array` to `Static<T>`
+- **Internal** (not exported):
+  - `StreamBuffer` class - Accumulates chunks for incremental decoding
+  - `TryDecodeResult` type - Internal status type for buffer operations
 - **Guarantees**:
   - Incomplete data returns `needMore` status (does not error until stream ends)
   - Trailing incomplete data at stream end yields `TRUNCATED_STREAM` error
