@@ -92,8 +92,7 @@ for await (const result of decodeIterable(chunks())) {
 ### AsyncGenerator
 
 - `encodeIterable(values)` - Yields `Result<Uint8Array, EncodeError>`
-- `encodeIterableBytes(values)` - Yields `Uint8Array`, throws on error
-- `decodeIterable(chunks)` - Yields `Result<RelishValue, DecodeError>`
+- `decodeIterable(chunks)` - Yields `Result<DecodedValue, DecodeError>`
 
 ### Web Streams
 

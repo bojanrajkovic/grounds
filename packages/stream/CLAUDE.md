@@ -10,7 +10,6 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 
 - **Exposes**:
   - `encodeIterable(values)` - AsyncGenerator yielding `Result<Uint8Array, EncodeError>` per value
-  - `encodeIterableBytes(values)` - AsyncGenerator yielding `Uint8Array`, throws on error
   - `decodeIterable(chunks)` - AsyncGenerator yielding `Result<DecodedValue, DecodeError>`
   - `createEncoderStream()` - Web TransformStream: `RelishValue` to `Uint8Array`
   - `createDecoderStream()` - Web TransformStream: `Uint8Array` to `DecodedValue`
@@ -67,7 +66,6 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 
 ## Gotchas
 
-- `encodeIterableBytes` throws on error; use `encodeIterable` for Result-based handling
 - Web Streams stop processing on first error (no continuation)
 - `tryDecodeOne()` returns `needMore` for empty buffer (not an error)
 - Schema decoder uses `fromRelish`, not full codec decode (avoids double-decode)

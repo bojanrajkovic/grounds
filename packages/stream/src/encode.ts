@@ -18,15 +18,3 @@ export async function* encodeIterable(
     // Continue to next value even if this one failed
   }
 }
-
-export async function* encodeIterableBytes(
-  values: AsyncIterable<RelishValue>
-): AsyncGenerator<Uint8Array> {
-  for await (const value of values) {
-    const result = encode(value);
-    if (result.isErr()) {
-      throw result.error;
-    }
-    yield result.value;
-  }
-}
