@@ -22,10 +22,13 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Struct fields have numeric `fieldId` property
   - Enum variants have numeric `variantId` property
   - TypeScript static inference extracts correct JS types from schemas
+  - **Enum encode**: Variant inferred automatically via `Value.Check` against variant schemas
+  - **Enum decode**: Returns unwrapped value directly (not wrapped in `{ variant, value }`)
 - **Expects**:
   - Valid TypeBox schemas or Relish schemas as inputs
   - Field/variant IDs in valid range (0-127 for bit 7 rule)
   - Callers access metadata via exported symbols, not string keys
+  - **Enum values**: Must match exactly one variant schema (encode fails if ambiguous or no match)
 
 ## Dependencies
 
@@ -86,3 +89,7 @@ If users request these for advanced use cases, we can design a better API or exp
 - RMap uses custom format (TypeBox lacks native Map support)
 - Use symbol imports to access metadata; string keys won't work
 - BigInt schemas (u64, u128, i64, i128) use Type.BigInt() not Type.Integer()
+- **Enum API**: Users pass raw values, not `{ variant, value }` wrappers
+  - Encode: Pass the value directly (e.g., `"success"` or `{ content, sender }`), variant inferred via schema matching
+  - Decode: Returns unwrapped value directly (e.g., `"success"` not `{ variant: "ok", value: "success" }`)
+  - Users handle variant discrimination themselves via type guards on discriminator fields they define in struct variants
