@@ -39,16 +39,18 @@ const UserSchema = RStruct({
 const codec = createCodec(UserSchema);
 
 // Encode
-const encoded = codec.encode({ name: "Alice", age: 30 });
-if (encoded.isOk()) {
-  console.log(encoded.value); // Uint8Array
-}
+const encoded = codec.encode({ name: "Alice", age: 30, email: null });
+encoded.match(
+  (bytes) => console.log("Encoded:", bytes), // Uint8Array
+  (err) => console.error("Encode failed:", err)
+);
 
 // Decode
-const decoded = codec.decode(encoded.value);
-if (decoded.isOk()) {
-  console.log(decoded.value); // { name: "Alice", age: 30, email: null }
-}
+const decoded = codec.decode(encoded.unwrapOr(new Uint8Array()));
+decoded.match(
+  (user) => console.log("Decoded:", user), // { name: "Alice", age: 30, email: null }
+  (err) => console.error("Decode failed:", err)
+);
 ```
 
 ### Low-level API
@@ -57,14 +59,15 @@ if (decoded.isOk()) {
 import { encode, decode, TypeCode } from "@grounds/core";
 
 // Encode a value
-const result = encode({ type: TypeCode.String, value: "hello" });
-if (result.isOk()) {
-  // Decode bytes
-  const decoded = decode(result.value);
-  if (decoded.isOk()) {
-    console.log(decoded.value); // { type: TypeCode.String, value: "hello" }
-  }
-}
+const encoded = encode({ type: TypeCode.String, value: "hello" });
+
+// Decode bytes
+const decoded = encoded.andThen((bytes) => decode(bytes));
+
+decoded.match(
+  (value) => console.log(value), // { type: TypeCode.String, value: "hello" }
+  (err) => console.error("Failed:", err)
+);
 ```
 
 ### Streaming

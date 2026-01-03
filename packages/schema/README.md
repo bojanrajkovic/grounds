@@ -43,19 +43,29 @@ const MetadataSchema = RMap(RString, RString);
 
 ```typescript
 import { createCodec } from "@grounds/schema";
+import { DateTime } from "luxon";
 
 const userCodec = createCodec(UserSchema);
 
 // Encode
-const result = userCodec.encode({
+const encoded = userCodec.encode({
   id: 123n,
   name: "Alice",
   email: "alice@example.com",
   createdAt: DateTime.now(),
 });
 
+encoded.match(
+  (bytes) => console.log("Encoded:", bytes),
+  (err) => console.error("Encode failed:", err)
+);
+
 // Decode
 const decoded = userCodec.decode(bytes);
+decoded.match(
+  (user) => console.log("Decoded:", user),
+  (err) => console.error("Decode failed:", err)
+);
 ```
 
 ### Type inference
