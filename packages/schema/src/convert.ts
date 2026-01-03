@@ -5,6 +5,7 @@ import { Result, ok, err } from "neverthrow";
 import {
   type RelishValue,
   type TypeCode as TypeCodeType,
+  isPrimitiveTypeCode,
   Null,
   Bool,
   U8,
@@ -35,17 +36,11 @@ import type { TRStruct, TStructField } from "./struct.js";
 import type { TREnum, TEnumVariant } from "./enum.js";
 
 /**
- * Type code threshold: codes below this are primitive types (0x00-0x0e),
- * codes at or above are composite types (Array, Map, Struct, Enum, Timestamp).
- */
-const COMPOSITE_TYPE_THRESHOLD = 0x0f;
-
-/**
  * Extracts the raw value from a RelishValue based on its type code.
  *
  * - Null (0x00): returns null
- * - Primitives (0x01-0x0e): extracts the `.value` property
- * - Composites (0x0f+): returns the full RelishValue
+ * - Primitives (0x01-0x0e, 0x13): extracts the `.value` property
+ * - Composites (0x0f-0x12): returns the full RelishValue
  *
  * This is needed because Array_ and Map_ constructors expect raw JS values
  * for primitive elements/keys/values, but full RelishValue for composites.
@@ -61,7 +56,7 @@ function extractRawValue(
   if (typeCode === 0x00) {
     // Null type: raw value is null literal
     return null;
-  } else if (typeCode < COMPOSITE_TYPE_THRESHOLD) {
+  } else if (isPrimitiveTypeCode(typeCode)) {
     // Primitive type: extract the value property
     // Type assertion needed: TypeScript cannot narrow RelishValue discriminated union
     // based on numeric type code comparison at compile time
