@@ -12,7 +12,11 @@ import {
   RString,
   RTimestamp,
   RArray,
+  RMap,
+  ROptional,
 } from "../src/types.js";
+import { RStruct, field } from "../src/struct.js";
+import { REnum, variant } from "../src/enum.js";
 import { TypeCode, type RelishArray, type RelishTimestamp, type RelishF64 } from "@grounds/core";
 import { DateTime } from "luxon";
 
@@ -121,5 +125,110 @@ describe("jsToRelish Array", () => {
     expect(result.isOk()).toBe(true);
     const arr = result._unsafeUnwrap() as RelishArray;
     expect(arr.elementType).toBe(TypeCode.String);
+  });
+});
+
+describe("jsToRelish Map", () => {
+  it("converts Map<number, string>", () => {
+    const schema = RMap(RU32(), RString());
+    const input = new Map([[1, "one"], [2, "two"]]);
+    const result = jsToRelish(input, schema);
+    expect(result.isOk()).toBe(true);
+    const map = result._unsafeUnwrap() as any;
+    expect(map.type).toBe("map");
+    expect(map.keyType).toBe(TypeCode.U32);
+    expect(map.valueType).toBe(TypeCode.String);
+  });
+
+  it("converts empty Map", () => {
+    const schema = RMap(RString(), RU32());
+    const input = new Map<string, number>();
+    const result = jsToRelish(input, schema);
+    expect(result.isOk()).toBe(true);
+    const map = result._unsafeUnwrap() as any;
+    expect(map.entries.size).toBe(0);
+  });
+});
+
+describe("jsToRelish Struct", () => {
+  it("converts struct with all fields", () => {
+    const schema = RStruct({
+      name: field(1, RString()),
+      age: field(2, RU32()),
+    });
+    const result = jsToRelish({ name: "Alice", age: 30 }, schema);
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as any;
+    expect(struct.type).toBe("struct");
+  });
+
+  it("omits null optional fields", () => {
+    const schema = RStruct({
+      name: field(1, RString()),
+      nickname: field(2, ROptional(RString())),
+    });
+    const result = jsToRelish({ name: "Alice", nickname: null }, schema);
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as any;
+    // Should have only 1 field (nickname omitted)
+    expect(struct.fields.size).toBe(1);
+  });
+
+  it("includes non-null optional fields", () => {
+    const schema = RStruct({
+      name: field(1, RString()),
+      nickname: field(2, ROptional(RString())),
+    });
+    const result = jsToRelish({ name: "Alice", nickname: "Ali" }, schema);
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as any;
+    // Should have 2 fields
+    expect(struct.fields.size).toBe(2);
+  });
+
+  it("orders fields by field ID", () => {
+    const schema = RStruct({
+      z_last: field(10, RString()),
+      a_first: field(1, RString()),
+      m_middle: field(5, RU32()),
+    });
+    const result = jsToRelish({ z_last: "z", a_first: "a", m_middle: 5 }, schema);
+    expect(result.isOk()).toBe(true);
+    const struct = result._unsafeUnwrap() as any;
+    const fieldIds = Array.from(struct.fields.keys());
+    expect(fieldIds).toEqual([1, 5, 10]);
+  });
+});
+
+describe("jsToRelish Enum", () => {
+  it("converts enum variant", () => {
+    const schema = REnum({
+      success: variant(1, RString()),
+      failure: variant(2, RU32()),
+    });
+    const result = jsToRelish({ variant: "success", value: "ok" }, schema);
+    expect(result.isOk()).toBe(true);
+    const enumVal = result._unsafeUnwrap() as any;
+    expect(enumVal.type).toBe("enum");
+    expect(enumVal.variantId).toBe(1);
+  });
+
+  it("converts different variant", () => {
+    const schema = REnum({
+      success: variant(1, RString()),
+      failure: variant(2, RU32()),
+    });
+    const result = jsToRelish({ variant: "failure", value: 404 }, schema);
+    expect(result.isOk()).toBe(true);
+    const enumVal = result._unsafeUnwrap() as any;
+    expect(enumVal.variantId).toBe(2);
+  });
+
+  it("returns error for unknown variant", () => {
+    const schema = REnum({
+      success: variant(1, RString()),
+    });
+    const result = jsToRelish({ variant: "unknown", value: "x" }, schema);
+    expect(result.isErr()).toBe(true);
   });
 });
