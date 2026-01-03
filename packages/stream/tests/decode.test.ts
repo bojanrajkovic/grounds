@@ -1,6 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { decodeIterable } from "../src/decode.js";
+import { expectOk, expectErr } from "@grounds/test-utils";
 
 describe("decodeIterable", () => {
   it("should decode values from chunked input", async () => {
@@ -12,9 +13,7 @@ describe("decodeIterable", () => {
 
     const values = [];
     for await (const result of decodeIterable(chunks())) {
-      if (result.isOk()) {
-        values.push(result.value);
-      }
+      values.push(expectOk(result));
     }
 
     expect(values).toHaveLength(3);
@@ -39,9 +38,8 @@ describe("decodeIterable", () => {
 
     // Second result: TRUNCATED_STREAM error (not generic UNEXPECTED_EOF)
     expect(results[1]?.isErr()).toBe(true);
-    if (results[1]?.isErr()) {
-      expect(results[1].error.code).toBe("TRUNCATED_STREAM");
-    }
+    const error = expectErr(results[1]!);
+    expect(error.code).toBe("TRUNCATED_STREAM");
   });
 
   it("should yield decode errors for invalid data", async () => {
@@ -54,10 +52,8 @@ describe("decodeIterable", () => {
       results.push(result);
     }
 
-    expect(results[0]?.isErr()).toBe(true);
-    if (results[0]?.isErr()) {
-      expect(results[0].error.code).toBe("INVALID_TYPE_CODE");
-    }
+    const error = expectErr(results[0]!);
+    expect(error.code).toBe("INVALID_TYPE_CODE");
   });
 
   it("should decode multiple complete values from chunks", async () => {
@@ -74,7 +70,7 @@ describe("decodeIterable", () => {
 
     expect(results).toHaveLength(3);
     expect(results.every((r) => r.isOk())).toBe(true);
-    expect(results.map((r) => r.isOk() && r.value)).toEqual([null, null, null]);
+    expect(results.map((r) => expectOk(r))).toEqual([null, null, null]);
   });
 
   it("should handle empty chunks gracefully", async () => {
@@ -86,9 +82,7 @@ describe("decodeIterable", () => {
 
     const values = [];
     for await (const result of decodeIterable(chunks())) {
-      if (result.isOk()) {
-        values.push(result.value);
-      }
+      values.push(expectOk(result));
     }
 
     expect(values).toHaveLength(2);
@@ -124,10 +118,8 @@ describe("decodeIterable", () => {
       results.push(result);
     }
 
-    expect(results[0]?.isOk()).toBe(true);
-    if (results[0]?.isOk()) {
-      expect(results[0].value).toBe(false);
-    }
+    const value = expectOk(results[0]!);
+    expect(value).toBe(false);
   });
 
   it("should decode u16, u32 values from chunks", async () => {
@@ -140,9 +132,7 @@ describe("decodeIterable", () => {
 
     const values = [];
     for await (const result of decodeIterable(chunks())) {
-      if (result.isOk()) {
-        values.push(result.value);
-      }
+      values.push(expectOk(result));
     }
 
     expect(values).toHaveLength(2);
@@ -162,9 +152,7 @@ describe("decodeIterable", () => {
     }
 
     expect(results[0]?.isOk()).toBe(true);
-    expect(results[1]?.isErr()).toBe(true);
-    if (results[1]?.isErr()) {
-      expect(results[1].error.code).toBe("TRUNCATED_STREAM");
-    }
+    const error = expectErr(results[1]!);
+    expect(error.code).toBe("TRUNCATED_STREAM");
   });
 });

@@ -24,6 +24,7 @@
     "luxon": ">=3.0.0"
   },
   "devDependencies": {
+    "@grounds/test-utils": "workspace:*",
     "@sinclair/typebox": "^0.34.12",
     "@types/luxon": "^3.4.2",
     "luxon": "^3.5.0"

@@ -24,6 +24,7 @@
     "@sinclair/typebox": ">=0.34.0"
   },
   "devDependencies": {
+    "@grounds/test-utils": "workspace:*",
     "@sinclair/typebox": "^0.34.12"
   }
 }

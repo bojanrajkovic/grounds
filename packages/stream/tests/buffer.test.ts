@@ -1,6 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { StreamBuffer } from "../src/buffer.js";
+import { expectOk } from "@grounds/test-utils";
 
 describe("StreamBuffer", () => {
   it("should accumulate chunks", () => {
@@ -40,7 +41,7 @@ describe("StreamBuffer", () => {
     const result = buffer.tryDecodeOne();
     expect(result.status).toBe("ok");
     if (result.status === "ok") {
-      expect(result.value.isOk()).toBe(true);
+      expectOk(result.value);
     }
   });
 

@@ -2,6 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { createSchemaEncoderStream, createSchemaDecoderStream } from "../src/schema-streams.js";
 import { RStruct, RString, RU32, RArray, REnum, field, variant, createCodec } from "@grounds/schema";
+import { expectOk } from "@grounds/test-utils";
 
 describe("createSchemaEncoderStream", () => {
   it("should encode typed objects to Relish bytes", async () => {
@@ -112,9 +113,8 @@ describe("createSchemaEncoderStream", () => {
 
     // Verify each chunk decodes correctly
     for (let i = 0; i < chunks.length; i++) {
-      const decoded = codec.decode(chunks[i]!);
-      expect(decoded.isOk()).toBe(true);
-      expect(decoded._unsafeUnwrap()).toBe(values[i]);
+      const decoded = expectOk(codec.decode(chunks[i]!));
+      expect(decoded).toBe(values[i]);
     }
   });
 });
@@ -128,17 +128,13 @@ describe("createSchemaDecoderStream", () => {
 
     // First, encode some users
     const codec = createCodec(UserSchema);
-    const encoded1 = codec.encode({ name: "Alice", age: 30 });
-    const encoded2 = codec.encode({ name: "Bob", age: 25 });
-
-    if (encoded1.isErr() || encoded2.isErr()) {
-      throw new Error("Encoding failed");
-    }
+    const encoded1 = expectOk(codec.encode({ name: "Alice", age: 30 }));
+    const encoded2 = expectOk(codec.encode({ name: "Bob", age: 25 }));
 
     const readable = new ReadableStream<Uint8Array>({
       start(controller) {
-        controller.enqueue(encoded1.value);
-        controller.enqueue(encoded2.value);
+        controller.enqueue(encoded1);
+        controller.enqueue(encoded2);
         controller.close();
       },
     });
@@ -188,14 +184,10 @@ describe("createSchemaDecoderStream", () => {
     });
 
     const codec = createCodec(UserSchema);
-    const encoded = codec.encode({ name: "Alice" });
-
-    if (encoded.isErr()) {
-      throw new Error("Encoding failed");
-    }
+    const encoded = expectOk(codec.encode({ name: "Alice" }));
 
     // Send complete message + incomplete data (just type byte for string)
-    const incompleteData = new Uint8Array([...encoded.value, 0x0e, 0x05]);
+    const incompleteData = new Uint8Array([...encoded, 0x0e, 0x05]);
 
     const readable = new ReadableStream<Uint8Array>({
       start(controller) {
@@ -225,17 +217,13 @@ describe("createSchemaDecoderStream", () => {
     });
 
     const codec = createCodec(UserSchema);
-    const encoded1 = codec.encode({ name: "Alice", age: 30 });
-    const encoded2 = codec.encode({ name: "Bob", age: 25 });
-
-    if (encoded1.isErr() || encoded2.isErr()) {
-      throw new Error("Encoding failed");
-    }
+    const encoded1 = expectOk(codec.encode({ name: "Alice", age: 30 }));
+    const encoded2 = expectOk(codec.encode({ name: "Bob", age: 25 }));
 
     // Combine both messages
-    const combined = new Uint8Array(encoded1.value.length + encoded2.value.length);
-    combined.set(encoded1.value, 0);
-    combined.set(encoded2.value, encoded1.value.length);
+    const combined = new Uint8Array(encoded1.length + encoded2.length);
+    combined.set(encoded1, 0);
+    combined.set(encoded2, encoded1.length);
 
     // Split at an arbitrary point (middle of the combined data)
     const splitPoint = Math.floor(combined.length / 2);
@@ -270,11 +258,7 @@ describe("createSchemaDecoderStream", () => {
     const codec = createCodec(NumberSchema);
 
     const values = [42, 100, 255, 1000];
-    const encodedValues = values.map((v) => {
-      const result = codec.encode(v);
-      if (result.isErr()) throw new Error("Encoding failed");
-      return result.value;
-    });
+    const encodedValues = values.map((v) => expectOk(codec.encode(v)));
 
     // Combine all encoded values into one chunk
     const totalLength = encodedValues.reduce((sum, arr) => sum + arr.length, 0);
@@ -310,11 +294,10 @@ describe("createSchemaDecoderStream", () => {
     const StringSchema = RString();
     const codec = createCodec(StringSchema);
 
-    const encoded = codec.encode("Hello");
-    if (encoded.isErr()) throw new Error("Encoding failed");
+    const encoded = expectOk(codec.encode("Hello"));
 
     // Stream one byte at a time
-    const bytes = encoded.value;
+    const bytes = encoded;
 
     const readable = new ReadableStream<Uint8Array>({
       start(controller) {
@@ -343,12 +326,11 @@ describe("createSchemaDecoderStream", () => {
     const ArraySchema = RArray(RU32());
     const codec = createCodec(ArraySchema);
 
-    const encoded = codec.encode([1, 2, 3, 4, 5]);
-    if (encoded.isErr()) throw new Error("Encoding failed");
+    const encoded = expectOk(codec.encode([1, 2, 3, 4, 5]));
 
     const readable = new ReadableStream<Uint8Array>({
       start(controller) {
-        controller.enqueue(encoded.value);
+        controller.enqueue(encoded);
         controller.close();
       },
     });

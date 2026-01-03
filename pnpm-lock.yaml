@@ -30,6 +30,9 @@ importers:
         specifier: ^8.1.1
         version: 8.2.0
     devDependencies:
+      '@grounds/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.7.1
@@ -46,6 +49,9 @@ importers:
         specifier: ^8.1.1
         version: 8.2.0
     devDependencies:
+      '@grounds/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@sinclair/typebox':
         specifier: ^0.34.12
         version: 0.34.46
@@ -68,9 +74,28 @@ importers:
         specifier: ^8.1.1
         version: 8.2.0
     devDependencies:
+      '@grounds/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@sinclair/typebox':
         specifier: ^0.34.12
         version: 0.34.46
+
+  packages/test-utils:
+    dependencies:
+      luxon:
+        specifier: ^3.5.0
+        version: 3.7.2
+      neverthrow:
+        specifier: ^8.1.1
+        version: 8.2.0
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9
+    devDependencies:
+      '@types/luxon':
+        specifier: ^3.4.2
+        version: 3.7.1
 
 packages:
 

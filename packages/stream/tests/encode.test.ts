@@ -85,6 +85,8 @@ describe("encodeIterable", () => {
 
     expect(results).toHaveLength(1);
     expect(results[0]?.isErr()).toBe(true);
-    expect(results[0]?.isErr() && results[0].error).toBeInstanceOf(EncodeError);
+    if (results[0]?.isErr()) {
+      expect(results[0].error).toBeInstanceOf(EncodeError);
+    }
   });
 });
