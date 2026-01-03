@@ -60,17 +60,9 @@ export class DecodeError extends Error {
   override readonly name = "DecodeError";
   readonly code: DecodeErrorCode;
 
-  constructor(code: DecodeErrorCode | string, message?: string) {
-    // Support both old (message-only) and new (code, message) signatures
-    if (message === undefined) {
-      // Old signature: DecodeError(message)
-      super(code);
-      this.code = "UNEXPECTED_EOF"; // Default code for backward compatibility
-    } else {
-      // New signature: DecodeError(code, message)
-      super(message);
-      this.code = code as DecodeErrorCode;
-    }
+  constructor(code: DecodeErrorCode, message: string) {
+    super(message);
+    this.code = code;
   }
 
   static unexpectedEnd(expected: number, available: number): DecodeError {

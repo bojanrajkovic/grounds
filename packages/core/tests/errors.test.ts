@@ -33,9 +33,10 @@ describe("EncodeError", () => {
 });
 
 describe("DecodeError", () => {
-  it("creates error with message", () => {
-    const error = new DecodeError("unexpected end of input");
+  it("creates error with code and message", () => {
+    const error = new DecodeError("UNEXPECTED_EOF", "unexpected end of input");
     expect(error.message).toBe("unexpected end of input");
+    expect(error.code).toBe("UNEXPECTED_EOF");
     expect(error.name).toBe("DecodeError");
     expect(error).toBeInstanceOf(Error);
   });
