@@ -86,6 +86,34 @@ describe("Codec", () => {
     expect(decoded).toEqual({ ok: "success" });
   });
 
+  it("encodes and decodes enum with struct variants", () => {
+    const MessageSchema = REnum({
+      text: variant(0, RStruct({
+        content: field(0, RString()),
+        sender: field(1, RString()),
+      })),
+      image: variant(1, RStruct({
+        url: field(0, RString()),
+        width: field(1, RU32()),
+        height: field(2, RU32()),
+      })),
+    });
+
+    const codec = createCodec(MessageSchema);
+
+    // Roundtrip text message
+    const textMessage = { content: "Hello!", sender: "Alice" };
+    const textEncoded = expectOk(codec.encode(textMessage));
+    const textDecoded = expectOk(codec.decode(textEncoded));
+    expect(textDecoded).toEqual({ text: textMessage });
+
+    // Roundtrip image message
+    const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
+    const imageEncoded = expectOk(codec.encode(imageMessage));
+    const imageDecoded = expectOk(codec.decode(imageEncoded));
+    expect(imageDecoded).toEqual({ image: imageMessage });
+  });
+
   it("encodes and decodes map", () => {
     const codec = createCodec(RMap(RString(), RU32()));
     const input = new Map([["one", 1], ["two", 2]]);

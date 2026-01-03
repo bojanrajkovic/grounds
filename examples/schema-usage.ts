@@ -11,24 +11,24 @@ import { DateTime } from "luxon";
 
 // Define a User schema
 const UserSchema = RStruct({
-  id: field(RU64, 0),
-  name: field(RString, 1),
-  email: field(ROptional(RString), 2),
-  active: field(RBool, 3),
-  createdAt: field(RTimestamp, 4),
+  id: field(0, RU64()),
+  name: field(1, RString()),
+  email: field(2, ROptional(RString())),
+  active: field(3, RBool()),
+  createdAt: field(4, RTimestamp()),
 });
 
 // Define a Message enum
 const MessageSchema = REnum({
-  text: variant(RStruct({
-    content: field(RString, 0),
-    sender: field(RString, 1),
-  }), 0),
-  image: variant(RStruct({
-    url: field(RString, 0),
-    width: field(RU32, 1),
-    height: field(RU32, 2),
-  }), 1),
+  text: variant(0, RStruct({
+    content: field(0, RString()),
+    sender: field(1, RString()),
+  })),
+  image: variant(1, RStruct({
+    url: field(0, RString()),
+    width: field(1, RU32()),
+    height: field(2, RU32()),
+  })),
 });
 
 // Create codecs
