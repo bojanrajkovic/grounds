@@ -466,15 +466,15 @@ function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T
       const decodedEnum = value as Readonly<{ variantId: number; value: unknown }>;
       const variantId = decodedEnum.variantId;
 
-      // Find variant by ID and convert to named variant
-      // Returns { variantName: value } format for ergonomic destructuring
-      for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
+      // Find variant by ID and decode the inner value
+      // Returns the unwrapped value directly - users handle discrimination
+      for (const [_variantName, variantSchema] of Object.entries(enumSchema.variants)) {
         if (getVariantId(variantSchema) === variantId) {
           const valueResult = _decodeValueToTyped(decodedEnum.value, variantSchema as unknown as TRelishSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
-          return ok({ [variantName]: valueResult.value } as T);
+          return ok(valueResult.value as T);
         }
       }
 

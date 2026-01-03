@@ -237,9 +237,9 @@ describe("toRelish Enum", () => {
     const encoded = expectOk(toRelish("ok", schema));
     expect(encoded).toBeInstanceOf(Uint8Array);
 
-    // Decode: returns { variantName: value } format
+    // Decode: returns unwrapped value directly
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal).toEqual({ success: "ok" });
+    expect(enumVal).toBe("ok");
   });
 
   it("converts different variant to bytes and round-trips", () => {
@@ -250,8 +250,9 @@ describe("toRelish Enum", () => {
     // Pass just the value - infers "failure" variant since 404 is a number
     const encoded = expectOk(toRelish(404, schema));
 
+    // Decode: returns unwrapped value directly
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal).toEqual({ failure: 404 });
+    expect(enumVal).toBe(404);
   });
 
   it("returns error for unknown variant", () => {
@@ -373,9 +374,9 @@ describe("fromRelish", () => {
     // Encode: pass just the value
     const encoded = expectOk(codec.encode("ok"));
 
-    // Decode: returns { variantName: value }
+    // Decode: returns unwrapped value directly
     const enumVal = expectOk(fromRelish(encoded, schema));
-    expect(enumVal).toEqual({ success: "ok" });
+    expect(enumVal).toBe("ok");
   });
 });
 

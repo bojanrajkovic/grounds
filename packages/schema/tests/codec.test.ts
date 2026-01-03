@@ -81,9 +81,9 @@ describe("Codec", () => {
     // Encode: pass just the value, variant inferred from schema matching
     const encoded = expectOk(codec.encode("success"));
 
-    // Decode: returns { variantName: value }
+    // Decode: returns unwrapped value directly
     const decoded = expectOk(codec.decode(encoded));
-    expect(decoded).toEqual({ ok: "success" });
+    expect(decoded).toBe("success");
   });
 
   it("encodes and decodes enum with struct variants", () => {
@@ -101,17 +101,17 @@ describe("Codec", () => {
 
     const codec = createCodec(MessageSchema);
 
-    // Roundtrip text message
+    // Roundtrip text message - decode returns unwrapped struct
     const textMessage = { content: "Hello!", sender: "Alice" };
     const textEncoded = expectOk(codec.encode(textMessage));
     const textDecoded = expectOk(codec.decode(textEncoded));
-    expect(textDecoded).toEqual({ text: textMessage });
+    expect(textDecoded).toEqual(textMessage);
 
-    // Roundtrip image message
+    // Roundtrip image message - decode returns unwrapped struct
     const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
     const imageEncoded = expectOk(codec.encode(imageMessage));
     const imageDecoded = expectOk(codec.decode(imageEncoded));
-    expect(imageDecoded).toEqual({ image: imageMessage });
+    expect(imageDecoded).toEqual(imageMessage);
   });
 
   it("encodes and decodes map", () => {

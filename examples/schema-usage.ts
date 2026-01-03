@@ -24,30 +24,40 @@ type User = Static<typeof UserSchema>;
 // User = { id: bigint; name: string; email: string | null; active: boolean; createdAt: DateTime }
 
 // Define a Message enum with struct variants
-const MessageSchema = REnum({
-  text: variant(0, RStruct({
-    content: field(0, RString()),
-    sender: field(1, RString()),
-  })),
-  image: variant(1, RStruct({
-    url: field(0, RString()),
-    width: field(1, RU32()),
-    height: field(2, RU32()),
-  })),
+// Each variant has a 'type' field for user-defined discrimination
+const TextMessageSchema = RStruct({
+  type: field(0, RString()),  // "text"
+  content: field(1, RString()),
+  sender: field(2, RString()),
 });
 
-// The inferred type is a discriminated union: { text: TextMessage } | { image: ImageMessage }
-type Message = Static<typeof MessageSchema>;
+const ImageMessageSchema = RStruct({
+  type: field(0, RString()),  // "image"
+  url: field(1, RString()),
+  width: field(2, RU32()),
+  height: field(3, RU32()),
+});
 
-// Helper function to process messages with type-safe variant discrimination
-function processMessage(message: Message): string {
-  // Use "in" operator to discriminate between variants
-  if ("text" in message) {
-    // TypeScript knows message.text exists and has { content, sender }
-    return `Text from ${message.text.sender}: "${message.text.content}"`;
+const MessageSchema = REnum({
+  text: variant(0, TextMessageSchema),
+  image: variant(1, ImageMessageSchema),
+});
+
+// Extract types for each variant
+type TextMessage = Static<typeof TextMessageSchema>;
+type ImageMessage = Static<typeof ImageMessageSchema>;
+
+// Type guard: check the discriminator field
+function isTextMessage(msg: TextMessage | ImageMessage): msg is TextMessage {
+  return msg.type === "text";
+}
+
+// Helper function to process messages with user-defined discrimination
+function processMessage(message: TextMessage | ImageMessage): string {
+  if (isTextMessage(message)) {
+    return `Text from ${message.sender}: "${message.content}"`;
   } else {
-    // TypeScript knows message.image exists and has { url, width, height }
-    return `Image: ${message.image.url} (${message.image.width}x${message.image.height})`;
+    return `Image: ${message.url} (${message.width}x${message.height})`;
   }
 }
 
@@ -80,22 +90,22 @@ userCodec.encode(user)
     (err) => console.log("Failed:", err.message),
   );
 
-// Encode messages - just pass the value, variant is inferred
+// Encode messages - just pass the value, variant is inferred from schema matching
 console.log("\n=== Encoding messages ===");
 
-// Pass the struct that matches a variant - encoder infers which variant
-const textMessage = { content: "Hello!", sender: "Alice" };
-const imageMessage = { url: "https://example.com/img.png", width: 800, height: 600 };
+// Include discriminator field for user-defined type narrowing
+const textMessage: TextMessage = { type: "text", content: "Hello!", sender: "Alice" };
+const imageMessage: ImageMessage = { type: "image", url: "https://example.com/img.png", width: 800, height: 600 };
 
-// Roundtrip text message and process with type-safe discrimination
+// Roundtrip text message - decode returns unwrapped struct
 messageCodec.encode(textMessage)
   .andThen((bytes) => {
     console.log("Text message:", bytes.length, "bytes");
     return messageCodec.decode(bytes);
   })
   .match(
-    // Decoded as { text: { content, sender } } - use processMessage for type-safe handling
-    (decoded) => console.log("Processed:", processMessage(decoded)),
+    // Decoded as { type, content, sender } - use type guard for discrimination
+    (decoded) => console.log("Processed:", processMessage(decoded as TextMessage | ImageMessage)),
     (err) => console.log("Text failed:", err.message),
   );
 
@@ -106,8 +116,8 @@ messageCodec.encode(imageMessage)
     return messageCodec.decode(bytes);
   })
   .match(
-    // Decoded as { image: { url, width, height } }
-    (decoded) => console.log("Processed:", processMessage(decoded)),
+    // Decoded as { type, url, width, height }
+    (decoded) => console.log("Processed:", processMessage(decoded as TextMessage | ImageMessage)),
     (err) => console.log("Image failed:", err.message),
   );
 
