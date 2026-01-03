@@ -1,6 +1,10 @@
 {
   "name": "@grounds/stream",
   "version": "0.0.1",
+  "description": "Streaming encode/decode utilities for Relish serialization",
+  "keywords": ["relish", "serialization", "streaming", "async", "web-streams"],
+  "author": "Bojan Rajkovic",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +15,18 @@
     }
   },
   "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brajkovic/grounds.git",
+    "directory": "packages/stream"
+  },
+  "homepage": "https://github.com/brajkovic/grounds#readme",
+  "bugs": {
+    "url": "https://github.com/brajkovic/grounds/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run"

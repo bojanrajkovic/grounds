@@ -1,6 +1,10 @@
 {
   "name": "@grounds/core",
   "version": "0.0.1",
+  "description": "Low-level Relish binary serialization for TypeScript",
+  "keywords": ["relish", "serialization", "binary", "encoding", "decoding"],
+  "author": "Bojan Rajkovic",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,6 +17,18 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brajkovic/grounds.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/brajkovic/grounds#readme",
+  "bugs": {
+    "url": "https://github.com/brajkovic/grounds/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run"

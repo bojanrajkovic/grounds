@@ -1,6 +1,10 @@
 {
   "name": "@grounds/schema",
   "version": "0.0.1",
+  "description": "TypeBox-based schema definitions for Relish serialization",
+  "keywords": ["relish", "serialization", "schema", "typebox", "binary"],
+  "author": "Bojan Rajkovic",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +15,18 @@
     }
   },
   "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brajkovic/grounds.git",
+    "directory": "packages/schema"
+  },
+  "homepage": "https://github.com/brajkovic/grounds#readme",
+  "bugs": {
+    "url": "https://github.com/brajkovic/grounds/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run"
