@@ -20,11 +20,12 @@ import {
   F64,
   String_,
   Timestamp,
+  Array_,
   EncodeError,
 } from "@grounds/core";
 import { DateTime } from "luxon";
-import { RelishKind } from "./symbols.js";
-import type { TRelishSchema } from "./types.js";
+import { RelishKind, RelishTypeCode, RelishElementType } from "./symbols.js";
+import type { TRelishSchema, TRArray } from "./types.js";
 
 export function jsToRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
   const kind = schema[RelishKind];
@@ -78,6 +79,37 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
     case "RTimestamp": {
       const dt = value as DateTime;
       return ok(Timestamp(BigInt(dt.toUnixInteger())));
+    }
+
+    case "RArray": {
+      const arraySchema = schema as TRArray<TRelishSchema>;
+      const elementSchema = arraySchema[RelishElementType];
+      const jsArray = value as Array<unknown>;
+      const elementTypeCode = elementSchema[RelishTypeCode];
+      const elements: Array<string | number | bigint | boolean | RelishValue | null> = [];
+
+      for (const item of jsArray) {
+        const elementResult = jsToRelish(item, elementSchema);
+        if (elementResult.isErr()) {
+          return err(elementResult.error);
+        }
+        const relishValue = elementResult.value;
+
+        // Extract raw value for primitives, keep RelishValue for composites
+        if (elementTypeCode === 0x00) {
+          // Null: raw value is null
+          elements.push(null);
+        } else if (elementTypeCode < 0x0f) {
+          // Primitive: extract the value property
+          const extractedValue = (relishValue as { value: unknown }).value as string | number | bigint | boolean;
+          elements.push(extractedValue);
+        } else {
+          // Composite: pass RelishValue directly
+          elements.push(relishValue as RelishValue);
+        }
+      }
+
+      return ok(Array_(elementTypeCode, elements));
     }
 
     default:
