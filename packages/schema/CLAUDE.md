@@ -39,15 +39,9 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - Field/variant ID on schema: Allows codec to extract IDs without separate mapping
 - ROptional preserves inner TypeCode: Enables codec to know underlying type
 
-## API Surface Design
+## API Surface
 
-**Principle: Minimal first pass, expand on demand**
-
-It's always easier to add things than to remove them. The first pass of any API should export only what users **need**, not everything that might be useful. Internal functions, symbols, and conversion helpers remain unexported until users request them.
-
-**Hyrum's Law**: With a sufficient number of users of an API, it does not matter what you promise in the contract: all observable behaviors of your system will be depended on by somebody.
-
-**Corollary**: Every export becomes a compatibility burden. If it's public, someone will use it in ways you didn't intend. Keep the public API minimal, and expand only when users demonstrate actual need.
+Following project-wide API design principles (see root CLAUDE.md), this package exports a minimal public API.
 
 **Not exported (internal implementation details)**:
 - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType` (schema introspection)

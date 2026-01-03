@@ -1,6 +1,6 @@
 # Grounds - Relish Serialization in TypeScript
 
-Last verified: 2026-01-02
+Last verified: 2026-01-03
 
 ## Project Overview
 
@@ -95,6 +95,22 @@ Every source file MUST have a pattern comment:
 - All 64-bit and 128-bit integers: JavaScript BigInt
 - Timestamps: Unix seconds as bigint (core) / Luxon DateTime (schema)
 - Maps: Always native JavaScript `Map<K, V>`
+
+### API Surface Design
+
+**Principle: Minimal first pass, expand on demand**
+
+It's always easier to add things than to remove them. The first pass of any API should export only what users **need**, not everything that might be useful. Internal functions, symbols, and conversion helpers remain unexported until users request them.
+
+**Hyrum's Law**: With a sufficient number of users of an API, it does not matter what you promise in the contract: all observable behaviors of your system will be depended on by somebody.
+
+**Corollary**: Every export becomes a compatibility burden. If it's public, someone will use it in ways you didn't intend. Keep the public API minimal, and expand only when users demonstrate actual need.
+
+**Guidelines**:
+- Export only what users need to accomplish common tasks
+- Keep internal implementation details unexported
+- When users request advanced features, design a proper API (don't just export internals)
+- Document what's intentionally not exported and why
 
 ## Testing
 
