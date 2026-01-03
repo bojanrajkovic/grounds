@@ -65,3 +65,6 @@ export {
   RelishValueType,
 } from "./symbols.js";
 
+// Conversion and codec
+export { jsToRelish, decodedToTyped } from "./convert.js";
+export { createCodec, type Codec } from "./codec.js";
