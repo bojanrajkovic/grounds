@@ -21,9 +21,9 @@ npm install @grounds/schema @sinclair/typebox luxon
 npm install @grounds/stream
 ```
 
-## Quick Start
+## Quick start
 
-### Schema-Driven (Recommended)
+### Schema-driven (recommended)
 
 ```typescript
 import { RStruct, RString, RU32, ROptional, field, createCodec } from "@grounds/schema";
@@ -51,16 +51,20 @@ if (decoded.isOk()) {
 }
 ```
 
-### Low-Level API
+### Low-level API
 
 ```typescript
 import { encode, decode, TypeCode } from "@grounds/core";
 
 // Encode a value
 const result = encode({ type: TypeCode.String, value: "hello" });
-
-// Decode bytes
-const decoded = decode(result.value);
+if (result.isOk()) {
+  // Decode bytes
+  const decoded = decode(result.value);
+  if (decoded.isOk()) {
+    console.log(decoded.value); // { type: TypeCode.String, value: "hello" }
+  }
+}
 ```
 
 ### Streaming
@@ -75,7 +79,7 @@ const encoded = readableStream.pipeThrough(createEncoderStream());
 const decoded = byteStream.pipeThrough(createDecoderStream());
 ```
 
-## Type Codes
+## Type codes
 
 | Type | Code | JavaScript |
 |------|------|------------|
@@ -91,7 +95,7 @@ const decoded = byteStream.pipeThrough(createDecoderStream());
 | Enum | 0x12 | tagged union |
 | Timestamp | 0x13 | `bigint` / `DateTime` |
 
-## Wire Format
+## Wire format
 
 Relish uses T[L]V (Type-Length-Value) encoding:
 - **Type**: 1 byte (0x00-0x13)
@@ -110,10 +114,10 @@ pnpm lint          # Run linter
 ## Documentation
 
 - **Conceptual docs**: See `docs/` directory for design documentation and examples
-- **Architecture decisions**: See `adrs/` directory for architectural decision records
+- **Architecture decisions**: See `docs/adrs/` directory for architectural decision records
 - **API reference**: Auto-generated from TSDoc (coming soon)
 
-## Project Structure
+## Project structure
 
 ```
 grounds/
@@ -121,15 +125,15 @@ grounds/
 │   ├── core/          # Low-level encoding (@grounds/core)
 │   ├── schema/        # TypeBox integration (@grounds/schema)
 │   └── stream/        # Streaming utilities (@grounds/stream)
-├── docs/              # Conceptual documentation
-├── adrs/              # Architecture Decision Records
-├── examples/          # Usage examples
-└── docs/design-plans/ # Design documents
+├── docs/
+│   ├── adrs/          # Architecture Decision Records
+│   └── design-plans/  # Design documents
+└── examples/          # Usage examples
 ```
 
-## Development Workflow
+## Development workflow
 
-### Branching Strategy
+### Branching strategy
 
 All development should follow this workflow:
 
@@ -146,18 +150,18 @@ All development should follow this workflow:
    - Include detailed description and test results
    - Wait for PR merge before starting dependent work
 
-### Phase-Based Development
+### Phase-based development
 
 When working on multi-phase projects:
 - Complete one phase fully before starting the next
 - Ensure previous phase's PR is merged before beginning subsequent phases
-- Document architectural decisions in `adrs/` directory
+- Document architectural decisions in `docs/adrs/` directory
 
 ## Contributing
 
 See [CLAUDE.md](./CLAUDE.md) for coding standards, patterns, and development workflow.
 
-## Future Work
+## Future work
 
 Track planned features and improvements in [GitHub Issues](https://github.com/bojanrajkovic/grounds/issues).
 
