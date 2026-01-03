@@ -11,6 +11,7 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/core` - Low-level T[L]V encoding (@grounds/core)
 - `packages/schema` - TypeBox integration (@grounds/schema)
 - `packages/stream` - Streaming utilities (@grounds/stream)
+- `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
 
 ## Branch Naming
 
