@@ -11,6 +11,7 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/core` - Low-level T[L]V encoding (@grounds/core)
 - `packages/schema` - TypeBox integration (@grounds/schema)
 - `packages/stream` - Streaming utilities (@grounds/stream)
+- `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
 
 ## Branch Naming
 
@@ -82,6 +83,7 @@ Every source file MUST have a pattern comment:
 - Use function declarations for top-level functions
 - Use named exports only (no default exports)
 - Always type function returns explicitly
+- Prefer type guards over `as` casts: use `"prop" in obj` checks and type predicates (`x is T`) instead of unsafe type assertions
 
 ### Error Handling
 

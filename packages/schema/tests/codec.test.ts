@@ -5,36 +5,31 @@ import { RString, RU32, RArray, RMap, ROptional } from "../src/types.js";
 import { field, RStruct } from "../src/struct.js";
 import { variant, REnum } from "../src/enum.js";
 import type { Static } from "@sinclair/typebox";
+import { expectOk, expectMap } from "@grounds/test-utils";
 
 describe("Codec", () => {
   it("encodes and decodes primitive", () => {
     const codec = createCodec(RU32());
-    const encoded = codec.encode(42);
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode(42));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toBe(42);
+    const decoded = expectOk(codec.decode(encoded));
+    expect(decoded).toBe(42);
   });
 
   it("encodes and decodes string", () => {
     const codec = createCodec(RString());
-    const encoded = codec.encode("hello world");
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode("hello world"));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toBe("hello world");
+    const decoded = expectOk(codec.decode(encoded));
+    expect(decoded).toBe("hello world");
   });
 
   it("encodes and decodes array", () => {
     const codec = createCodec(RArray(RU32()));
-    const encoded = codec.encode([1, 2, 3]);
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode([1, 2, 3]));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toEqual([1, 2, 3]);
+    const decoded = expectOk(codec.decode(encoded));
+    expect(decoded).toEqual([1, 2, 3]);
   });
 
   it("encodes and decodes struct", () => {
@@ -47,12 +42,10 @@ describe("Codec", () => {
     const codec = createCodec(UserSchema);
 
     const user: User = { name: "Alice", age: 30 };
-    const encoded = codec.encode(user);
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode(user));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toEqual(user);
+    const decoded = expectOk(codec.decode(encoded));
+    expect(decoded).toEqual(user);
   });
 
   it("encodes and decodes struct with optional", () => {
@@ -66,15 +59,15 @@ describe("Codec", () => {
 
     // With optional present
     const user1: User = { name: "Alice", nickname: "Ali" };
-    const encoded1 = codec.encode(user1);
-    const decoded1 = codec.decode(encoded1._unsafeUnwrap());
-    expect(decoded1._unsafeUnwrap()).toEqual(user1);
+    const encoded1 = expectOk(codec.encode(user1));
+    const decoded1 = expectOk(codec.decode(encoded1));
+    expect(decoded1).toEqual(user1);
 
     // With optional null
     const user2: User = { name: "Bob", nickname: null };
-    const encoded2 = codec.encode(user2);
-    const decoded2 = codec.decode(encoded2._unsafeUnwrap());
-    expect(decoded2._unsafeUnwrap()).toEqual(user2);
+    const encoded2 = expectOk(codec.encode(user2));
+    const decoded2 = expectOk(codec.decode(encoded2));
+    expect(decoded2).toEqual(user2);
   });
 
   it("encodes and decodes enum", () => {
@@ -87,24 +80,20 @@ describe("Codec", () => {
     const codec = createCodec(ResultSchema);
 
     const okResult: Result = { variant: "ok", value: "success" };
-    const encoded = codec.encode(okResult);
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode(okResult));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toEqual(okResult);
+    const decoded = expectOk(codec.decode(encoded));
+    expect(decoded).toEqual(okResult);
   });
 
   it("encodes and decodes map", () => {
     const codec = createCodec(RMap(RString(), RU32()));
     const input = new Map([["one", 1], ["two", 2]]);
 
-    const encoded = codec.encode(input);
-    expect(encoded.isOk()).toBe(true);
+    const encoded = expectOk(codec.encode(input));
 
-    const decoded = codec.decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    const result = decoded._unsafeUnwrap() as Map<string, number>;
+    const result = expectOk(codec.decode(encoded));
+    expectMap<string, number>(result);
     expect(result.get("one")).toBe(1);
     expect(result.get("two")).toBe(2);
   });

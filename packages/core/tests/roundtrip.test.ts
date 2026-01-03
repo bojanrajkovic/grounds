@@ -2,15 +2,14 @@
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import { encode, decode, Null, Bool, U8, U16, U32, U64, I8, I32, I64, F64, String_ as Str, Timestamp, Array_, Map_, TypeCode, DateTime } from "../src/index.js";
+import { expectOk } from "@grounds/test-utils";
 
 describe("Roundtrip encode/decode", () => {
   it("roundtrips Null", () => {
     const value = Null;
-    const encoded = encode(value);
-    expect(encoded.isOk()).toBe(true);
-    const decoded = decode(encoded._unsafeUnwrap());
-    expect(decoded.isOk()).toBe(true);
-    expect(decoded._unsafeUnwrap()).toBe(null);
+    const encoded = expectOk(encode(value));
+    const decoded = expectOk(decode(encoded));
+    expect(decoded).toBe(null);
   });
 
   it("roundtrips Bool", () => {
@@ -156,7 +155,7 @@ describe("Roundtrip encode/decode", () => {
         if (encoded.isErr()) return false;
         const decoded = decode(encoded.value);
         if (decoded.isErr()) return false;
-        const dt = decoded.value as DateTime;
+        const dt = decoded.value;
         return DateTime.isDateTime(dt) && dt.toSeconds() === n;
       })
     );
@@ -170,7 +169,7 @@ describe("Roundtrip encode/decode", () => {
         if (encoded.isErr()) return false;
         const decoded = decode(encoded.value);
         if (decoded.isErr()) return false;
-        const decodedArr = decoded.value as ReadonlyArray<number>;
+        const decodedArr = decoded.value;
         if (!Array.isArray(decodedArr)) return false;
         return JSON.stringify(decodedArr) === JSON.stringify(arr);
       })
@@ -185,7 +184,7 @@ describe("Roundtrip encode/decode", () => {
         if (encoded.isErr()) return false;
         const decoded = decode(encoded.value);
         if (decoded.isErr()) return false;
-        const decodedArr = decoded.value as ReadonlyArray<string>;
+        const decodedArr = decoded.value;
         if (!Array.isArray(decodedArr)) return false;
         return JSON.stringify(decodedArr) === JSON.stringify(arr);
       })
@@ -209,7 +208,7 @@ describe("Roundtrip encode/decode", () => {
           if (encoded.isErr()) return false;
           const decoded = decode(encoded.value);
           if (decoded.isErr()) return false;
-          const decodedMap = decoded.value as ReadonlyMap<number, string>;
+          const decodedMap = decoded.value;
           if (!(decodedMap instanceof Map)) return false;
           if (decodedMap.size !== uniqueEntries.size) return false;
           for (const [k, v] of uniqueEntries) {

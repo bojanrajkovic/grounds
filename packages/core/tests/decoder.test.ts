@@ -1,7 +1,8 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { Decoder, decode } from "../src/decoder.js";
-import { TypeCode, DateTime } from "../src/types.js";
+import { TypeCode } from "../src/types.js";
+import { expectOk, expectErr, expectArray, expectMap, expectDateTime, expectStruct, expectEnum } from "@grounds/test-utils";
 
 describe("Decoder", () => {
   it("creates decoder instance with buffer", () => {
@@ -22,39 +23,30 @@ describe("Decoder varsize length", () => {
   it("decodes short form length (bit 0 = 0)", () => {
     // Length 3 encoded as: 3 << 1 = 6 = 0x06
     const decoder = new Decoder(new Uint8Array([0x06]));
-    const result = decoder.decodeVarsizeLength();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe(3);
+    expect(expectOk(decoder.decodeVarsizeLength())).toBe(3);
   });
 
   it("decodes length 0 (short form)", () => {
     // Length 0 encoded as: 0 << 1 = 0 = 0x00
     const decoder = new Decoder(new Uint8Array([0x00]));
-    const result = decoder.decodeVarsizeLength();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe(0);
+    expect(expectOk(decoder.decodeVarsizeLength())).toBe(0);
   });
 
   it("decodes length 63 (max 7-bit)", () => {
     // Length 63 encoded as: 63 << 1 = 126 = 0x7E
     const decoder = new Decoder(new Uint8Array([0x7E]));
-    const result = decoder.decodeVarsizeLength();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe(63);
+    expect(expectOk(decoder.decodeVarsizeLength())).toBe(63);
   });
 
   it("decodes long form length (bit 0 = 1)", () => {
     // Length 128 encoded as: (128 << 1) | 1 = 257 as 4-byte LE = [0x01, 0x01, 0x00, 0x00]
     const decoder = new Decoder(new Uint8Array([0x01, 0x01, 0x00, 0x00]));
-    const result = decoder.decodeVarsizeLength();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe(128);
+    expect(expectOk(decoder.decodeVarsizeLength())).toBe(128);
   });
 
   it("returns error for truncated long form", () => {
     const decoder = new Decoder(new Uint8Array([0x01, 0x01]));
-    const result = decoder.decodeVarsizeLength();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeVarsizeLength());
   });
 });
 
@@ -62,34 +54,26 @@ describe("Decoder primitives", () => {
   describe("Null", () => {
     it("decodes null as raw null value", () => {
       const decoder = new Decoder(new Uint8Array([TypeCode.Null]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(null);
+      expect(expectOk(decoder.decodeValue())).toBe(null);
     });
   });
 
   describe("Bool", () => {
     it("decodes true (0xFF) as raw boolean", () => {
       const decoder = new Decoder(new Uint8Array([TypeCode.Bool, 0xFF]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(true);
+      expect(expectOk(decoder.decodeValue())).toBe(true);
     });
 
     it("decodes false (0x00) as raw boolean", () => {
       const decoder = new Decoder(new Uint8Array([TypeCode.Bool, 0x00]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(false);
+      expect(expectOk(decoder.decodeValue())).toBe(false);
     });
   });
 
   describe("u8", () => {
     it("decodes u8 as raw number", () => {
       const decoder = new Decoder(new Uint8Array([TypeCode.U8, 42]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(42);
+      expect(expectOk(decoder.decodeValue())).toBe(42);
     });
   });
 
@@ -97,9 +81,7 @@ describe("Decoder primitives", () => {
     it("decodes u16 little-endian as raw number", () => {
       // 0x1234 in little-endian = [0x34, 0x12]
       const decoder = new Decoder(new Uint8Array([TypeCode.U16, 0x34, 0x12]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(0x1234);
+      expect(expectOk(decoder.decodeValue())).toBe(0x1234);
     });
   });
 
@@ -107,9 +89,7 @@ describe("Decoder primitives", () => {
     it("decodes u32 little-endian as raw number", () => {
       // 0x12345678 in little-endian = [0x78, 0x56, 0x34, 0x12]
       const decoder = new Decoder(new Uint8Array([TypeCode.U32, 0x78, 0x56, 0x34, 0x12]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(0x12345678);
+      expect(expectOk(decoder.decodeValue())).toBe(0x12345678);
     });
   });
 
@@ -117,9 +97,7 @@ describe("Decoder primitives", () => {
     it("decodes u64 as raw bigint", () => {
       // 1n in little-endian = [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
       const decoder = new Decoder(new Uint8Array([TypeCode.U64, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(1n);
+      expect(expectOk(decoder.decodeValue())).toBe(1n);
     });
   });
 
@@ -127,9 +105,7 @@ describe("Decoder primitives", () => {
     it("decodes negative i8 as raw number", () => {
       // -1 as signed byte = 0xFF
       const decoder = new Decoder(new Uint8Array([TypeCode.I8, 0xFF]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(-1);
+      expect(expectOk(decoder.decodeValue())).toBe(-1);
     });
   });
 
@@ -137,9 +113,7 @@ describe("Decoder primitives", () => {
     it("decodes negative i32 as raw number", () => {
       // -1 as signed 32-bit = [0xFF, 0xFF, 0xFF, 0xFF]
       const decoder = new Decoder(new Uint8Array([TypeCode.I32, 0xFF, 0xFF, 0xFF, 0xFF]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBe(-1);
+      expect(expectOk(decoder.decodeValue())).toBe(-1);
     });
   });
 
@@ -147,9 +121,7 @@ describe("Decoder primitives", () => {
     it("decodes f32 as raw number", () => {
       // 1.0f32 in little-endian = [0x00, 0x00, 0x80, 0x3F]
       const decoder = new Decoder(new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0x3F]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBeCloseTo(1.0);
+      expect(expectOk(decoder.decodeValue())).toBeCloseTo(1.0);
     });
   });
 
@@ -157,9 +129,7 @@ describe("Decoder primitives", () => {
     it("decodes f64 as raw number", () => {
       // 1.0f64 in little-endian = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F]
       const decoder = new Decoder(new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F]));
-      const result = decoder.decodeValue();
-      expect(result.isOk()).toBe(true);
-      expect(result._unsafeUnwrap()).toBeCloseTo(1.0);
+      expect(expectOk(decoder.decodeValue())).toBeCloseTo(1.0);
     });
   });
 });
@@ -168,17 +138,13 @@ describe("Decoder String", () => {
   it("decodes empty string as raw string", () => {
     // Empty string: [TypeCode.String, length=0 (0x00)]
     const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x00]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe("");
+    expect(expectOk(decoder.decodeValue())).toBe("");
   });
 
   it("decodes ASCII string as raw string", () => {
     // "foo": [TypeCode.String, length=3 (0x06), 'f', 'o', 'o']
     const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x06, 0x66, 0x6F, 0x6F]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe("foo");
+    expect(expectOk(decoder.decodeValue())).toBe("foo");
   });
 
   it("decodes UTF-8 string as raw string", () => {
@@ -186,16 +152,13 @@ describe("Decoder String", () => {
     const utf8Bytes = new TextEncoder().encode("日本");
     const buffer = new Uint8Array([TypeCode.String, utf8Bytes.length << 1, ...utf8Bytes]);
     const decoder = new Decoder(buffer);
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe("日本");
+    expect(expectOk(decoder.decodeValue())).toBe("日本");
   });
 
   it("rejects invalid UTF-8", () => {
     // Invalid UTF-8 sequence: [0xFF, 0xFE]
     const decoder = new Decoder(new Uint8Array([TypeCode.String, 0x04, 0xFF, 0xFE]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 });
 
@@ -207,11 +170,9 @@ describe("Decoder Timestamp", () => {
       TypeCode.Timestamp,
       0x80, 0x00, 0x92, 0x65, 0x00, 0x00, 0x00, 0x00
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const decoded = result._unsafeUnwrap();
-    expect(DateTime.isDateTime(decoded)).toBe(true);
-    expect((decoded as DateTime).toSeconds()).toBe(1704067200);
+    const decoded = expectOk(decoder.decodeValue());
+    expectDateTime(decoded);
+    expect(decoded.toSeconds()).toBe(1704067200);
   });
 });
 
@@ -227,10 +188,8 @@ describe("Decoder Array", () => {
       0x03, 0x00, 0x00, 0x00,
       0x04, 0x00, 0x00, 0x00
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as ReadonlyArray<number>;
-    expect(Array.isArray(arr)).toBe(true);
+    const arr = expectOk(decoder.decodeValue());
+    expectArray<number>(arr);
     expect(arr).toEqual([1, 2, 3, 4]);
   });
 
@@ -239,10 +198,8 @@ describe("Decoder Array", () => {
     // [TypeCode.Array, 0x02, TypeCode.U32]
     // 0x02 = (1 << 1) = 2, where 1 = 1 (element type byte only)
     const decoder = new Decoder(new Uint8Array([TypeCode.Array, 0x02, TypeCode.U32]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as ReadonlyArray<unknown>;
-    expect(Array.isArray(arr)).toBe(true);
+    const arr = expectOk(decoder.decodeValue());
+    expectArray<unknown>(arr);
     expect(arr).toEqual([]);
   });
 
@@ -256,10 +213,8 @@ describe("Decoder Array", () => {
       0x06, 0x62, 0x61, 0x72,  // length=3 "bar"
       0x06, 0x62, 0x61, 0x7A   // length=3 "baz"
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap() as ReadonlyArray<string>;
-    expect(Array.isArray(arr)).toBe(true);
+    const arr = expectOk(decoder.decodeValue());
+    expectArray<string>(arr);
     expect(arr).toEqual(["foo", "bar", "baz"]);
   });
 });
@@ -274,10 +229,8 @@ describe("Decoder Map", () => {
       0x01, 0x00, 0x00, 0x00,  // key: 1
       0x0A, 0x00, 0x00, 0x00   // value: 10
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as ReadonlyMap<number, number>;
-    expect(map instanceof Map).toBe(true);
+    const map = expectOk(decoder.decodeValue());
+    expectMap<number, number>(map);
     expect(map.get(1)).toBe(10);
     expect(map.size).toBe(1);
   });
@@ -287,10 +240,8 @@ describe("Decoder Map", () => {
     // [TypeCode.Map, 0x04, TypeCode.U32, TypeCode.U32]
     // 0x04 = (2 << 1) = 4, where 2 = 2 (key+value type bytes only)
     const decoder = new Decoder(new Uint8Array([TypeCode.Map, 0x04, TypeCode.U32, TypeCode.U32]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as ReadonlyMap<number, number>;
-    expect(map instanceof Map).toBe(true);
+    const map = expectOk(decoder.decodeValue());
+    expectMap<number, number>(map);
     expect(map.size).toBe(0);
   });
 
@@ -303,10 +254,8 @@ describe("Decoder Map", () => {
       0x01, 0x00, 0x00, 0x00,  // key: 1
       0x06, 0x66, 0x6F, 0x6F   // value: "foo" (length=3)
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as ReadonlyMap<number, string>;
-    expect(map instanceof Map).toBe(true);
+    const map = expectOk(decoder.decodeValue());
+    expectMap<number, string>(map);
     expect(map.get(1)).toBe("foo");
     expect(map.size).toBe(1);
   });
@@ -318,8 +267,7 @@ describe("Decoder Map", () => {
       0x01, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00,  // key: 1, value: 10
       0x01, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00   // key: 1 (duplicate!), value: 20
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 });
 
@@ -333,10 +281,8 @@ describe("Decoder Struct", () => {
       0x01,                   // field_id=1
       TypeCode.U8, 0x2A      // u8(42)
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as Readonly<{ [fieldId: number]: unknown }>;
-    expect(typeof struct).toBe("object");
+    const struct = expectOk(decoder.decodeValue());
+    expectStruct(struct);
     expect(struct[1]).toBe(42);
   });
 
@@ -348,9 +294,8 @@ describe("Decoder Struct", () => {
       0x02, TypeCode.U8, 0x02,  // field 2 = 2
       0x05, TypeCode.U8, 0x05   // field 5 = 5
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as Readonly<{ [fieldId: number]: unknown }>;
+    const struct = expectOk(decoder.decodeValue());
+    expectStruct(struct);
     expect(struct[1]).toBe(1);
     expect(struct[2]).toBe(2);
     expect(struct[5]).toBe(5);
@@ -363,8 +308,7 @@ describe("Decoder Struct", () => {
       0x02, TypeCode.U8, 0x02,  // field 2 first (wrong!)
       0x01, TypeCode.U8, 0x01   // field 1 second
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 
   it("rejects field ID with bit 7 set", () => {
@@ -373,8 +317,7 @@ describe("Decoder Struct", () => {
       TypeCode.Struct, 0x06,
       0x80, TypeCode.U8, 0x01  // field 128 - bit 7 set
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 });
 
@@ -388,9 +331,8 @@ describe("Decoder Enum", () => {
       0x01,                  // variant_id=1
       TypeCode.U8, 0x2A     // u8(42)
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isOk()).toBe(true);
-    const enumVal = result._unsafeUnwrap() as Readonly<{ variantId: number; value: unknown }>;
+    const enumVal = expectOk(decoder.decodeValue());
+    expectEnum(enumVal);
     expect(enumVal.variantId).toBe(1);
     expect(enumVal.value).toBe(42);
   });
@@ -402,8 +344,7 @@ describe("Decoder Enum", () => {
       0x01,                  // variant_id=1
       TypeCode.U8, 0x2A     // u8(42) - this won't fit
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 
   it("rejects variant ID with bit 7 set", () => {
@@ -412,26 +353,21 @@ describe("Decoder Enum", () => {
       0x80,                  // variant 128 - bit 7 set
       TypeCode.U8, 0x01
     ]));
-    const result = decoder.decodeValue();
-    expect(result.isErr()).toBe(true);
+    expectErr(decoder.decodeValue());
   });
 });
 
 describe("decode() public API", () => {
   it("decodes complete value as raw DecodedValue", () => {
-    const result = decode(new Uint8Array([TypeCode.U32, 0x2A, 0x00, 0x00, 0x00]));
-    expect(result.isOk()).toBe(true);
-    expect(result._unsafeUnwrap()).toBe(42);
+    expect(expectOk(decode(new Uint8Array([TypeCode.U32, 0x2A, 0x00, 0x00, 0x00])))).toBe(42);
   });
 
   it("returns error for empty buffer", () => {
-    const result = decode(new Uint8Array([]));
-    expect(result.isErr()).toBe(true);
+    expectErr(decode(new Uint8Array([])));
   });
 
   it("returns error for truncated value", () => {
-    const result = decode(new Uint8Array([TypeCode.U32, 0x2A])); // Missing 3 bytes
-    expect(result.isErr()).toBe(true);
+    expectErr(decode(new Uint8Array([TypeCode.U32, 0x2A]))); // Missing 3 bytes
   });
 
   it('decodes [["a","b"],["10","17"]] from hex bytes', () => {
@@ -442,18 +378,10 @@ describe("decode() public API", () => {
       0x0e, 0x0e, 0x04, 0x31, 0x30, 0x04, 0x31, 0x37,  // Inner2: length=7, String, "10", "17"
     ]);
 
-    const result = decode(bytes);
-    expect(result.isOk()).toBe(true);
-
-    const value = result._unsafeUnwrap();
-    expect(Array.isArray(value)).toBe(true);
-    const arr = value as Array<unknown>;
+    const arr = expectOk(decode(bytes));
+    expectArray<Array<string>>(arr);
     expect(arr.length).toBe(2);
-
-    expect(Array.isArray(arr[0])).toBe(true);
     expect(arr[0]).toEqual(["a", "b"]);
-
-    expect(Array.isArray(arr[1])).toBe(true);
     expect(arr[1]).toEqual(["10", "17"]);
   });
 
@@ -465,14 +393,8 @@ describe("decode() public API", () => {
       0x01, 0x04, 0x4f, 0x00, 0x00, 0x00,      // Field 1: U32 79
     ]);
 
-    const result = decode(bytes);
-    expect(result.isOk()).toBe(true);
-
-    const value = result._unsafeUnwrap();
-    expect(typeof value).toBe('object');
-    expect(value).not.toBeNull();
-    const obj = value as Record<number, unknown>;
-
+    const obj = expectOk(decode(bytes));
+    expectStruct(obj);
     expect(obj[0]).toBe("Frank");
     expect(obj[1]).toBe(79);
   });

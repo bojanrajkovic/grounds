@@ -17,6 +17,14 @@
   },
   "dependencies": {
     "@grounds/core": "workspace:*",
+    "@grounds/schema": "workspace:*",
     "neverthrow": "^8.1.1"
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": ">=0.34.0"
+  },
+  "devDependencies": {
+    "@grounds/test-utils": "workspace:*",
+    "@sinclair/typebox": "^0.34.12"
   }
 }
