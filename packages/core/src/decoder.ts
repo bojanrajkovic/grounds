@@ -268,37 +268,7 @@ export class Decoder {
     const elements: Array<DecodedValue> = [];
 
     while (this.cursor < endPosition) {
-      let elementResult: Result<DecodedValue, DecodeError>;
-
-      // Check if element type is composite
-      if (
-        elementType === TypeCode.Array ||
-        elementType === TypeCode.Map ||
-        elementType === TypeCode.Struct ||
-        elementType === TypeCode.Enum
-      ) {
-        // Composite types: decode [L]V without expecting type code
-        switch (elementType) {
-          case TypeCode.Array:
-            elementResult = this.decodeArray();
-            break;
-          case TypeCode.Map:
-            elementResult = this.decodeMap();
-            break;
-          case TypeCode.Struct:
-            elementResult = this.decodeStruct();
-            break;
-          case TypeCode.Enum:
-            elementResult = this.decodeEnum();
-            break;
-          default:
-            return err(DecodeError.unknownTypeCode(elementType));
-        }
-      } else {
-        // Primitive types: decode raw value without type code
-        elementResult = this.decodePrimitiveValue(elementType);
-      }
-
+      const elementResult = this.decodeValueByType(elementType);
       if (elementResult.isErr()) {
         return err(elementResult.error);
       }
@@ -309,9 +279,9 @@ export class Decoder {
     return ok(elements as DecodedValue);
   }
 
-  private decodePrimitiveValue(typeCode: TypeCode): Result<DecodedValue, DecodeError> {
-    // Decode raw value for a primitive type (without reading a type code from buffer)
-    // Uses same dispatch table as decodeValue()
+  private decodeValueByType(typeCode: TypeCode): Result<DecodedValue, DecodeError> {
+    // Decode a value without reading type code from buffer
+    // Routes to appropriate decoder for both primitive and composite types
     const decoderMethod = Decoder.TYPE_DECODERS[typeCode];
     if (decoderMethod === undefined) {
       return err(DecodeError.unknownTypeCode(typeCode));
@@ -346,34 +316,8 @@ export class Decoder {
     const seenKeys = new Set<string>();
 
     while (this.cursor < endPosition) {
-      // Decode key (composite or primitive)
-      let keyResult: Result<DecodedValue, DecodeError>;
-      if (
-        keyType === TypeCode.Array ||
-        keyType === TypeCode.Map ||
-        keyType === TypeCode.Struct ||
-        keyType === TypeCode.Enum
-      ) {
-        switch (keyType) {
-          case TypeCode.Array:
-            keyResult = this.decodeArray();
-            break;
-          case TypeCode.Map:
-            keyResult = this.decodeMap();
-            break;
-          case TypeCode.Struct:
-            keyResult = this.decodeStruct();
-            break;
-          case TypeCode.Enum:
-            keyResult = this.decodeEnum();
-            break;
-          default:
-            return err(DecodeError.unknownTypeCode(keyType));
-        }
-      } else {
-        keyResult = this.decodePrimitiveValue(keyType);
-      }
-
+      // Decode key
+      const keyResult = this.decodeValueByType(keyType);
       if (keyResult.isErr()) {
         return err(keyResult.error);
       }
@@ -385,34 +329,8 @@ export class Decoder {
       }
       seenKeys.add(keyString);
 
-      // Decode value (composite or primitive)
-      let valueResult: Result<DecodedValue, DecodeError>;
-      if (
-        valueType === TypeCode.Array ||
-        valueType === TypeCode.Map ||
-        valueType === TypeCode.Struct ||
-        valueType === TypeCode.Enum
-      ) {
-        switch (valueType) {
-          case TypeCode.Array:
-            valueResult = this.decodeArray();
-            break;
-          case TypeCode.Map:
-            valueResult = this.decodeMap();
-            break;
-          case TypeCode.Struct:
-            valueResult = this.decodeStruct();
-            break;
-          case TypeCode.Enum:
-            valueResult = this.decodeEnum();
-            break;
-          default:
-            return err(DecodeError.unknownTypeCode(valueType));
-        }
-      } else {
-        valueResult = this.decodePrimitiveValue(valueType);
-      }
-
+      // Decode value
+      const valueResult = this.decodeValueByType(valueType);
       if (valueResult.isErr()) {
         return err(valueResult.error);
       }
