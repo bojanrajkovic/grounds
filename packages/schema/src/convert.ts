@@ -69,6 +69,44 @@ function extractRawValue(
   }
 }
 
+// =============================================================================
+// Field/Variant Schema Helpers
+// =============================================================================
+// These helpers centralize type assertions for accessing field and variant
+// metadata from schemas. The assertions are needed because TypeScript's type
+// system doesn't preserve the augmented properties through dynamic access.
+
+/**
+ * Extract field ID from a struct field schema.
+ */
+function getFieldId(fieldSchema: TStructField): number {
+  return (fieldSchema as unknown as { fieldId: number }).fieldId;
+}
+
+/**
+ * Check if a field schema is optional.
+ */
+function isOptionalField(fieldSchema: TStructField): boolean {
+  return (fieldSchema as unknown as { [RelishKind]?: string })[RelishKind] === "ROptional";
+}
+
+/**
+ * Get the inner schema from a field, unwrapping ROptional if present.
+ */
+function getInnerSchema(fieldSchema: TStructField): TRelishSchema {
+  if (isOptionalField(fieldSchema)) {
+    return (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
+  }
+  return fieldSchema as unknown as TRelishSchema;
+}
+
+/**
+ * Extract variant ID from an enum variant schema.
+ */
+function getVariantId(variantSchema: TEnumVariant): number {
+  return (variantSchema as unknown as { variantId: number }).variantId;
+}
+
 /**
  * Internal helper: Convert JavaScript value to RelishValue.
  *
@@ -201,21 +239,10 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
       // Collect field entries with their IDs for sorting
       const fieldEntries: Array<{ name: string; fieldId: number; schema: TRelishSchema }> = [];
       for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
-        // Type assertion needed: TStructField has fieldId property added by the field() helper,
-        // but TypeScript's Record<string, TStructField> doesn't preserve this augmentation
-        const fieldId = (fieldSchema as { fieldId: number }).fieldId;
-        let actualSchema = fieldSchema as unknown as TRelishSchema;
-
-        // Type assertion needed: checking RelishKind symbol property requires accessing
-        // the schema as a dynamic object since TStructField doesn't directly expose the symbol
-        if ((fieldSchema as { [RelishKind]?: string })[RelishKind] === "ROptional") {
-          actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
-        }
-
         fieldEntries.push({
           name,
-          fieldId,
-          schema: actualSchema,
+          fieldId: getFieldId(fieldSchema),
+          schema: getInnerSchema(fieldSchema),
         });
       }
 
@@ -225,11 +252,9 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
       for (const { name, fieldId, schema: fieldSchema } of fieldEntries) {
         const fieldValue = jsObj[name];
         const fieldSchemaObj = structSchema.fields[name];
-        // Type assertion needed: same reason as above - RelishKind symbol access
-        const isOptional = (fieldSchemaObj as { [RelishKind]?: string })[RelishKind] === "ROptional";
 
         // Skip null values for optional fields
-        if (fieldValue === null && isOptional) {
+        if (fieldValue === null && isOptionalField(fieldSchemaObj)) {
           continue;
         }
 
@@ -246,29 +271,22 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
     case "REnum": {
       const enumSchema = schema as TREnum<Record<string, TEnumVariant>>;
       const jsEnum = value as { variant: string; value: unknown };
-      // Type assertion needed: variants is typed as Record<string, TEnumVariant>,
-      // but we need to access it dynamically by the variant name from runtime value
       const variantSchema = (enumSchema.variants as Record<string, TEnumVariant | undefined>)[jsEnum.variant];
 
       if (variantSchema === undefined) {
-        return err(new EncodeError(`unknown enum variant: ${jsEnum.variant}`));
+        return err(EncodeError.unknownVariant(jsEnum.variant));
       }
 
-      // Type assertion needed: TEnumVariant has variantId property added by variant() helper,
-      // but TypeScript's type doesn't preserve this augmentation through the dynamic access
-      const variantId = (variantSchema as { variantId: number }).variantId;
-      // Type assertion through unknown needed: TEnumVariant extends TSchema but TypeScript
-      // doesn't see it as compatible with TRelishSchema which has symbol properties
       const valueResult = _toRelishValue(jsEnum.value, variantSchema as unknown as TRelishSchema);
       if (valueResult.isErr()) {
         return err(valueResult.error);
       }
 
-      return ok(Enum(variantId, valueResult.value));
+      return ok(Enum(getVariantId(variantSchema), valueResult.value));
     }
 
     default:
-      return err(new EncodeError(`unsupported schema type: ${kind as string}`));
+      return err(EncodeError.unsupportedType(kind as string));
   }
 }
 
@@ -409,24 +427,18 @@ function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T
       const jsObj: Record<string, unknown> = {};
 
       for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
-        const fieldId = (fieldSchema as { fieldId: number }).fieldId;
+        const fieldId = getFieldId(fieldSchema);
         const fieldValue = decodedStruct[fieldId];
 
         if (fieldValue === undefined) {
           // Missing field - set to null for optional, error for required
-          const fieldKind = (fieldSchema as { [RelishKind]?: string })[RelishKind];
-          if (fieldKind === "ROptional") {
+          if (isOptionalField(fieldSchema)) {
             jsObj[name] = null;
           } else {
             return err(DecodeError.missingRequiredField(fieldId));
           }
         } else {
-          let actualSchema = fieldSchema as unknown as TRelishSchema;
-          const fieldKind = (fieldSchema as { [RelishKind]?: string })[RelishKind];
-          if (fieldKind === "ROptional") {
-            actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
-          }
-          const valueResult = _decodeValueToTyped(fieldValue, actualSchema);
+          const valueResult = _decodeValueToTyped(fieldValue, getInnerSchema(fieldSchema));
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
@@ -441,13 +453,11 @@ function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T
       const enumSchema = schema as TREnum<Record<string, TEnumVariant>>;
       const decodedEnum = value as Readonly<{ variantId: number; value: unknown }>;
       const variantId = decodedEnum.variantId;
-      const enumValue = decodedEnum.value;
 
       // Find variant by ID and convert to named variant
       for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
-        const vid = (variantSchema as { variantId: number }).variantId;
-        if (vid === variantId) {
-          const valueResult = _decodeValueToTyped(enumValue, variantSchema as unknown as TRelishSchema);
+        if (getVariantId(variantSchema) === variantId) {
+          const valueResult = _decodeValueToTyped(decodedEnum.value, variantSchema as unknown as TRelishSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
