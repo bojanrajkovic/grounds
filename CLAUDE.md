@@ -82,6 +82,7 @@ Every source file MUST have a pattern comment:
 - Use function declarations for top-level functions
 - Use named exports only (no default exports)
 - Always type function returns explicitly
+- Prefer type guards over `as` casts: use `"prop" in obj` checks and type predicates (`x is T`) instead of unsafe type assertions
 
 ### Error Handling
 
