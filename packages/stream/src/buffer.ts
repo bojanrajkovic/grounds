@@ -1,6 +1,6 @@
 // pattern: Functional Core
 import { type Result, ok } from "neverthrow";
-import { decode, type DecodedValue, type DecodeError } from "@grounds/core";
+import { Decoder, type DecodedValue, type DecodeError } from "@grounds/core";
 
 export type TryDecodeResult =
   | { status: "ok"; value: Result<DecodedValue, DecodeError>; bytesConsumed: number }
@@ -41,7 +41,8 @@ export class StreamBuffer {
 
     // Get all available bytes for decode attempt
     const data = this.toUint8Array();
-    const result = decode(data);
+    const decoder = new Decoder(data);
+    const result = decoder.decodeValue();
 
     if (result.isErr()) {
       const error = result.error;
@@ -53,11 +54,9 @@ export class StreamBuffer {
       return { status: "error", error };
     }
 
-    // Success - figure out how many bytes were consumed
-    // For now, consume all bytes (single value decode)
-    const bytesConsumed = this.totalLength;
-    this.chunks = [];
-    this.totalLength = 0;
+    // Success - consume exactly the bytes that were decoded
+    const bytesConsumed = decoder.position;
+    this.consume(bytesConsumed);
 
     return { status: "ok", value: ok(result.value), bytesConsumed };
   }
