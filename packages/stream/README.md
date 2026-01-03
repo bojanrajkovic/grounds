@@ -23,9 +23,12 @@ async function* values() {
 }
 
 for await (const result of encodeIterable(values())) {
-  if (result.isOk()) {
-    // Send result.value (Uint8Array) to network/file
-  }
+  result.match(
+    (bytes) => {
+      // Send bytes (Uint8Array) to network/file
+    },
+    (err) => console.error("Encode failed:", err)
+  );
 }
 
 // Decode from chunked input
@@ -34,9 +37,10 @@ async function* chunks() {
 }
 
 for await (const result of decodeIterable(chunks())) {
-  if (result.isOk()) {
-    console.log(result.value); // RelishValue
-  }
+  result.match(
+    (value) => console.log(value), // DecodedValue
+    (err) => console.error("Decode failed:", err)
+  );
 }
 ```
 
@@ -59,7 +63,7 @@ import { createSchemaEncoderStream, createSchemaDecoderStream } from "@grounds/s
 import { RStruct, RString, field } from "@grounds/schema";
 
 const UserSchema = RStruct({
-  name: field(RString, 0),
+  name: field(0, RString()),
 });
 
 // Type-safe encode: User -> Uint8Array
@@ -75,11 +79,11 @@ Streaming decoders detect incomplete data at end of stream:
 
 ```typescript
 for await (const result of decodeIterable(chunks())) {
-  if (result.isErr()) {
-    if (result.error.code === "TRUNCATED_STREAM") {
-      // Incomplete value at end of input
+  result.mapErr((error) => {
+    if (error.code === "TRUNCATED_STREAM") {
+      console.error("Incomplete value at end of input");
     }
-  }
+  });
 }
 ```
 
