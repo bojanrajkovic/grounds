@@ -251,12 +251,27 @@ describe("encode arrays (Rust test vectors)", () => {
     );
   });
 
-  it("encodes nested array with RelishValue elements", () => {
-    // Composite element types still use RelishValue
+  it("encodes nested array without repeating type codes for composite elements", () => {
+    // Array of arrays: outer declares element type = Array once
+    // Each inner array encodes as [L]V without redundant type code
     const inner1 = Array_(TypeCode.U8, [1, 2]);
     const inner2 = Array_(TypeCode.U8, [3, 4]);
     const result = encode(Array_(TypeCode.Array, [inner1, inner2]));
     expect(result.isOk()).toBe(true);
+
+    // Expected encoding:
+    // 0x0f = outer array type
+    // 0x12 = length 9 bytes (1 element type + 4 inner1 + 4 inner2)
+    // 0x0f = element type (Array)
+    // Inner1: 0x06, 0x02, 0x01, 0x02 (length=3 bytes, type=U8, values 1,2)
+    // Inner2: 0x06, 0x02, 0x03, 0x04 (length=3 bytes, type=U8, values 3,4)
+    expect(result._unsafeUnwrap()).toEqual(
+      new Uint8Array([
+        TypeCode.Array, 0x12, TypeCode.Array,
+        0x06, TypeCode.U8, 0x01, 0x02,
+        0x06, TypeCode.U8, 0x03, 0x04,
+      ])
+    );
   });
 });
 
