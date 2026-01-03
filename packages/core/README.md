@@ -45,11 +45,10 @@ const mapResult = encode({
 import { decode } from "@grounds/core";
 
 const result = decode(bytes);
-if (result.isOk()) {
-  console.log(result.value); // RelishValue
-} else {
-  console.error(result.error); // DecodeError
-}
+result.match(
+  (value) => console.log(value), // DecodedValue
+  (error) => console.error(error) // DecodeError
+);
 ```
 
 ### Error handling
@@ -57,13 +56,19 @@ if (result.isOk()) {
 All operations return `Result<T, E>` from neverthrow:
 
 ```typescript
-import { encode } from "@grounds/core";
+import { encode, TypeCode } from "@grounds/core";
 
 const result = encode({ type: TypeCode.U8, value: 256 }); // Out of range
-if (result.isErr()) {
-  console.error(result.error.code); // "INTEGER_OVERFLOW"
-  console.error(result.error.message); // "u8 value 256 out of range"
-}
+result.mapErr((error) => {
+  console.error(error.code); // "INTEGER_OVERFLOW"
+  console.error(error.message); // "u8 value 256 out of range"
+});
+
+// Or use match for both success and error cases
+result.match(
+  (bytes) => console.log("Encoded:", bytes),
+  (error) => console.error("Failed:", error.message)
+);
 ```
 
 ## API reference
