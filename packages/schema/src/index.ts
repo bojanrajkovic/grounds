@@ -58,4 +58,4 @@ export type { TEnumVariant, TREnum } from "./enum.js";
 export { createCodec, type Codec } from "./codec.js";
 
 // Conversion utilities (for streaming integration)
-export { decodedToTyped } from "./convert.js";
+export { fromRelish } from "./convert.js";

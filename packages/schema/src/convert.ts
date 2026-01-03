@@ -67,7 +67,7 @@ function extractRawValue(
   }
 }
 
-export function jsToRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
+export function toRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
   const kind = schema[RelishKind];
 
   switch (kind) {
@@ -129,7 +129,7 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       const elements: Array<string | number | bigint | boolean | RelishValue | null> = [];
 
       for (const item of jsArray) {
-        const elementResult = jsToRelish(item, elementSchema);
+        const elementResult = toRelish(item, elementSchema);
         if (elementResult.isErr()) {
           return err(elementResult.error);
         }
@@ -154,11 +154,11 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       const entries = new Map<unknown, unknown>();
 
       for (const [k, v] of jsMap) {
-        const keyResult = jsToRelish(k, keySchema);
+        const keyResult = toRelish(k, keySchema);
         if (keyResult.isErr()) {
           return err(keyResult.error);
         }
-        const valueResult = jsToRelish(v, valueSchema);
+        const valueResult = toRelish(v, valueSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -217,7 +217,7 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
           continue;
         }
 
-        const valueResult = jsToRelish(fieldValue, fieldSchema);
+        const valueResult = toRelish(fieldValue, fieldSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -243,7 +243,7 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       const variantId = (variantSchema as { variantId: number }).variantId;
       // Type assertion through unknown needed: TEnumVariant extends TSchema but TypeScript
       // doesn't see it as compatible with TRelishSchema which has symbol properties
-      const valueResult = jsToRelish(jsEnum.value, variantSchema as unknown as TRelishSchema);
+      const valueResult = toRelish(jsEnum.value, variantSchema as unknown as TRelishSchema);
       if (valueResult.isErr()) {
         return err(valueResult.error);
       }
@@ -270,7 +270,7 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
  * @param schema - The Relish schema
  * @returns Schema-aware typed value
  */
-export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result<T, DecodeError> {
+export function fromRelish<T>(value: unknown, schema: TRelishSchema): Result<T, DecodeError> {
   const kind = schema[RelishKind];
 
   switch (kind) {
@@ -305,7 +305,7 @@ export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result
       const jsArray: Array<unknown> = [];
 
       for (const elem of decodedArr) {
-        const elemResult = decodedToTyped(elem, elementSchema);
+        const elemResult = fromRelish(elem, elementSchema);
         if (elemResult.isErr()) {
           return err(elemResult.error);
         }
@@ -322,7 +322,7 @@ export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result
       const jsMap = new Map<unknown, unknown>();
 
       for (const [k, v] of decodedMap) {
-        const valueResult = decodedToTyped(v, valueSchema);
+        const valueResult = fromRelish(v, valueSchema);
         if (valueResult.isErr()) {
           return err(valueResult.error);
         }
@@ -355,7 +355,7 @@ export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result
           if (fieldKind === "ROptional") {
             actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
           }
-          const valueResult = decodedToTyped(fieldValue, actualSchema);
+          const valueResult = fromRelish(fieldValue, actualSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
@@ -376,7 +376,7 @@ export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result
       for (const [variantName, variantSchema] of Object.entries(enumSchema.variants)) {
         const vid = (variantSchema as { variantId: number }).variantId;
         if (vid === variantId) {
-          const valueResult = decodedToTyped(enumValue, variantSchema as unknown as TRelishSchema);
+          const valueResult = fromRelish(enumValue, variantSchema as unknown as TRelishSchema);
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }
@@ -392,7 +392,7 @@ export function decodedToTyped<T>(value: unknown, schema: TRelishSchema): Result
       if (value === null) {
         return ok(null as T);
       }
-      return decodedToTyped(value, optionalSchema.inner);
+      return fromRelish(value, optionalSchema.inner);
     }
 
     default:

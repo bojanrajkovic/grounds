@@ -21,7 +21,7 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 - **Guarantees**:
   - Incomplete data returns `needMore` status (does not error until stream ends)
   - Trailing incomplete data at stream end yields `TRUNCATED_STREAM` error
-  - Schema streams convert raw decoded values to TypeScript-typed values
+  - Schema streams convert raw decoded values to TypeScript-typed values using `fromRelish`
   - Buffer correctly handles chunked input across message boundaries
 - **Expects**:
   - Valid `RelishValue` inputs for encoding
@@ -30,7 +30,7 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 
 ## Dependencies
 
-- **Uses**: `@grounds/core` (encode, decode, error types), `@grounds/schema` (createCodec, decodedToTyped)
+- **Uses**: `@grounds/core` (encode, decode, error types), `@grounds/schema` (createCodec, fromRelish)
 - **Used by**: User applications needing streaming serialization
 - **Boundary**: No direct I/O; wraps Web Streams API and async iterables
 
@@ -62,4 +62,4 @@ Streaming utilities for Relish serialization. Enables incremental encoding and d
 - `encodeIterableBytes` throws on error; use `encodeIterable` for Result-based handling
 - Web Streams stop processing on first error (no continuation)
 - `tryDecodeOne()` returns `needMore` for empty buffer (not an error)
-- Schema decoder uses `decodedToTyped`, not full codec decode (avoids double-decode)
+- Schema decoder uses `fromRelish`, not full codec decode (avoids double-decode)

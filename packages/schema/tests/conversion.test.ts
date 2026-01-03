@@ -1,6 +1,6 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
-import { jsToRelish, decodedToTyped } from "../src/convert.js";
+import { toRelish, fromRelish } from "../src/convert.js";
 import {
   RNull,
   RBool,
@@ -30,51 +30,51 @@ import {
 } from "@grounds/core";
 import { DateTime } from "luxon";
 
-describe("jsToRelish primitives", () => {
+describe("toRelish primitives", () => {
   it("converts null", () => {
-    const result = jsToRelish(null, RNull());
+    const result = toRelish(null, RNull());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "null" });
   });
 
   it("converts boolean true", () => {
-    const result = jsToRelish(true, RBool());
+    const result = toRelish(true, RBool());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "bool", value: true });
   });
 
   it("converts boolean false", () => {
-    const result = jsToRelish(false, RBool());
+    const result = toRelish(false, RBool());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "bool", value: false });
   });
 
   it("converts u8", () => {
-    const result = jsToRelish(42, RU8());
+    const result = toRelish(42, RU8());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "u8", value: 42 });
   });
 
   it("converts u32", () => {
-    const result = jsToRelish(123456, RU32());
+    const result = toRelish(123456, RU32());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "u32", value: 123456 });
   });
 
   it("converts u64 bigint", () => {
-    const result = jsToRelish(123n, RU64());
+    const result = toRelish(123n, RU64());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "u64", value: 123n });
   });
 
   it("converts i32", () => {
-    const result = jsToRelish(-100, RI32());
+    const result = toRelish(-100, RI32());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "i32", value: -100 });
   });
 
   it("converts f64", () => {
-    const result = jsToRelish(3.14159, RF64());
+    const result = toRelish(3.14159, RF64());
     expect(result.isOk()).toBe(true);
     const value = result._unsafeUnwrap() as RelishF64;
     expect(value.type).toBe("f64");
@@ -82,19 +82,19 @@ describe("jsToRelish primitives", () => {
   });
 
   it("converts string", () => {
-    const result = jsToRelish("hello", RString());
+    const result = toRelish("hello", RString());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual({ type: "string", value: "hello" });
   });
 });
 
-describe("jsToRelish Timestamp", () => {
+describe("toRelish Timestamp", () => {
   it("converts DateTime to Timestamp bigint", () => {
     const dt = DateTime.fromObject(
       { year: 2024, month: 1, day: 1 },
       { zone: "UTC" },
     );
-    const result = jsToRelish(dt, RTimestamp());
+    const result = toRelish(dt, RTimestamp());
     expect(result.isOk()).toBe(true);
     const value = result._unsafeUnwrap() as RelishTimestamp;
     expect(value.type).toBe("timestamp");
@@ -103,17 +103,17 @@ describe("jsToRelish Timestamp", () => {
 
   it("converts DateTime.now()", () => {
     const dt = DateTime.now();
-    const result = jsToRelish(dt, RTimestamp());
+    const result = toRelish(dt, RTimestamp());
     expect(result.isOk()).toBe(true);
     const value = result._unsafeUnwrap() as RelishTimestamp;
     expect(value.unixSeconds).toBe(BigInt(dt.toUnixInteger()));
   });
 });
 
-describe("jsToRelish Array", () => {
+describe("toRelish Array", () => {
   it("converts Array<number> to Relish Array", () => {
     const schema = RArray(RU32());
-    const result = jsToRelish([1, 2, 3], schema);
+    const result = toRelish([1, 2, 3], schema);
     expect(result.isOk()).toBe(true);
     const arr = result._unsafeUnwrap() as RelishArray;
     expect(arr.type).toBe("array");
@@ -123,7 +123,7 @@ describe("jsToRelish Array", () => {
 
   it("converts empty array", () => {
     const schema = RArray(RU32());
-    const result = jsToRelish([], schema);
+    const result = toRelish([], schema);
     expect(result.isOk()).toBe(true);
     const arr = result._unsafeUnwrap() as RelishArray;
     expect(arr.elements.length).toBe(0);
@@ -131,18 +131,18 @@ describe("jsToRelish Array", () => {
 
   it("converts Array<string>", () => {
     const schema = RArray(RString());
-    const result = jsToRelish(["foo", "bar"], schema);
+    const result = toRelish(["foo", "bar"], schema);
     expect(result.isOk()).toBe(true);
     const arr = result._unsafeUnwrap() as RelishArray;
     expect(arr.elementType).toBe(TypeCode.String);
   });
 });
 
-describe("jsToRelish Map", () => {
+describe("toRelish Map", () => {
   it("converts Map<number, string>", () => {
     const schema = RMap(RU32(), RString());
     const input = new Map([[1, "one"], [2, "two"]]);
-    const result = jsToRelish(input, schema);
+    const result = toRelish(input, schema);
     expect(result.isOk()).toBe(true);
     const map = result._unsafeUnwrap() as RelishMap;
     expect(map.type).toBe("map");
@@ -153,20 +153,20 @@ describe("jsToRelish Map", () => {
   it("converts empty Map", () => {
     const schema = RMap(RString(), RU32());
     const input = new Map<string, number>();
-    const result = jsToRelish(input, schema);
+    const result = toRelish(input, schema);
     expect(result.isOk()).toBe(true);
     const map = result._unsafeUnwrap() as RelishMap;
     expect(map.entries.size).toBe(0);
   });
 });
 
-describe("jsToRelish Struct", () => {
+describe("toRelish Struct", () => {
   it("converts struct with all fields", () => {
     const schema = RStruct({
       name: field(1, RString()),
       age: field(2, RU32()),
     });
-    const result = jsToRelish({ name: "Alice", age: 30 }, schema);
+    const result = toRelish({ name: "Alice", age: 30 }, schema);
     expect(result.isOk()).toBe(true);
     const struct = result._unsafeUnwrap() as RelishStruct;
     expect(struct.type).toBe("struct");
@@ -177,7 +177,7 @@ describe("jsToRelish Struct", () => {
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = jsToRelish({ name: "Alice", nickname: null }, schema);
+    const result = toRelish({ name: "Alice", nickname: null }, schema);
     expect(result.isOk()).toBe(true);
     const struct = result._unsafeUnwrap() as RelishStruct;
     // Should have only 1 field (nickname omitted)
@@ -189,7 +189,7 @@ describe("jsToRelish Struct", () => {
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = jsToRelish({ name: "Alice", nickname: "Ali" }, schema);
+    const result = toRelish({ name: "Alice", nickname: "Ali" }, schema);
     expect(result.isOk()).toBe(true);
     const struct = result._unsafeUnwrap() as RelishStruct;
     // Should have 2 fields
@@ -202,7 +202,7 @@ describe("jsToRelish Struct", () => {
       a_first: field(1, RString()),
       m_middle: field(5, RU32()),
     });
-    const result = jsToRelish({ z_last: "z", a_first: "a", m_middle: 5 }, schema);
+    const result = toRelish({ z_last: "z", a_first: "a", m_middle: 5 }, schema);
     expect(result.isOk()).toBe(true);
     const struct = result._unsafeUnwrap() as RelishStruct;
     const fieldIds = Array.from(struct.fields.keys());
@@ -210,13 +210,13 @@ describe("jsToRelish Struct", () => {
   });
 });
 
-describe("jsToRelish Enum", () => {
+describe("toRelish Enum", () => {
   it("converts enum variant", () => {
     const schema = REnum({
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = jsToRelish({ variant: "success", value: "ok" }, schema);
+    const result = toRelish({ variant: "success", value: "ok" }, schema);
     expect(result.isOk()).toBe(true);
     const enumVal = result._unsafeUnwrap() as RelishEnum;
     expect(enumVal.type).toBe("enum");
@@ -228,7 +228,7 @@ describe("jsToRelish Enum", () => {
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = jsToRelish({ variant: "failure", value: 404 }, schema);
+    const result = toRelish({ variant: "failure", value: 404 }, schema);
     expect(result.isOk()).toBe(true);
     const enumVal = result._unsafeUnwrap() as RelishEnum;
     expect(enumVal.variantId).toBe(2);
@@ -238,45 +238,45 @@ describe("jsToRelish Enum", () => {
     const schema = REnum({
       success: variant(1, RString()),
     });
-    const result = jsToRelish({ variant: "unknown", value: "x" }, schema);
+    const result = toRelish({ variant: "unknown", value: "x" }, schema);
     expect(result.isErr()).toBe(true);
   });
 });
 
-describe("decodedToTyped", () => {
+describe("fromRelish", () => {
   it("converts null (pass through)", () => {
-    const result = decodedToTyped(null, RNull());
+    const result = fromRelish(null, RNull());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBeNull();
   });
 
   it("converts boolean (pass through)", () => {
-    const result = decodedToTyped(true, RBool());
+    const result = fromRelish(true, RBool());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(true);
   });
 
   it("converts u32 (pass through)", () => {
-    const result = decodedToTyped(42, RU32());
+    const result = fromRelish(42, RU32());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(42);
   });
 
   it("converts u64 bigint (pass through)", () => {
-    const result = decodedToTyped(123n, RU64());
+    const result = fromRelish(123n, RU64());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe(123n);
   });
 
   it("converts string (pass through)", () => {
-    const result = decodedToTyped("hello", RString());
+    const result = fromRelish("hello", RString());
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toBe("hello");
   });
 
   it("converts DateTime (pass through from decoder)", () => {
     const dt = DateTime.fromSeconds(1704067200, { zone: "UTC" }); // 2024-01-01 00:00:00 UTC
-    const result = decodedToTyped(dt, RTimestamp());
+    const result = fromRelish(dt, RTimestamp());
     expect(result.isOk()).toBe(true);
     const resultDt = result._unsafeUnwrap() as DateTime;
     expect(DateTime.isDateTime(resultDt)).toBe(true);
@@ -285,14 +285,14 @@ describe("decodedToTyped", () => {
 
   it("converts Array<number> (already decoded)", () => {
     const decodedArr: ReadonlyArray<number> = [1, 2, 3];
-    const result = decodedToTyped(decodedArr, RArray(RU32()));
+    const result = fromRelish(decodedArr, RArray(RU32()));
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toEqual([1, 2, 3]);
   });
 
   it("converts Map<number, string> (already decoded)", () => {
     const decodedMap = new Map<number, string>([[1, "one"], [2, "two"]]);
-    const result = decodedToTyped(decodedMap, RMap(RU32(), RString()));
+    const result = fromRelish(decodedMap, RMap(RU32(), RString()));
     expect(result.isOk()).toBe(true);
     const jsMap = result._unsafeUnwrap() as Map<number, string>;
     expect(jsMap.get(1)).toBe("one");
@@ -308,7 +308,7 @@ describe("decodedToTyped", () => {
       name: field(1, RString()),
       age: field(2, RU32()),
     });
-    const result = decodedToTyped(decodedStruct, schema);
+    const result = fromRelish(decodedStruct, schema);
     expect(result.isOk()).toBe(true);
     const obj = result._unsafeUnwrap() as { name: string; age: number };
     expect(obj.name).toBe("Alice");
@@ -323,7 +323,7 @@ describe("decodedToTyped", () => {
       name: field(1, RString()),
       nickname: field(2, ROptional(RString())),
     });
-    const result = decodedToTyped(decodedStruct, schema);
+    const result = fromRelish(decodedStruct, schema);
     expect(result.isOk()).toBe(true);
     const obj = result._unsafeUnwrap() as { name: string; nickname: string | null };
     expect(obj.name).toBe("Alice");
@@ -339,7 +339,7 @@ describe("decodedToTyped", () => {
       success: variant(1, RString()),
       failure: variant(2, RU32()),
     });
-    const result = decodedToTyped(decodedEnum, schema);
+    const result = fromRelish(decodedEnum, schema);
     expect(result.isOk()).toBe(true);
     const enumVal = result._unsafeUnwrap() as { variant: string; value: unknown };
     expect(enumVal.variant).toBe("success");

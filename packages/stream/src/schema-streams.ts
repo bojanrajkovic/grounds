@@ -1,6 +1,6 @@
 // pattern: Imperative Shell
 import type { Static } from "@sinclair/typebox";
-import { createCodec, decodedToTyped, type TRelishSchema } from "@grounds/schema";
+import { createCodec, fromRelish, type TRelishSchema } from "@grounds/schema";
 import { StreamBuffer } from "./buffer.js";
 import { DecodeError as DecodeErrorClass } from "@grounds/core";
 
@@ -49,7 +49,7 @@ export function createSchemaDecoderStream<T extends TRelishSchema>(
           }
 
           // Convert raw DecodedValue to schema-typed value
-          const typedResult = decodedToTyped<Static<T>>(result.value.value, schema);
+          const typedResult = fromRelish<Static<T>>(result.value.value, schema);
           if (typedResult.isErr()) {
             controller.error(typedResult.error);
             return;
@@ -84,7 +84,7 @@ export function createSchemaDecoderStream<T extends TRelishSchema>(
           }
 
           // Convert raw DecodedValue to schema-typed value
-          const typedResult = decodedToTyped<Static<T>>(result.value.value, schema);
+          const typedResult = fromRelish<Static<T>>(result.value.value, schema);
           if (typedResult.isErr()) {
             controller.error(typedResult.error);
             return;

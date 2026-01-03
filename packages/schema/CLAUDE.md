@@ -14,7 +14,7 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Composite constructors: `RStruct(fields)`, `REnum(variants)`
   - Field/variant helpers: `field(id, schema)`, `variant(id, schema)`
   - Codec: `createCodec(schema)` returns `Codec<T>` with `encode(value): Result<Uint8Array, EncodeError>` and `decode(bytes): Result<T, DecodeError>`
-  - Conversion: `decodedToTyped(value, schema)` converts raw `DecodedValue` to schema-typed value (for streaming)
+  - Conversion: `fromRelish(value, schema)` converts raw `DecodedValue` to schema-typed value (for streaming)
   - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`, `Codec<T>`
 - **Guarantees**:
   - All schema constructors return TypeBox-compatible schemas
@@ -45,11 +45,11 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 Following project-wide API design principles (see root CLAUDE.md), this package exports a minimal public API.
 
 **Exported for streaming integration**:
-- `decodedToTyped(value, schema)`: Converts raw `DecodedValue` from core decoder to schema-typed value. Needed by `@grounds/stream` for schema-aware streaming where `buffer.tryDecodeOne()` returns raw values that must be converted.
+- `fromRelish(value, schema)`: Converts raw `DecodedValue` from core decoder to schema-typed value. Needed by `@grounds/stream` for schema-aware streaming where `buffer.tryDecodeOne()` returns raw values that must be converted.
 
 **Not exported (internal implementation details)**:
 - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType` (schema introspection)
-- Conversion function: `jsToRelish` (Codec wraps this; users don't need intermediate RelishValue forms)
+- Conversion function: `toRelish` (Codec wraps this; users don't need intermediate RelishValue forms)
 
 If users request these for advanced use cases, we can design a better API or export the existing one. But we won't export speculatively.
 
@@ -67,7 +67,7 @@ If users request these for advanced use cases, we can design a better API or exp
 - `symbols.ts` - Symbol definitions for metadata keys
 - `struct.ts` - Struct schema support with field tagging
 - `enum.ts` - Enum schema support with variant tagging
-- `convert.ts` - Bidirectional conversion: `jsToRelish` (JS → RelishValue) and `decodedToTyped` (DecodedValue → schema-aware typed JS)
+- `convert.ts` - Bidirectional conversion: `toRelish` (JS → RelishValue) and `fromRelish` (DecodedValue → schema-aware typed JS)
 - `codec.ts` - Type-safe codec: `createCodec` function and `Codec<T>` type for end-to-end encoding/decoding
 
 ## Gotchas
