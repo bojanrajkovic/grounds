@@ -1,7 +1,8 @@
 // pattern: Functional Core
 // TypeBox-based schema type constructors for Relish types
 
-import { Type, type TSchema } from "@sinclair/typebox";
+import { Type, type TSchema, type Static } from "@sinclair/typebox";
+import { DateTime } from "luxon";
 import { TypeCode } from "@grounds/core";
 import {
   RelishKind,
@@ -166,7 +167,7 @@ export function RString(): TRString {
 }
 
 // Array schema - generic parameter for element type
-export type TRArray<T extends TSchema = TSchema> = TRelishSchema & {
+export type TRArray<T extends TSchema = TSchema> = TRelishSchema<Array<Static<T>>> & {
   [RelishKind]: "RArray";
   [RelishElementType]: T;
 };
@@ -182,7 +183,7 @@ export function RArray<T extends TSchema>(elementSchema: T): TRArray<T> {
 
 // Map schema - generic parameters for key and value types
 export type TRMap<K extends TSchema = TSchema, V extends TSchema = TSchema> =
-  TRelishSchema & {
+  TRelishSchema<Map<Static<K>, Static<V>>> & {
     [RelishKind]: "RMap";
     [RelishKeyType]: K;
     [RelishValueType]: V;
@@ -204,7 +205,7 @@ export function RMap<K extends TSchema, V extends TSchema>(
 }
 
 // Optional schema - wraps any schema to make it nullable
-export type TROptional<T extends TSchema = TSchema> = TRelishSchema & {
+export type TROptional<T extends TSchema = TSchema> = TRelishSchema<Static<T> | null> & {
   [RelishKind]: "ROptional";
   inner: T;
 };
@@ -221,7 +222,7 @@ export function ROptional<T extends TSchema>(schema: T): TROptional<T> {
 }
 
 // Timestamp schema - represents Unix timestamps as Luxon DateTime
-export type TRTimestamp = TRelishSchema & {
+export type TRTimestamp = TRelishSchema<DateTime> & {
   [RelishKind]: "RTimestamp";
 };
 

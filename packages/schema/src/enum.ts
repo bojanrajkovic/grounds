@@ -1,7 +1,7 @@
 // pattern: Functional Core
 // TypeBox-based enum support with variant tagging
 
-import { Type, type TSchema } from "@sinclair/typebox";
+import { Type, type TSchema, type Static } from "@sinclair/typebox";
 import { TypeCode } from "@grounds/core";
 import { RelishKind, RelishTypeCode } from "./symbols.js";
 import type { TRelishSchema } from "./types.js";
@@ -28,10 +28,13 @@ export function variant<T extends TSchema>(
 
 /**
  * Schema type for a Relish enum (discriminated union)
+ * The inferred type is a union of { variantName: valueType }
  */
 export type TREnum<
   T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>,
-> = TRelishSchema & {
+> = TRelishSchema<{
+  [K in keyof T]: { [P in K]: Static<T[K]> }
+}[keyof T]> & {
   [RelishKind]: "REnum";
   variants: T;
 };
