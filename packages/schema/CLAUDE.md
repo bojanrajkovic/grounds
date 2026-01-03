@@ -1,6 +1,6 @@
 # @grounds/schema
 
-Last verified: 2026-01-02
+Last verified: 2026-01-02 (Task 7 - decodedToTyped implementation)
 
 ## Purpose
 
@@ -13,6 +13,7 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Container constructors: `RArray(element)`, `RMap(key, value)`, `ROptional(inner)`
   - Composite constructors: `RStruct(fields)`, `REnum(variants)`
   - Field/variant helpers: `field(id, schema)`, `variant(id, schema)`
+  - Conversion functions: `jsToRelish(value, schema)` - JS value → RelishValue, `decodedToTyped(value, schema)` - DecodedValue → schema-aware typed JS
   - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType`
   - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`
 - **Guarantees**:
@@ -28,9 +29,9 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 
 ## Dependencies
 
-- **Uses**: `@sinclair/typebox` (schema construction), `@grounds/core` (TypeCode constants)
-- **Used by**: Future codec implementation, user applications
-- **Boundary**: No encoding/decoding logic; schemas only
+- **Uses**: `@sinclair/typebox` (schema construction), `@grounds/core` (TypeCode constants, encode/decode functions, error types), `luxon` (DateTime in conversion)
+- **Used by**: Codec implementation, user applications
+- **Boundary**: Conversion logic bridges between schema-aware types and Relish wire format
 
 ## Key Decisions
 
@@ -53,6 +54,7 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - `symbols.ts` - Symbol definitions for metadata keys
 - `struct.ts` - Struct schema support with field tagging
 - `enum.ts` - Enum schema support with variant tagging
+- `convert.ts` - Bidirectional conversion: `jsToRelish` (JS → RelishValue) and `decodedToTyped` (DecodedValue → schema-aware typed JS)
 
 ## Gotchas
 

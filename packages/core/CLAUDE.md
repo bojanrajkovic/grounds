@@ -1,6 +1,6 @@
 # @grounds/core
 
-Last verified: 2026-01-02
+Last verified: 2026-01-02 (Task 7 - decodedToTyped implementation)
 
 ## Purpose
 
@@ -16,7 +16,8 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - `Encoder` class - Reusable encoder with pre-allocated buffer for performance
   - `decode(bytes: Uint8Array) -> Result<DecodedValue, DecodeError>` - Decode bytes to raw JS values
   - `Decoder` class - Cursor-based binary decoder with validation
-  - `EncodeError`, `DecodeError` - Error types with factory methods
+  - `EncodeError` - Error type with factory methods: `unsortedFields()`, `invalidFieldId()`, `invalidTypeCode()`, `unsupportedType()`, `unknownVariant()`
+  - `DecodeError` - Error type with factory methods: `unexpectedEnd()`, `unknownTypeCode()`, `invalidTypeCode()`, `unsortedFields()`, `duplicateMapKey()`, `invalidUtf8()`, `enumLengthMismatch()`, `invalidFieldId()`, `invalidVariantId()`, `missingRequiredField()`, `unknownVariantId()`, `unsupportedType()`
   - `DecodedValue` - Union type for decoder output (raw JS values: number | bigint | boolean | null | string | DateTime | ReadonlyArray | ReadonlyMap | object)
 - **Guarantees**:
   - All RelishValue types are readonly/immutable
