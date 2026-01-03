@@ -1,4 +1,3 @@
-// pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { jsToRelish } from "../src/convert.js";
 import {
@@ -17,7 +16,15 @@ import {
 } from "../src/types.js";
 import { RStruct, field } from "../src/struct.js";
 import { REnum, variant } from "../src/enum.js";
-import { TypeCode, type RelishArray, type RelishTimestamp, type RelishF64 } from "@grounds/core";
+import {
+  TypeCode,
+  type RelishArray,
+  type RelishTimestamp,
+  type RelishF64,
+  type RelishMap,
+  type RelishStruct,
+  type RelishEnum,
+} from "@grounds/core";
 import { DateTime } from "luxon";
 
 describe("jsToRelish primitives", () => {
@@ -134,7 +141,7 @@ describe("jsToRelish Map", () => {
     const input = new Map([[1, "one"], [2, "two"]]);
     const result = jsToRelish(input, schema);
     expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as any;
+    const map = result._unsafeUnwrap() as RelishMap;
     expect(map.type).toBe("map");
     expect(map.keyType).toBe(TypeCode.U32);
     expect(map.valueType).toBe(TypeCode.String);
@@ -145,7 +152,7 @@ describe("jsToRelish Map", () => {
     const input = new Map<string, number>();
     const result = jsToRelish(input, schema);
     expect(result.isOk()).toBe(true);
-    const map = result._unsafeUnwrap() as any;
+    const map = result._unsafeUnwrap() as RelishMap;
     expect(map.entries.size).toBe(0);
   });
 });
@@ -158,7 +165,7 @@ describe("jsToRelish Struct", () => {
     });
     const result = jsToRelish({ name: "Alice", age: 30 }, schema);
     expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as any;
+    const struct = result._unsafeUnwrap() as RelishStruct;
     expect(struct.type).toBe("struct");
   });
 
@@ -169,7 +176,7 @@ describe("jsToRelish Struct", () => {
     });
     const result = jsToRelish({ name: "Alice", nickname: null }, schema);
     expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as any;
+    const struct = result._unsafeUnwrap() as RelishStruct;
     // Should have only 1 field (nickname omitted)
     expect(struct.fields.size).toBe(1);
   });
@@ -181,7 +188,7 @@ describe("jsToRelish Struct", () => {
     });
     const result = jsToRelish({ name: "Alice", nickname: "Ali" }, schema);
     expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as any;
+    const struct = result._unsafeUnwrap() as RelishStruct;
     // Should have 2 fields
     expect(struct.fields.size).toBe(2);
   });
@@ -194,7 +201,7 @@ describe("jsToRelish Struct", () => {
     });
     const result = jsToRelish({ z_last: "z", a_first: "a", m_middle: 5 }, schema);
     expect(result.isOk()).toBe(true);
-    const struct = result._unsafeUnwrap() as any;
+    const struct = result._unsafeUnwrap() as RelishStruct;
     const fieldIds = Array.from(struct.fields.keys());
     expect(fieldIds).toEqual([1, 5, 10]);
   });
@@ -208,7 +215,7 @@ describe("jsToRelish Enum", () => {
     });
     const result = jsToRelish({ variant: "success", value: "ok" }, schema);
     expect(result.isOk()).toBe(true);
-    const enumVal = result._unsafeUnwrap() as any;
+    const enumVal = result._unsafeUnwrap() as RelishEnum;
     expect(enumVal.type).toBe("enum");
     expect(enumVal.variantId).toBe(1);
   });
@@ -220,7 +227,7 @@ describe("jsToRelish Enum", () => {
     });
     const result = jsToRelish({ variant: "failure", value: 404 }, schema);
     expect(result.isOk()).toBe(true);
-    const enumVal = result._unsafeUnwrap() as any;
+    const enumVal = result._unsafeUnwrap() as RelishEnum;
     expect(enumVal.variantId).toBe(2);
   });
 

@@ -4,6 +4,7 @@
 import { Result, ok, err } from "neverthrow";
 import {
   type RelishValue,
+  type TypeCode as TypeCodeType,
   Null,
   Bool,
   U8,
@@ -31,6 +32,44 @@ import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishVal
 import type { TRelishSchema, TRArray, TRMap, TROptional } from "./types.js";
 import type { TRStruct, TStructField } from "./struct.js";
 import type { TREnum, TEnumVariant } from "./enum.js";
+
+/**
+ * Type code threshold: codes below this are primitive types (0x00-0x0e),
+ * codes at or above are composite types (Array, Map, Struct, Enum, Timestamp).
+ */
+const COMPOSITE_TYPE_THRESHOLD = 0x0f;
+
+/**
+ * Extracts the raw value from a RelishValue based on its type code.
+ *
+ * - Null (0x00): returns null
+ * - Primitives (0x01-0x0e): extracts the `.value` property
+ * - Composites (0x0f+): returns the full RelishValue
+ *
+ * This is needed because Array_ and Map_ constructors expect raw JS values
+ * for primitive elements/keys/values, but full RelishValue for composites.
+ *
+ * @param relishValue - The converted RelishValue
+ * @param typeCode - The type code of the value
+ * @returns The raw value suitable for Array_/Map_ constructors
+ */
+function extractRawValue(
+  relishValue: RelishValue,
+  typeCode: number,
+): string | number | bigint | boolean | RelishValue | null {
+  if (typeCode === 0x00) {
+    // Null type: raw value is null literal
+    return null;
+  } else if (typeCode < COMPOSITE_TYPE_THRESHOLD) {
+    // Primitive type: extract the value property
+    // Type assertion needed: TypeScript cannot narrow RelishValue discriminated union
+    // based on numeric type code comparison at compile time
+    return (relishValue as { value: unknown }).value as string | number | bigint | boolean;
+  } else {
+    // Composite type: pass RelishValue directly
+    return relishValue;
+  }
+}
 
 export function jsToRelish(value: unknown, schema: TRelishSchema): Result<RelishValue, EncodeError> {
   const kind = schema[RelishKind];
@@ -98,20 +137,7 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
         if (elementResult.isErr()) {
           return err(elementResult.error);
         }
-        const relishValue = elementResult.value;
-
-        // Extract raw value for primitives, keep RelishValue for composites
-        if (elementTypeCode === 0x00) {
-          // Null: raw value is null
-          elements.push(null);
-        } else if (elementTypeCode < 0x0f) {
-          // Primitive: extract the value property
-          const extractedValue = (relishValue as { value: unknown }).value as string | number | bigint | boolean;
-          elements.push(extractedValue);
-        } else {
-          // Composite: pass RelishValue directly
-          elements.push(relishValue as RelishValue);
-        }
+        elements.push(extractRawValue(elementResult.value, elementTypeCode));
       }
 
       return ok(Array_(elementTypeCode, elements));
@@ -122,9 +148,14 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       const keySchema = mapSchema[RelishKeyType];
       const valueSchema = mapSchema[RelishValueType];
       const jsMap = value as Map<unknown, unknown>;
-      const keyTypeCode = keySchema[RelishTypeCode] as any;
-      const valueTypeCode = valueSchema[RelishTypeCode] as any;
-      const entries = new Map<any, any>();
+      // Type assertions needed: RelishTypeCode symbol property returns TypeCode at runtime,
+      // but TypeScript cannot infer the specific TypeCode value from the symbol lookup
+      const keyTypeCode = keySchema[RelishTypeCode] as TypeCodeType;
+      const valueTypeCode = valueSchema[RelishTypeCode] as TypeCodeType;
+      // Map entries hold values matching the runtime type codes.
+      // Using Map<unknown, unknown> since TypeScript cannot express that the types
+      // depend on the runtime type code values.
+      const entries = new Map<unknown, unknown>();
 
       for (const [k, v] of jsMap) {
         const keyResult = jsToRelish(k, keySchema);
@@ -136,26 +167,18 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
           return err(valueResult.error);
         }
 
-        // Extract raw values for primitives
-        let mapKey: any = k;
-        let mapValue: any = valueResult.value;
-
-        if (keyTypeCode === 0x00) {
-          mapKey = null;
-        } else if (keyTypeCode < 0x0f) {
-          mapKey = (keyResult.value as { value: unknown }).value;
-        }
-
-        if (valueTypeCode === 0x00) {
-          mapValue = null;
-        } else if (valueTypeCode < 0x0f) {
-          mapValue = (valueResult.value as { value: unknown }).value;
-        }
-
-        entries.set(mapKey, mapValue);
+        entries.set(
+          extractRawValue(keyResult.value, keyTypeCode),
+          extractRawValue(valueResult.value, valueTypeCode),
+        );
       }
 
-      return ok(Map_(keyTypeCode, valueTypeCode, entries) as RelishValue);
+      // Type assertion to any needed: Map_ is generic over TypeCode with MapInput<K,V> entries,
+      // but we have runtime type codes and dynamically typed entries. TypeScript's static
+      // type system cannot express "entries types depend on runtime type code values".
+      // Runtime validation in Map_ will catch any type mismatches.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ok(Map_(keyTypeCode, valueTypeCode, entries as any) as RelishValue);
     }
 
     case "RStruct": {
@@ -166,12 +189,15 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       // Collect field entries with their IDs for sorting
       const fieldEntries: Array<{ name: string; fieldId: number; schema: TRelishSchema }> = [];
       for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
-        const fieldId = (fieldSchema as any).fieldId as number;
+        // Type assertion needed: TStructField has fieldId property added by the field() helper,
+        // but TypeScript's Record<string, TStructField> doesn't preserve this augmentation
+        const fieldId = (fieldSchema as { fieldId: number }).fieldId;
         let actualSchema = fieldSchema as unknown as TRelishSchema;
 
-        // Unwrap ROptional to get the actual schema
-        if ((fieldSchema as any)[RelishKind] === "ROptional") {
-          actualSchema = ((fieldSchema as unknown) as TROptional<TRelishSchema>).inner;
+        // Type assertion needed: checking RelishKind symbol property requires accessing
+        // the schema as a dynamic object since TStructField doesn't directly expose the symbol
+        if ((fieldSchema as { [RelishKind]?: string })[RelishKind] === "ROptional") {
+          actualSchema = (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
         }
 
         fieldEntries.push({
@@ -187,7 +213,8 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
       for (const { name, fieldId, schema: fieldSchema } of fieldEntries) {
         const fieldValue = jsObj[name];
         const fieldSchemaObj = structSchema.fields[name];
-        const isOptional = (fieldSchemaObj as any)[RelishKind] === "ROptional";
+        // Type assertion needed: same reason as above - RelishKind symbol access
+        const isOptional = (fieldSchemaObj as { [RelishKind]?: string })[RelishKind] === "ROptional";
 
         // Skip null values for optional fields
         if (fieldValue === null && isOptional) {
@@ -207,14 +234,20 @@ export function jsToRelish(value: unknown, schema: TRelishSchema): Result<Relish
     case "REnum": {
       const enumSchema = schema as TREnum<Record<string, TEnumVariant>>;
       const jsEnum = value as { variant: string; value: unknown };
-      const variantSchema = (enumSchema.variants as any)[jsEnum.variant];
+      // Type assertion needed: variants is typed as Record<string, TEnumVariant>,
+      // but we need to access it dynamically by the variant name from runtime value
+      const variantSchema = (enumSchema.variants as Record<string, TEnumVariant | undefined>)[jsEnum.variant];
 
       if (variantSchema === undefined) {
         return err(new EncodeError(`unknown enum variant: ${jsEnum.variant}`));
       }
 
-      const variantId = (variantSchema as any).variantId as number;
-      const valueResult = jsToRelish(jsEnum.value, variantSchema as TRelishSchema);
+      // Type assertion needed: TEnumVariant has variantId property added by variant() helper,
+      // but TypeScript's type doesn't preserve this augmentation through the dynamic access
+      const variantId = (variantSchema as { variantId: number }).variantId;
+      // Type assertion through unknown needed: TEnumVariant extends TSchema but TypeScript
+      // doesn't see it as compatible with TRelishSchema which has symbol properties
+      const valueResult = jsToRelish(jsEnum.value, variantSchema as unknown as TRelishSchema);
       if (valueResult.isErr()) {
         return err(valueResult.error);
       }
