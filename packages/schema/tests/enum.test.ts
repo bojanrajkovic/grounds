@@ -27,31 +27,33 @@ describe("REnum", () => {
       expect(schema[RelishTypeCode]).toBe(TypeCode.Enum);
     });
 
-    it("infers correct discriminated union type", () => {
+    it("infers correct unwrapped union type", () => {
       const schema = REnum({
         success: variant(1, RString()),
         error: variant(2, RU32()),
       });
+      // Static infers string | number (unwrapped variant types)
       type Inferred = Static<typeof schema>;
-      const value1: Inferred = { success: "ok" };
-      const value2: Inferred = { error: 500 };
-      expect(value1).toEqual({ success: "ok" });
-      expect(value2).toEqual({ error: 500 });
+      const value1: Inferred = "ok";
+      const value2: Inferred = 500;
+      expect(value1).toBe("ok");
+      expect(value2).toBe(500);
     });
 
-    it("supports multiple variants", () => {
+    it("supports multiple variants with unwrapped types", () => {
       const schema = REnum({
         pending: variant(1, RU8()),
         active: variant(2, RString()),
         complete: variant(3, RU32()),
       });
+      // Static infers number | string | number (simplified to string | number)
       type Inferred = Static<typeof schema>;
-      const value1: Inferred = { pending: 0 };
-      const value2: Inferred = { active: "running" };
-      const value3: Inferred = { complete: 100 };
-      expect(Object.keys(value1)).toHaveLength(1);
-      expect(Object.keys(value2)).toHaveLength(1);
-      expect(Object.keys(value3)).toHaveLength(1);
+      const value1: Inferred = 0;
+      const value2: Inferred = "running";
+      const value3: Inferred = 100;
+      expect(value1).toBe(0);
+      expect(value2).toBe("running");
+      expect(value3).toBe(100);
     });
   });
 });

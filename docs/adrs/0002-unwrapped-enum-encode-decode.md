@@ -83,13 +83,13 @@ function isTextMessage(msg: TextMessage | ImageMessage): msg is TextMessage {
 - **User controls discrimination**: Discriminator field design is user's choice (string enum, numeric code, etc.)
 - **Better data modeling**: Users think about their domain model, not library internals
 - **Symmetric encode/decode**: Encode takes `{ content, sender }`, decode returns `{ content, sender }`
+- **Correct type inference**: `Static<typeof EnumSchema>` infers unwrapped union (e.g., `string | number`)
 
 ### Negative
 
 - **Users must handle discrimination**: No automatic `"variantName" in message` check
 - **Ambiguous schemas fail**: If two variants have identical shapes, encode fails (can't infer which variant)
 - **Runtime validation overhead**: `Value.Check` called for each variant until match found
-- **Type system mismatch**: `Static<typeof EnumSchema>` still infers the wrapped union type, not the unwrapped union
 
 ### Neutral
 
