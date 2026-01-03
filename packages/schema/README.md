@@ -22,16 +22,16 @@ import {
 
 // Struct with fields
 const UserSchema = RStruct({
-  id: field(RU64, 0),
-  name: field(RString, 1),
-  email: field(ROptional(RString), 2),
-  createdAt: field(RTimestamp, 3),
+  id: field(0, RU64()),
+  name: field(1, RString()),
+  email: field(2, ROptional(RString())),
+  createdAt: field(3, RTimestamp()),
 });
 
 // Enum with variants
 const MessageSchema = REnum({
-  text: variant(RStruct({ content: field(RString, 0) }), 0),
-  image: variant(RStruct({ url: field(RString, 0), width: field(RU32, 1) }), 1),
+  text: variant(0, RStruct({ content: field(0, RString()) })),
+  image: variant(1, RStruct({ url: field(0, RString()), width: field(1, RU32()) })),
 });
 
 // Collections
@@ -67,6 +67,12 @@ import { Static } from "@sinclair/typebox";
 
 type User = Static<typeof UserSchema>;
 // { id: bigint; name: string; email: string | null; createdAt: DateTime }
+
+// Enum schemas infer unwrapped union types
+type Message = Static<typeof MessageSchema>;
+// { content: string } | { url: string; width: number }
+
+// Users handle variant discrimination via type guards on their own discriminator fields
 ```
 
 ## API reference

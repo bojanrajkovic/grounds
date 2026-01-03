@@ -30,9 +30,9 @@ import { RStruct, RString, RU32, ROptional, field, createCodec } from "@grounds/
 
 // Define a schema
 const UserSchema = RStruct({
-  name: field(RString, 0),
-  age: field(RU32, 1),
-  email: field(ROptional(RString), 2),
+  name: field(0, RString()),
+  age: field(1, RU32()),
+  email: field(2, ROptional(RString())),
 });
 
 // Create a codec
