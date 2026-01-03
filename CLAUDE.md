@@ -39,6 +39,12 @@ Branches should be prefixed with username and conventional commit type:
 
 ### Pull Request Requirements
 
+- **MANDATORY: Use conventional commit format for PR title**
+  - Format: `<type>(<scope>): <description>`
+  - Example: `feat(schema): add TypeBox-based schema types`
+  - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
+  - Scope: package name without @grounds/ prefix (e.g., `core`, `schema`, `stream`)
+  - **This is NOT optional** - all PRs must follow this format
 - Clear description of changes and their purpose
 - Links to relevant documentation or ADRs
 - Test results and verification steps
