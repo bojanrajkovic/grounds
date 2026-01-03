@@ -1,8 +1,19 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { jsToRelish } from "../src/convert.js";
-import { RNull, RBool, RU8, RU32, RU64, RI32, RF64, RString, RTimestamp, RArray } from "../src/types.js";
-import { TypeCode } from "@grounds/core";
+import {
+  RNull,
+  RBool,
+  RU8,
+  RU32,
+  RU64,
+  RI32,
+  RF64,
+  RString,
+  RTimestamp,
+  RArray,
+} from "../src/types.js";
+import { TypeCode, type RelishArray, type RelishTimestamp, type RelishF64 } from "@grounds/core";
 import { DateTime } from "luxon";
 
 describe("jsToRelish primitives", () => {
@@ -51,9 +62,9 @@ describe("jsToRelish primitives", () => {
   it("converts f64", () => {
     const result = jsToRelish(3.14159, RF64());
     expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap();
+    const value = result._unsafeUnwrap() as RelishF64;
     expect(value.type).toBe("f64");
-    expect((value as { value: number }).value).toBeCloseTo(3.14159);
+    expect(value.value).toBeCloseTo(3.14159);
   });
 
   it("converts string", () => {
@@ -65,20 +76,23 @@ describe("jsToRelish primitives", () => {
 
 describe("jsToRelish Timestamp", () => {
   it("converts DateTime to Timestamp bigint", () => {
-    const dt = DateTime.fromObject({ year: 2024, month: 1, day: 1 }, { zone: "UTC" });
+    const dt = DateTime.fromObject(
+      { year: 2024, month: 1, day: 1 },
+      { zone: "UTC" },
+    );
     const result = jsToRelish(dt, RTimestamp());
     expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap();
+    const value = result._unsafeUnwrap() as RelishTimestamp;
     expect(value.type).toBe("timestamp");
-    expect((value as { unixSeconds: bigint }).unixSeconds).toBe(BigInt(dt.toUnixInteger()));
+    expect(value.unixSeconds).toBe(BigInt(dt.toUnixInteger()));
   });
 
   it("converts DateTime.now()", () => {
     const dt = DateTime.now();
     const result = jsToRelish(dt, RTimestamp());
     expect(result.isOk()).toBe(true);
-    const value = result._unsafeUnwrap();
-    expect((value as { unixSeconds: bigint }).unixSeconds).toBe(BigInt(dt.toUnixInteger()));
+    const value = result._unsafeUnwrap() as RelishTimestamp;
+    expect(value.unixSeconds).toBe(BigInt(dt.toUnixInteger()));
   });
 });
 
@@ -87,25 +101,25 @@ describe("jsToRelish Array", () => {
     const schema = RArray(RU32());
     const result = jsToRelish([1, 2, 3], schema);
     expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap();
+    const arr = result._unsafeUnwrap() as RelishArray;
     expect(arr.type).toBe("array");
-    expect((arr as { elementType: number }).elementType).toBe(TypeCode.U32);
-    expect((arr as { elements: Array<number> }).elements.length).toBe(3);
+    expect(arr.elementType).toBe(TypeCode.U32);
+    expect(arr.elements.length).toBe(3);
   });
 
   it("converts empty array", () => {
     const schema = RArray(RU32());
     const result = jsToRelish([], schema);
     expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap();
-    expect((arr as { elements: Array<unknown> }).elements.length).toBe(0);
+    const arr = result._unsafeUnwrap() as RelishArray;
+    expect(arr.elements.length).toBe(0);
   });
 
   it("converts Array<string>", () => {
     const schema = RArray(RString());
     const result = jsToRelish(["foo", "bar"], schema);
     expect(result.isOk()).toBe(true);
-    const arr = result._unsafeUnwrap();
-    expect((arr as { elementType: number }).elementType).toBe(TypeCode.String);
+    const arr = result._unsafeUnwrap() as RelishArray;
+    expect(arr.elementType).toBe(TypeCode.String);
   });
 });
