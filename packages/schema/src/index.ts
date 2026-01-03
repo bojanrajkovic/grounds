@@ -56,3 +56,6 @@ export type { TEnumVariant, TREnum } from "./enum.js";
 
 // Codec (type-safe encode/decode)
 export { createCodec, type Codec } from "./codec.js";
+
+// Conversion utilities (for streaming integration)
+export { decodedToTyped } from "./convert.js";

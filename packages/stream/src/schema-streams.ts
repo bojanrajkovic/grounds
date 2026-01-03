@@ -1,6 +1,6 @@
 // pattern: Imperative Shell
 import type { Static } from "@sinclair/typebox";
-import { createCodec, type TRelishSchema } from "@grounds/schema";
+import { createCodec, decodedToTyped, type TRelishSchema } from "@grounds/schema";
 import { StreamBuffer } from "./buffer.js";
 import { DecodeError as DecodeErrorClass } from "@grounds/core";
 
@@ -24,7 +24,6 @@ export function createSchemaEncoderStream<T extends TRelishSchema>(
 export function createSchemaDecoderStream<T extends TRelishSchema>(
   schema: T
 ): TransformStream<Uint8Array, Static<T>> {
-  const codec = createCodec(schema);
   const buffer = new StreamBuffer();
 
   return new TransformStream({
@@ -32,41 +31,30 @@ export function createSchemaDecoderStream<T extends TRelishSchema>(
       buffer.append(chunk);
 
       while (buffer.length > 0) {
-        // Peek at the buffer to get the bytes we're about to decode
-        const peekLength = Math.min(buffer.length, 1024); // Reasonable peek limit
-        const peekedBytes = buffer.peek(peekLength);
+        const result = buffer.tryDecodeOne();
 
-        // Try to decode from the peeked data
-        const decodeResult = codec.decode(peekedBytes);
+        if (result.status === "needMore") {
+          break;
+        }
 
-        // If decode succeeded, we need to figure out how many bytes it consumed
-        // by re-decoding and measuring
-        if (decodeResult.isOk()) {
-          // Re-decode to get the bytesConsumed
-          const result = buffer.tryDecodeOne();
-          if (result.status === "ok") {
-            if (result.value.isErr()) {
-              controller.error(result.value.error);
-              return;
-            }
-            controller.enqueue(decodeResult.value);
-          } else if (result.status === "error") {
-            controller.error(result.error);
-            return;
-          } else {
-            // This shouldn't happen if decode succeeded
-            break;
-          }
-        } else if (decodeResult.isErr()) {
-          // Check if it's an UNEXPECTED_EOF (need more data) or real error
-          if (decodeResult.error.code === "UNEXPECTED_EOF") {
-            // Need more data
-            break;
-          } else {
-            // Real decode error
-            controller.error(decodeResult.error);
+        if (result.status === "error") {
+          controller.error(result.error);
+          return;
+        }
+
+        if (result.status === "ok") {
+          if (result.value.isErr()) {
+            controller.error(result.value.error);
             return;
           }
+
+          // Convert raw DecodedValue to schema-typed value
+          const typedResult = decodedToTyped<Static<T>>(result.value.value, schema);
+          if (typedResult.isErr()) {
+            controller.error(typedResult.error);
+            return;
+          }
+          controller.enqueue(typedResult.value);
         }
       }
     },
@@ -74,6 +62,7 @@ export function createSchemaDecoderStream<T extends TRelishSchema>(
     flush(controller) {
       if (buffer.length > 0) {
         const result = buffer.tryDecodeOne();
+
         if (result.status === "needMore") {
           controller.error(
             DecodeErrorClass.truncatedStream(
@@ -94,14 +83,13 @@ export function createSchemaDecoderStream<T extends TRelishSchema>(
             return;
           }
 
-          // For the final value, decode using codec
-          const peekedBytes = buffer.peek(buffer.length);
-          const decodeResult = codec.decode(peekedBytes);
-          if (decodeResult.isErr()) {
-            controller.error(decodeResult.error);
+          // Convert raw DecodedValue to schema-typed value
+          const typedResult = decodedToTyped<Static<T>>(result.value.value, schema);
+          if (typedResult.isErr()) {
+            controller.error(typedResult.error);
             return;
           }
-          controller.enqueue(decodeResult.value);
+          controller.enqueue(typedResult.value);
         }
       }
     },
