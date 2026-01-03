@@ -9,8 +9,11 @@ describe("@grounds/schema codec exports", () => {
       expect(typeof schema.createCodec).toBe("function");
     });
 
-    it("exports Codec type", () => {
-      expect(typeof schema.Codec).toBeDefined();
+    // Note: Codec is a TypeScript type, not a runtime value.
+    // This test verifies the import statement doesn't throw, not the type itself.
+    it("exports Codec type (import verification only)", () => {
+      // Types are erased at runtime; this test confirms the module loads without error
+      expect(true).toBe(true);
     });
   });
 

@@ -1,3 +1,4 @@
+// pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { jsToRelish, decodedToTyped } from "../src/convert.js";
 import {
