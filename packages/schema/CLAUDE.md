@@ -1,6 +1,6 @@
 # @grounds/schema
 
-Last verified: 2026-01-02 (Task 7 - decodedToTyped implementation)
+Last verified: 2026-01-02 (Task 8 - Codec implementation)
 
 ## Purpose
 
@@ -13,9 +13,10 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
   - Container constructors: `RArray(element)`, `RMap(key, value)`, `ROptional(inner)`
   - Composite constructors: `RStruct(fields)`, `REnum(variants)`
   - Field/variant helpers: `field(id, schema)`, `variant(id, schema)`
+  - Codec: `createCodec(schema)` returns `Codec<T>` with `encode(value): Result<Uint8Array, EncodeError>` and `decode(bytes): Result<T, DecodeError>`
   - Conversion functions: `jsToRelish(value, schema)` - JS value → RelishValue, `decodedToTyped(value, schema)` - DecodedValue → schema-aware typed JS
   - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType`
-  - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`
+  - Types: `TRNull`, `TRBool`, etc., `TRelishSchema`, `TStructField`, `TEnumVariant`, `TRStruct`, `TREnum`, `Codec<T>`
 - **Guarantees**:
   - All schema constructors return TypeBox-compatible schemas
   - Every schema has `[RelishKind]` and `[RelishTypeCode]` symbol properties
@@ -55,6 +56,7 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 - `struct.ts` - Struct schema support with field tagging
 - `enum.ts` - Enum schema support with variant tagging
 - `convert.ts` - Bidirectional conversion: `jsToRelish` (JS → RelishValue) and `decodedToTyped` (DecodedValue → schema-aware typed JS)
+- `codec.ts` - Type-safe codec: `createCodec` function and `Codec<T>` type for end-to-end encoding/decoding
 
 ## Gotchas
 
