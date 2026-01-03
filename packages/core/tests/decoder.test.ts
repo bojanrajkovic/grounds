@@ -433,4 +433,47 @@ describe("decode() public API", () => {
     const result = decode(new Uint8Array([TypeCode.U32, 0x2A])); // Missing 3 bytes
     expect(result.isErr()).toBe(true);
   });
+
+  it('decodes [["a","b"],["10","17"]] from hex bytes', () => {
+    // Hex: 0f1e0f0a0e026102620e0e043130043137
+    const bytes = new Uint8Array([
+      0x0f, 0x1e, 0x0f,           // Outer: Array, length=15, element type=Array
+      0x0a, 0x0e, 0x02, 0x61, 0x02, 0x62,  // Inner1: length=5, String, "a", "b"
+      0x0e, 0x0e, 0x04, 0x31, 0x30, 0x04, 0x31, 0x37,  // Inner2: length=7, String, "10", "17"
+    ]);
+
+    const result = decode(bytes);
+    expect(result.isOk()).toBe(true);
+
+    const value = result._unsafeUnwrap();
+    expect(Array.isArray(value)).toBe(true);
+    const arr = value as Array<unknown>;
+    expect(arr.length).toBe(2);
+
+    expect(Array.isArray(arr[0])).toBe(true);
+    expect(arr[0]).toEqual(["a", "b"]);
+
+    expect(Array.isArray(arr[1])).toBe(true);
+    expect(arr[1]).toEqual(["10", "17"]);
+  });
+
+  it('decodes Person { name: "Frank", age: 79 } from hex bytes', () => {
+    // Hex: 111c000e0a4672616e6b01044f000000
+    const bytes = new Uint8Array([
+      0x11, 0x1c,                              // Struct, length=14 bytes
+      0x00, 0x0e, 0x0a, 0x46, 0x72, 0x61, 0x6e, 0x6b,  // Field 0: String "Frank"
+      0x01, 0x04, 0x4f, 0x00, 0x00, 0x00,      // Field 1: U32 79
+    ]);
+
+    const result = decode(bytes);
+    expect(result.isOk()).toBe(true);
+
+    const value = result._unsafeUnwrap();
+    expect(typeof value).toBe('object');
+    expect(value).not.toBeNull();
+    const obj = value as Record<number, unknown>;
+
+    expect(obj[0]).toBe("Frank");
+    expect(obj[1]).toBe(79);
+  });
 });
