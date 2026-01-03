@@ -33,7 +33,10 @@ export type TRStruct<
   T extends Record<string, TStructField> = Record<string, TStructField>,
 > = TRelishSchema<{
   readonly [K in keyof T]: T[K] extends { static: infer S } ? S : unknown;
-}> & { [RelishKind]: "RStruct" };
+}> & {
+  [RelishKind]: "RStruct";
+  fields: T;
+};
 
 /**
  * Create a struct schema from field definitions
@@ -53,5 +56,6 @@ export function RStruct<T extends Record<string, TStructField>>(
     ...Type.Object(properties),
     [RelishKind]: "RStruct",
     [RelishTypeCode]: TypeCode.Struct,
+    fields,
   } as TRStruct<T>;
 }

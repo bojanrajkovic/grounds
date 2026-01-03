@@ -30,8 +30,11 @@ export function variant<T extends TSchema>(
  * Schema type for a Relish enum (discriminated union)
  */
 export type TREnum<
-  _T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>,
-> = TRelishSchema & { [RelishKind]: "REnum" };
+  T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>,
+> = TRelishSchema & {
+  [RelishKind]: "REnum";
+  variants: T;
+};
 
 /**
  * Create an enum schema from variant definitions
@@ -58,5 +61,6 @@ export function REnum<T extends Record<string, TEnumVariant>>(
     ...Type.Union(unionSchemas),
     [RelishKind]: "REnum",
     [RelishTypeCode]: TypeCode.Enum,
+    variants,
   } as unknown as TREnum<T>;
 }

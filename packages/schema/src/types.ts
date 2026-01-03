@@ -3,7 +3,13 @@
 
 import { Type, type TSchema } from "@sinclair/typebox";
 import { TypeCode } from "@grounds/core";
-import { RelishKind, RelishTypeCode } from "./symbols.js";
+import {
+  RelishKind,
+  RelishTypeCode,
+  RelishElementType,
+  RelishKeyType,
+  RelishValueType,
+} from "./symbols.js";
 
 // Base Relish schema type with metadata
 export type TRelishSchema<T = unknown> = TSchema & {
@@ -160,8 +166,9 @@ export function RString(): TRString {
 }
 
 // Array schema - generic parameter for element type
-export type TRArray<_T extends TSchema = TSchema> = TRelishSchema & {
+export type TRArray<T extends TSchema = TSchema> = TRelishSchema & {
   [RelishKind]: "RArray";
+  [RelishElementType]: T;
 };
 
 export function RArray<T extends TSchema>(elementSchema: T): TRArray<T> {
@@ -169,29 +176,37 @@ export function RArray<T extends TSchema>(elementSchema: T): TRArray<T> {
     ...Type.Array(elementSchema),
     [RelishKind]: "RArray",
     [RelishTypeCode]: TypeCode.Array,
+    [RelishElementType]: elementSchema,
   } as TRArray<T>;
 }
 
 // Map schema - generic parameters for key and value types
-export type TRMap<_K extends TSchema = TSchema, _V extends TSchema = TSchema> =
-  TRelishSchema & { [RelishKind]: "RMap" };
+export type TRMap<K extends TSchema = TSchema, V extends TSchema = TSchema> =
+  TRelishSchema & {
+    [RelishKind]: "RMap";
+    [RelishKeyType]: K;
+    [RelishValueType]: V;
+  };
 
 export function RMap<K extends TSchema, V extends TSchema>(
-  _keySchema: K,
-  _valueSchema: V,
+  keySchema: K,
+  valueSchema: V,
 ): TRMap<K, V> {
   // TypeBox doesn't have native Map support, so we use a custom format
-  // Key and value schemas are preserved in the type system for type inference
+  // Key and value schemas are stored using symbol properties for codec use
   return {
     type: "object",
     [RelishKind]: "RMap",
     [RelishTypeCode]: TypeCode.Map,
+    [RelishKeyType]: keySchema,
+    [RelishValueType]: valueSchema,
   } as unknown as TRMap<K, V>;
 }
 
 // Optional schema - wraps any schema to make it nullable
-export type TROptional<_T extends TSchema = TSchema> = TRelishSchema & {
+export type TROptional<T extends TSchema = TSchema> = TRelishSchema & {
   [RelishKind]: "ROptional";
+  inner: T;
 };
 
 export function ROptional<T extends TSchema>(schema: T): TROptional<T> {
@@ -201,6 +216,7 @@ export function ROptional<T extends TSchema>(schema: T): TROptional<T> {
     ...schema,
     [RelishKind]: "ROptional",
     [RelishTypeCode]: typeCode,
+    inner: schema,
   } as TROptional<T>;
 }
 

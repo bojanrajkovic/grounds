@@ -55,5 +55,13 @@ export { variant, REnum } from "./enum.js";
 export type { TEnumVariant, TREnum } from "./enum.js";
 
 // Symbols
-export { RelishKind, RelishTypeCode } from "./symbols.js";
+export {
+  RelishKind,
+  RelishTypeCode,
+  RelishFieldId,
+  RelishVariantId,
+  RelishElementType,
+  RelishKeyType,
+  RelishValueType,
+} from "./symbols.js";
 
