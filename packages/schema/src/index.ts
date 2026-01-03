@@ -54,17 +54,5 @@ export type { TStructField, TRStruct } from "./struct.js";
 export { variant, REnum } from "./enum.js";
 export type { TEnumVariant, TREnum } from "./enum.js";
 
-// Symbols
-export {
-  RelishKind,
-  RelishTypeCode,
-  RelishFieldId,
-  RelishVariantId,
-  RelishElementType,
-  RelishKeyType,
-  RelishValueType,
-} from "./symbols.js";
-
-// Conversion and codec
-export { jsToRelish, decodedToTyped } from "./convert.js";
+// Codec (type-safe encode/decode)
 export { createCodec, type Codec } from "./codec.js";

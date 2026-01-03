@@ -17,18 +17,6 @@ describe("@grounds/schema codec exports", () => {
     });
   });
 
-  describe("conversion functions", () => {
-    it("exports jsToRelish function", () => {
-      expect(schema.jsToRelish).toBeDefined();
-      expect(typeof schema.jsToRelish).toBe("function");
-    });
-
-    it("exports decodedToTyped function", () => {
-      expect(schema.decodedToTyped).toBeDefined();
-      expect(typeof schema.decodedToTyped).toBe("function");
-    });
-  });
-
   describe("schema constructors", () => {
     it("exports primitive constructors", () => {
       expect(schema.RNull).toBeDefined();
@@ -60,43 +48,6 @@ describe("@grounds/schema codec exports", () => {
       expect(schema.field).toBeDefined();
       expect(schema.REnum).toBeDefined();
       expect(schema.variant).toBeDefined();
-    });
-  });
-
-  describe("symbols", () => {
-    it("exports RelishKind symbol", () => {
-      expect(schema.RelishKind).toBeDefined();
-      expect(typeof schema.RelishKind).toBe("symbol");
-    });
-
-    it("exports RelishTypeCode symbol", () => {
-      expect(schema.RelishTypeCode).toBeDefined();
-      expect(typeof schema.RelishTypeCode).toBe("symbol");
-    });
-
-    it("exports RelishFieldId symbol", () => {
-      expect(schema.RelishFieldId).toBeDefined();
-      expect(typeof schema.RelishFieldId).toBe("symbol");
-    });
-
-    it("exports RelishVariantId symbol", () => {
-      expect(schema.RelishVariantId).toBeDefined();
-      expect(typeof schema.RelishVariantId).toBe("symbol");
-    });
-
-    it("exports RelishElementType symbol", () => {
-      expect(schema.RelishElementType).toBeDefined();
-      expect(typeof schema.RelishElementType).toBe("symbol");
-    });
-
-    it("exports RelishKeyType symbol", () => {
-      expect(schema.RelishKeyType).toBeDefined();
-      expect(typeof schema.RelishKeyType).toBe("symbol");
-    });
-
-    it("exports RelishValueType symbol", () => {
-      expect(schema.RelishValueType).toBeDefined();
-      expect(typeof schema.RelishValueType).toBe("symbol");
     });
   });
 
