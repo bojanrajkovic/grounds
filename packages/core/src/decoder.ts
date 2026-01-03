@@ -311,42 +311,12 @@ export class Decoder {
 
   private decodePrimitiveValue(typeCode: TypeCode): Result<DecodedValue, DecodeError> {
     // Decode raw value for a primitive type (without reading a type code from buffer)
-    switch (typeCode) {
-      case TypeCode.Null:
-        return ok(null);
-      case TypeCode.Bool:
-        return this.decodeBool();
-      case TypeCode.U8:
-        return this.decodeU8();
-      case TypeCode.U16:
-        return this.decodeU16();
-      case TypeCode.U32:
-        return this.decodeU32();
-      case TypeCode.U64:
-        return this.decodeU64();
-      case TypeCode.U128:
-        return this.decodeU128();
-      case TypeCode.I8:
-        return this.decodeI8();
-      case TypeCode.I16:
-        return this.decodeI16();
-      case TypeCode.I32:
-        return this.decodeI32();
-      case TypeCode.I64:
-        return this.decodeI64();
-      case TypeCode.I128:
-        return this.decodeI128();
-      case TypeCode.F32:
-        return this.decodeF32();
-      case TypeCode.F64:
-        return this.decodeF64();
-      case TypeCode.String:
-        return this.decodeString();
-      case TypeCode.Timestamp:
-        return this.decodeTimestamp();
-      default:
-        return err(DecodeError.unknownTypeCode(typeCode));
+    // Uses same dispatch table as decodeValue()
+    const decoderMethod = Decoder.TYPE_DECODERS[typeCode];
+    if (decoderMethod === undefined) {
+      return err(DecodeError.unknownTypeCode(typeCode));
     }
+    return decoderMethod(this);
   }
 
   private decodeMap(): Result<ReadonlyMap<DecodedValue, DecodedValue>, DecodeError> {
