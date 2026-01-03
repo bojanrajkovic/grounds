@@ -72,39 +72,48 @@ function extractRawValue(
 // =============================================================================
 // Field/Variant Schema Helpers
 // =============================================================================
-// These helpers centralize type assertions for accessing field and variant
-// metadata from schemas. The assertions are needed because TypeScript's type
-// system doesn't preserve the augmented properties through dynamic access.
+// These helpers use runtime checks to safely access field and variant metadata
+// from schemas, avoiding unsafe type assertions where possible.
 
 /**
  * Extract field ID from a struct field schema.
+ * Uses runtime check to verify property exists before accessing.
  */
 function getFieldId(fieldSchema: TStructField): number {
-  return (fieldSchema as unknown as { fieldId: number }).fieldId;
+  if ("fieldId" in fieldSchema && typeof fieldSchema.fieldId === "number") {
+    return fieldSchema.fieldId;
+  }
+  throw new Error("fieldSchema missing fieldId - was field() helper used?");
 }
 
 /**
- * Check if a field schema is optional.
+ * Type guard: Check if a field schema is optional.
+ * Narrows the type to TROptional for safe .inner access.
  */
-function isOptionalField(fieldSchema: TStructField): boolean {
-  return (fieldSchema as unknown as { [RelishKind]?: string })[RelishKind] === "ROptional";
+function isOptionalField(fieldSchema: TStructField): fieldSchema is TStructField & TROptional<TRelishSchema> {
+  return RelishKind in fieldSchema && fieldSchema[RelishKind] === "ROptional";
 }
 
 /**
  * Get the inner schema from a field, unwrapping ROptional if present.
+ * Uses isOptionalField type guard for safe narrowing.
  */
 function getInnerSchema(fieldSchema: TStructField): TRelishSchema {
   if (isOptionalField(fieldSchema)) {
-    return (fieldSchema as unknown as TROptional<TRelishSchema>).inner;
+    return fieldSchema.inner;
   }
   return fieldSchema as unknown as TRelishSchema;
 }
 
 /**
  * Extract variant ID from an enum variant schema.
+ * Uses runtime check to verify property exists before accessing.
  */
 function getVariantId(variantSchema: TEnumVariant): number {
-  return (variantSchema as unknown as { variantId: number }).variantId;
+  if ("variantId" in variantSchema && typeof variantSchema.variantId === "number") {
+    return variantSchema.variantId;
+  }
+  throw new Error("variantSchema missing variantId - was variant() helper used?");
 }
 
 /**
