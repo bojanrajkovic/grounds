@@ -164,6 +164,10 @@ When working on multi-phase projects:
 
 See [CLAUDE.md](./CLAUDE.md) for coding standards, patterns, and development workflow.
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/). Pre-1.0 releases (0.x.x) are considered unstable and may include breaking changes in minor versions.
+
 ## Future work
 
 Track planned features and improvements in [GitHub Issues](https://github.com/bojanrajkovic/grounds/issues).

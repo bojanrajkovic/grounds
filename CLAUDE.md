@@ -13,6 +13,15 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/stream` - Streaming utilities (@grounds/stream)
 - `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/):
+- **Major (1.0.0)**: Breaking API changes
+- **Minor (0.1.0)**: New features, backward compatible
+- **Patch (0.0.1)**: Bug fixes, backward compatible
+
+**Pre-1.0 releases (0.x.x)**: API is considered unstable. Breaking changes may occur in minor versions. Once the API stabilizes and reaches 1.0.0, strict semver will be enforced.
+
 ## Branch Naming
 
 Branches should be prefixed with username and conventional commit type:
