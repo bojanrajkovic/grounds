@@ -1,6 +1,6 @@
 # @grounds/schema
 
-Last verified: 2026-01-02 (Task 8 - Codec implementation)
+Last verified: 2026-01-02
 
 ## Purpose
 

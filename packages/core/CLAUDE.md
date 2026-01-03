@@ -1,6 +1,6 @@
 # @grounds/core
 
-Last verified: 2026-01-02 (Task 7 - decodedToTyped implementation)
+Last verified: 2026-01-02
 
 ## Purpose
 
