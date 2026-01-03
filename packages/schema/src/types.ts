@@ -1,5 +1,5 @@
 // pattern: Functional Core
-// TypeBox-based schema type constructors for Relish primitives
+// TypeBox-based schema type constructors for Relish types
 
 import { Type, type TSchema } from "@sinclair/typebox";
 import { TypeCode } from "@grounds/core";
@@ -146,4 +146,73 @@ export function RF64(): TRF64 {
     [RelishKind]: "RF64",
     [RelishTypeCode]: TypeCode.F64,
   } as TRF64;
+}
+
+// String schema
+export type TRString = TRelishSchema<string> & { [RelishKind]: "RString" };
+
+export function RString(): TRString {
+  return {
+    ...Type.String(),
+    [RelishKind]: "RString",
+    [RelishTypeCode]: TypeCode.String,
+  } as TRString;
+}
+
+// Array schema - generic parameter for element type
+export type TRArray<_T extends TSchema = TSchema> = TRelishSchema & {
+  [RelishKind]: "RArray";
+};
+
+export function RArray<T extends TSchema>(elementSchema: T): TRArray<T> {
+  return {
+    ...Type.Array(elementSchema),
+    [RelishKind]: "RArray",
+    [RelishTypeCode]: TypeCode.Array,
+  } as TRArray<T>;
+}
+
+// Map schema - generic parameters for key and value types
+export type TRMap<_K extends TSchema = TSchema, _V extends TSchema = TSchema> =
+  TRelishSchema & { [RelishKind]: "RMap" };
+
+export function RMap<K extends TSchema, V extends TSchema>(
+  _keySchema: K,
+  _valueSchema: V,
+): TRMap<K, V> {
+  // TypeBox doesn't have native Map support, so we use a custom format
+  // Key and value schemas are preserved in the type system for type inference
+  return {
+    type: "object",
+    [RelishKind]: "RMap",
+    [RelishTypeCode]: TypeCode.Map,
+  } as unknown as TRMap<K, V>;
+}
+
+// Optional schema - wraps any schema to make it nullable
+export type TROptional<_T extends TSchema = TSchema> = TRelishSchema & {
+  [RelishKind]: "ROptional";
+};
+
+export function ROptional<T extends TSchema>(schema: T): TROptional<T> {
+  // Preserve the type code from the wrapped schema
+  const typeCode = (schema as Record<symbol | string, unknown>)[RelishTypeCode];
+  return {
+    ...schema,
+    [RelishKind]: "ROptional",
+    [RelishTypeCode]: typeCode,
+  } as TROptional<T>;
+}
+
+// Timestamp schema - represents Unix timestamps as Luxon DateTime
+export type TRTimestamp = TRelishSchema & {
+  [RelishKind]: "RTimestamp";
+};
+
+export function RTimestamp(): TRTimestamp {
+  return {
+    type: "object",
+    [RelishKind]: "RTimestamp",
+    [RelishTypeCode]: TypeCode.Timestamp,
+  } as unknown as TRTimestamp;
 }

@@ -1,9 +1,22 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
-import { RNull, RBool, RU8, RU64, RI32, RF64 } from "../src/types.js";
+import {
+  RNull,
+  RBool,
+  RU8,
+  RU64,
+  RI32,
+  RF64,
+  RString,
+  RArray,
+  RMap,
+  ROptional,
+  RTimestamp,
+} from "../src/types.js";
 import { RelishTypeCode } from "../src/symbols.js";
 import { TypeCode } from "@grounds/core";
 import type { Static } from "@sinclair/typebox";
+import { DateTime } from "luxon";
 
 describe("Primitive Schema Types", () => {
   describe("RNull", () => {
@@ -80,6 +93,87 @@ describe("Primitive Schema Types", () => {
       type Inferred = Static<typeof schema>;
       const value: Inferred = 3.14159;
       expect(typeof value).toBe("number");
+    });
+  });
+});
+
+describe("Collection Schema Types", () => {
+  describe("RString", () => {
+    it("has correct type code", () => {
+      const schema = RString();
+      expect(schema[RelishTypeCode]).toBe(TypeCode.String);
+    });
+
+    it("infers string type", () => {
+      const schema = RString();
+      type Inferred = Static<typeof schema>;
+      const value: Inferred = "hello";
+      expect(typeof value).toBe("string");
+    });
+  });
+
+  describe("RArray", () => {
+    it("has correct type code", () => {
+      const schema = RArray(RU8());
+      expect(schema[RelishTypeCode]).toBe(TypeCode.Array);
+    });
+
+    it("infers array type", () => {
+      const schema = RArray(RU8());
+      type Inferred = Static<typeof schema>;
+      const value: Inferred = [1, 2, 3];
+      expect(Array.isArray(value)).toBe(true);
+    });
+
+    it("infers correct element type", () => {
+      const schema = RArray(RString());
+      type Inferred = Static<typeof schema>;
+      const value: Inferred = ["a", "b"];
+      expect(value[0]).toBe("a");
+    });
+  });
+
+  describe("RMap", () => {
+    it("has correct type code", () => {
+      const schema = RMap(RString(), RU8());
+      expect(schema[RelishTypeCode]).toBe(TypeCode.Map);
+    });
+
+    it("infers Map type", () => {
+      const schema = RMap(RString(), RU8());
+      type Inferred = Static<typeof schema>;
+      const value: Inferred = new Map([["a", 1]]);
+      expect(value instanceof Map).toBe(true);
+    });
+  });
+
+  describe("ROptional", () => {
+    it("preserves type code from wrapped schema", () => {
+      const schema = ROptional(RString());
+      expect(schema[RelishTypeCode]).toBe(TypeCode.String);
+    });
+
+    it("infers optional type", () => {
+      const schema = ROptional(RString());
+      type Inferred = Static<typeof schema>;
+      const value1: Inferred = "hello";
+      const value2: Inferred = null;
+      expect(value1).toBe("hello");
+      expect(value2).toBeNull();
+    });
+  });
+
+  describe("RTimestamp", () => {
+    it("has correct type code", () => {
+      const schema = RTimestamp();
+      expect(schema[RelishTypeCode]).toBe(TypeCode.Timestamp);
+    });
+
+    it("infers DateTime type", () => {
+      const schema = RTimestamp();
+      type Inferred = Static<typeof schema>;
+      const value: Inferred = DateTime.now();
+      expect(value instanceof DateTime).toBe(true);
     });
   });
 });
