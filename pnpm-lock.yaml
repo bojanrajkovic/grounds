@@ -61,9 +61,16 @@ importers:
       '@grounds/core':
         specifier: workspace:*
         version: link:../core
+      '@grounds/schema':
+        specifier: workspace:*
+        version: link:../schema
       neverthrow:
         specifier: ^8.1.1
         version: 8.2.0
+    devDependencies:
+      '@sinclair/typebox':
+        specifier: ^0.34.12
+        version: 0.34.46
 
 packages:
 
