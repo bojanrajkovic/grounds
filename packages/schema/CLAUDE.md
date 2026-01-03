@@ -77,7 +77,7 @@ If users request these for advanced use cases, we can design a better API or exp
 - `symbols.ts` - Symbol definitions for metadata keys
 - `struct.ts` - Struct schema support with field tagging
 - `enum.ts` - Enum schema support with variant tagging
-- `convert.ts` - Bidirectional conversion: `toRelish` (JS → RelishValue) and `fromRelish` (DecodedValue → schema-aware typed JS)
+- `convert.ts` - Bidirectional conversion: `toRelish` (JS → bytes) and `fromRelish` (bytes → JS)
 - `codec.ts` - Type-safe codec: `createCodec` function and `Codec<T>` type for end-to-end encoding/decoding
 
 ## Gotchas
