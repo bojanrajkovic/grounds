@@ -5,7 +5,6 @@ import {
   type RelishValue,
   Null,
   Bool,
-  U8,
   Struct,
   EncodeError,
 } from "@grounds/core";
