@@ -8,7 +8,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings",
-    "docs:build": "pnpm build && mdbook build docs",
+    "docs:build-validator": "./docs/build-validator.sh",
+    "docs:build": "pnpm docs:build-validator && mdbook build docs",
     "docs:serve": "mdbook serve docs"
   },
   "devDependencies": {
