@@ -156,6 +156,12 @@ export class Encoder {
 
       case "enum":
         return this.encodeEnum(value);
+
+      default: {
+        // Exhaustiveness check - should never reach here with valid RelishValue
+        const _exhaustive: never = value;
+        return err(EncodeError.unsupportedType(String(_exhaustive)));
+      }
     }
   }
 
