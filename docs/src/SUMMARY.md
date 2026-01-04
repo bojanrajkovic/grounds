@@ -24,6 +24,8 @@
 
 - [Async Generators](./streaming/async-generators.md)
 - [Web Streams](./streaming/web-streams.md)
+- [Schema with Async Generators](./streaming/schema-async-generators.md)
+- [Schema with Web Streams](./streaming/schema-web-streams.md)
 
 # Reference
 
