@@ -34,53 +34,119 @@ export function Bool(value: boolean): RelishBool {
   return { type: "bool", value };
 }
 
+// Integer range constants
+const U8_MAX = 255;
+const U16_MAX = 65535;
+const U32_MAX = 4294967295;
+const U64_MAX = 18446744073709551615n;
+const U128_MAX = 340282366920938463463374607431768211455n;
+
+const I8_MIN = -128;
+const I8_MAX = 127;
+const I16_MIN = -32768;
+const I16_MAX = 32767;
+const I32_MIN = -2147483648;
+const I32_MAX = 2147483647;
+const I64_MIN = -9223372036854775808n;
+const I64_MAX = 9223372036854775807n;
+const I128_MIN = -170141183460469231731687303715884105728n;
+const I128_MAX = 170141183460469231731687303715884105727n;
+
 /** Create an unsigned 8-bit integer value */
 export function U8(value: number): RelishU8 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`U8 value must be an integer: ${value}`);
+  }
+  if (value < 0 || value > U8_MAX) {
+    throw new Error(`U8 value out of range: ${value}`);
+  }
   return { type: "u8", value };
 }
 
 /** Create an unsigned 16-bit integer value */
 export function U16(value: number): RelishU16 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`U16 value must be an integer: ${value}`);
+  }
+  if (value < 0 || value > U16_MAX) {
+    throw new Error(`U16 value out of range: ${value}`);
+  }
   return { type: "u16", value };
 }
 
 /** Create an unsigned 32-bit integer value */
 export function U32(value: number): RelishU32 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`U32 value must be an integer: ${value}`);
+  }
+  if (value < 0 || value > U32_MAX) {
+    throw new Error(`U32 value out of range: ${value}`);
+  }
   return { type: "u32", value };
 }
 
 /** Create an unsigned 64-bit integer value */
 export function U64(value: bigint): RelishU64 {
+  if (value < 0n || value > U64_MAX) {
+    throw new Error(`U64 value out of range: ${value}`);
+  }
   return { type: "u64", value };
 }
 
 /** Create an unsigned 128-bit integer value */
 export function U128(value: bigint): RelishU128 {
+  if (value < 0n || value > U128_MAX) {
+    throw new Error(`U128 value out of range: ${value}`);
+  }
   return { type: "u128", value };
 }
 
 /** Create a signed 8-bit integer value */
 export function I8(value: number): RelishI8 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`I8 value must be an integer: ${value}`);
+  }
+  if (value < I8_MIN || value > I8_MAX) {
+    throw new Error(`I8 value out of range: ${value}`);
+  }
   return { type: "i8", value };
 }
 
 /** Create a signed 16-bit integer value */
 export function I16(value: number): RelishI16 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`I16 value must be an integer: ${value}`);
+  }
+  if (value < I16_MIN || value > I16_MAX) {
+    throw new Error(`I16 value out of range: ${value}`);
+  }
   return { type: "i16", value };
 }
 
 /** Create a signed 32-bit integer value */
 export function I32(value: number): RelishI32 {
+  if (!Number.isInteger(value)) {
+    throw new Error(`I32 value must be an integer: ${value}`);
+  }
+  if (value < I32_MIN || value > I32_MAX) {
+    throw new Error(`I32 value out of range: ${value}`);
+  }
   return { type: "i32", value };
 }
 
 /** Create a signed 64-bit integer value */
 export function I64(value: bigint): RelishI64 {
+  if (value < I64_MIN || value > I64_MAX) {
+    throw new Error(`I64 value out of range: ${value}`);
+  }
   return { type: "i64", value };
 }
 
 /** Create a signed 128-bit integer value */
 export function I128(value: bigint): RelishI128 {
+  if (value < I128_MIN || value > I128_MAX) {
+    throw new Error(`I128 value out of range: ${value}`);
+  }
   return { type: "i128", value };
 }
 

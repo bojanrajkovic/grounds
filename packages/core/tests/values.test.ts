@@ -46,12 +46,60 @@ describe("Value constructors", () => {
       expect(U8(255)).toEqual({ type: "u8", value: 255 });
     });
 
+    it("creates U8 with zero", () => {
+      expect(U8(0)).toEqual({ type: "u8", value: 0 });
+    });
+
+    it("throws on U8 overflow", () => {
+      expect(() => U8(256)).toThrow("U8 value out of range: 256");
+    });
+
+    it("throws on U8 underflow", () => {
+      expect(() => U8(-1)).toThrow("U8 value out of range: -1");
+    });
+
+    it("throws on U8 non-integer", () => {
+      expect(() => U8(1.5)).toThrow("U8 value must be an integer: 1.5");
+    });
+
     it("creates U16 value", () => {
       expect(U16(65535)).toEqual({ type: "u16", value: 65535 });
     });
 
+    it("creates U16 with zero", () => {
+      expect(U16(0)).toEqual({ type: "u16", value: 0 });
+    });
+
+    it("throws on U16 overflow", () => {
+      expect(() => U16(65536)).toThrow("U16 value out of range: 65536");
+    });
+
+    it("throws on U16 underflow", () => {
+      expect(() => U16(-1)).toThrow("U16 value out of range: -1");
+    });
+
+    it("throws on U16 non-integer", () => {
+      expect(() => U16(1.5)).toThrow("U16 value must be an integer: 1.5");
+    });
+
     it("creates U32 value", () => {
       expect(U32(4294967295)).toEqual({ type: "u32", value: 4294967295 });
+    });
+
+    it("creates U32 with zero", () => {
+      expect(U32(0)).toEqual({ type: "u32", value: 0 });
+    });
+
+    it("throws on U32 overflow", () => {
+      expect(() => U32(4294967296)).toThrow("U32 value out of range: 4294967296");
+    });
+
+    it("throws on U32 underflow", () => {
+      expect(() => U32(-1)).toThrow("U32 value out of range: -1");
+    });
+
+    it("throws on U32 non-integer", () => {
+      expect(() => U32(1.5)).toThrow("U32 value must be an integer: 1.5");
     });
 
     it("creates U64 value", () => {
@@ -61,35 +109,158 @@ describe("Value constructors", () => {
       });
     });
 
+    it("creates U64 with zero", () => {
+      expect(U64(0n)).toEqual({ type: "u64", value: 0n });
+    });
+
+    it("throws on U64 overflow", () => {
+      expect(() => U64(18446744073709551616n)).toThrow("U64 value out of range: 18446744073709551616");
+    });
+
+    it("throws on U64 underflow", () => {
+      expect(() => U64(-1n)).toThrow("U64 value out of range: -1");
+    });
+
     it("creates U128 value", () => {
       const max = 340282366920938463463374607431768211455n;
       expect(U128(max)).toEqual({ type: "u128", value: max });
     });
+
+    it("creates U128 with zero", () => {
+      expect(U128(0n)).toEqual({ type: "u128", value: 0n });
+    });
+
+    it("throws on U128 overflow", () => {
+      const overflow = 340282366920938463463374607431768211456n;
+      expect(() => U128(overflow)).toThrow("U128 value out of range");
+    });
+
+    it("throws on U128 underflow", () => {
+      expect(() => U128(-1n)).toThrow("U128 value out of range: -1");
+    });
   });
 
   describe("signed integers", () => {
-    it("creates I8 value", () => {
+    it("creates I8 value at min", () => {
       expect(I8(-128)).toEqual({ type: "i8", value: -128 });
     });
 
-    it("creates I16 value", () => {
+    it("creates I8 value at max", () => {
+      expect(I8(127)).toEqual({ type: "i8", value: 127 });
+    });
+
+    it("creates I8 with zero", () => {
+      expect(I8(0)).toEqual({ type: "i8", value: 0 });
+    });
+
+    it("throws on I8 overflow", () => {
+      expect(() => I8(128)).toThrow("I8 value out of range: 128");
+    });
+
+    it("throws on I8 underflow", () => {
+      expect(() => I8(-129)).toThrow("I8 value out of range: -129");
+    });
+
+    it("throws on I8 non-integer", () => {
+      expect(() => I8(1.5)).toThrow("I8 value must be an integer: 1.5");
+    });
+
+    it("creates I16 value at min", () => {
       expect(I16(-32768)).toEqual({ type: "i16", value: -32768 });
     });
 
-    it("creates I32 value", () => {
+    it("creates I16 value at max", () => {
+      expect(I16(32767)).toEqual({ type: "i16", value: 32767 });
+    });
+
+    it("creates I16 with zero", () => {
+      expect(I16(0)).toEqual({ type: "i16", value: 0 });
+    });
+
+    it("throws on I16 overflow", () => {
+      expect(() => I16(32768)).toThrow("I16 value out of range: 32768");
+    });
+
+    it("throws on I16 underflow", () => {
+      expect(() => I16(-32769)).toThrow("I16 value out of range: -32769");
+    });
+
+    it("throws on I16 non-integer", () => {
+      expect(() => I16(1.5)).toThrow("I16 value must be an integer: 1.5");
+    });
+
+    it("creates I32 value at min", () => {
       expect(I32(-2147483648)).toEqual({ type: "i32", value: -2147483648 });
     });
 
-    it("creates I64 value", () => {
+    it("creates I32 value at max", () => {
+      expect(I32(2147483647)).toEqual({ type: "i32", value: 2147483647 });
+    });
+
+    it("creates I32 with zero", () => {
+      expect(I32(0)).toEqual({ type: "i32", value: 0 });
+    });
+
+    it("throws on I32 overflow", () => {
+      expect(() => I32(2147483648)).toThrow("I32 value out of range: 2147483648");
+    });
+
+    it("throws on I32 underflow", () => {
+      expect(() => I32(-2147483649)).toThrow("I32 value out of range: -2147483649");
+    });
+
+    it("throws on I32 non-integer", () => {
+      expect(() => I32(1.5)).toThrow("I32 value must be an integer: 1.5");
+    });
+
+    it("creates I64 value at min", () => {
       expect(I64(-9223372036854775808n)).toEqual({
         type: "i64",
         value: -9223372036854775808n,
       });
     });
 
-    it("creates I128 value", () => {
+    it("creates I64 value at max", () => {
+      expect(I64(9223372036854775807n)).toEqual({
+        type: "i64",
+        value: 9223372036854775807n,
+      });
+    });
+
+    it("creates I64 with zero", () => {
+      expect(I64(0n)).toEqual({ type: "i64", value: 0n });
+    });
+
+    it("throws on I64 overflow", () => {
+      expect(() => I64(9223372036854775808n)).toThrow("I64 value out of range: 9223372036854775808");
+    });
+
+    it("throws on I64 underflow", () => {
+      expect(() => I64(-9223372036854775809n)).toThrow("I64 value out of range: -9223372036854775809");
+    });
+
+    it("creates I128 value at min", () => {
       const min = -170141183460469231731687303715884105728n;
       expect(I128(min)).toEqual({ type: "i128", value: min });
+    });
+
+    it("creates I128 value at max", () => {
+      const max = 170141183460469231731687303715884105727n;
+      expect(I128(max)).toEqual({ type: "i128", value: max });
+    });
+
+    it("creates I128 with zero", () => {
+      expect(I128(0n)).toEqual({ type: "i128", value: 0n });
+    });
+
+    it("throws on I128 overflow", () => {
+      const overflow = 170141183460469231731687303715884105728n;
+      expect(() => I128(overflow)).toThrow("I128 value out of range");
+    });
+
+    it("throws on I128 underflow", () => {
+      const underflow = -170141183460469231731687303715884105729n;
+      expect(() => I128(underflow)).toThrow("I128 value out of range");
     });
   });
 

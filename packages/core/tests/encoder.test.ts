@@ -10,6 +10,8 @@ import {
   U128,
   I32,
   I64,
+  F32,
+  F64,
   String_,
   Timestamp,
   Array_,
@@ -101,6 +103,98 @@ describe("encode primitives (Rust test vectors)", () => {
           TypeCode.I64,
           0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
         ])
+      );
+    });
+  });
+
+  describe("floating point IEEE-754 special values", () => {
+    // IEEE-754 single precision (32-bit) little-endian:
+    // +Infinity: 0x7F800000 -> [0x00, 0x00, 0x80, 0x7F]
+    // -Infinity: 0xFF800000 -> [0x00, 0x00, 0x80, 0xFF]
+    // NaN: 0x7FC00000 (quiet NaN) -> [0x00, 0x00, 0xC0, 0x7F]
+
+    it("encodes F32 positive infinity", () => {
+      const result = expectOk(encode(F32(Infinity)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0x7f])
+      );
+    });
+
+    it("encodes F32 negative infinity", () => {
+      const result = expectOk(encode(F32(-Infinity)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0xff])
+      );
+    });
+
+    it("encodes F32 NaN", () => {
+      const result = expectOk(encode(F32(NaN)));
+      // NaN has multiple valid representations; check type code and that it decodes as NaN
+      expect(result[0]).toBe(TypeCode.F32);
+      expect(result.length).toBe(5);
+      // Verify it's a valid NaN encoding by reading back
+      const view = new DataView(result.buffer, result.byteOffset);
+      const decoded = view.getFloat32(1, true);
+      expect(Number.isNaN(decoded)).toBe(true);
+    });
+
+    // IEEE-754 double precision (64-bit) little-endian:
+    // +Infinity: 0x7FF0000000000000 -> [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x7F]
+    // -Infinity: 0xFFF0000000000000 -> [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0xFF]
+    // NaN: 0x7FF8000000000000 (quiet NaN) -> [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x7F]
+
+    it("encodes F64 positive infinity", () => {
+      const result = expectOk(encode(F64(Infinity)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f])
+      );
+    });
+
+    it("encodes F64 negative infinity", () => {
+      const result = expectOk(encode(F64(-Infinity)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff])
+      );
+    });
+
+    it("encodes F64 NaN", () => {
+      const result = expectOk(encode(F64(NaN)));
+      // NaN has multiple valid representations; check type code and that it decodes as NaN
+      expect(result[0]).toBe(TypeCode.F64);
+      expect(result.length).toBe(9);
+      // Verify it's a valid NaN encoding by reading back
+      const view = new DataView(result.buffer, result.byteOffset);
+      const decoded = view.getFloat64(1, true);
+      expect(Number.isNaN(decoded)).toBe(true);
+    });
+
+    it("encodes F32 zero", () => {
+      const result = expectOk(encode(F32(0)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x00])
+      );
+    });
+
+    it("encodes F64 zero", () => {
+      const result = expectOk(encode(F64(0)));
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+      );
+    });
+
+    it("encodes F32 negative zero", () => {
+      const result = expectOk(encode(F32(-0)));
+      // Negative zero: 0x80000000 -> [0x00, 0x00, 0x00, 0x80]
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x80])
+      );
+    });
+
+    it("encodes F64 negative zero", () => {
+      const result = expectOk(encode(F64(-0)));
+      // Negative zero: 0x8000000000000000 -> [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
+      expect(result).toEqual(
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80])
       );
     });
   });
