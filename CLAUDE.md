@@ -12,6 +12,7 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/schema` - TypeBox integration (@grounds/schema)
 - `packages/stream` - Streaming utilities (@grounds/stream)
 - `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
+- `examples/` - Runnable usage examples organized by package (e.g., `examples/core/`)
 
 ## Versioning
 
@@ -180,6 +181,11 @@ The `docs/` directory should be updated during feature implementation:
 - Add conceptual documentation explaining design and usage
 - Include code examples demonstrating key features
 - Update existing docs when behavior changes
+
+**README.md updates:** When updating CLAUDE.md or project structure, also consider whether README.md needs corresponding updates. The README is user-facing documentation and should reflect:
+- New packages or directories in the monorepo structure
+- New commands or workflows
+- Changes to examples or getting started instructions
 
 ### Future Work and Issues
 

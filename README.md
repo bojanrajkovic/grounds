@@ -114,9 +114,25 @@ pnpm test          # Run tests
 pnpm lint          # Run linter
 ```
 
+## Examples
+
+Runnable examples are in the `examples/` directory, organized by package:
+
+```bash
+# Run a core package example
+pnpm exec tsx examples/core/encode-match.ts
+
+# Available core examples:
+# - encode-match.ts      - Basic encoding with .match() for result handling
+# - encode-roundtrip.ts  - Chaining encode/decode with .andThen()
+# - encode-transform.ts  - Transforming results with .map()
+# - encode-error.ts      - Error handling with .match() and .mapErr()
+# - encode-collections.ts - Encoding arrays and maps
+```
+
 ## Documentation
 
-- **Conceptual docs**: See `docs/` directory for design documentation and examples
+- **Conceptual docs**: See `docs/` directory for design documentation
 - **Architecture decisions**: See `docs/adrs/` directory for architectural decision records
 - **API reference**: Auto-generated from TSDoc (coming soon)
 
