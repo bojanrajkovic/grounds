@@ -68,6 +68,8 @@ pnpm install          # Install dependencies
 pnpm build            # Build all packages
 pnpm test             # Run all tests
 pnpm lint             # Run oxlint
+pnpm docs:build       # Build documentation (mdBook)
+pnpm docs:serve       # Serve documentation locally
 pnpm --filter @grounds/core build  # Build specific package
 ```
 
