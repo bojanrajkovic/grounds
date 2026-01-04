@@ -26,7 +26,6 @@ result.match(
 );
 
 // Use .mapErr() to add context to errors
-// Note: Error.message is non-enumerable, so we explicitly copy it
 const contextualResult = encode(invalidStruct).mapErr((err) => ({
   originalMessage: err.message,
   context: "Failed while encoding user profile struct",
