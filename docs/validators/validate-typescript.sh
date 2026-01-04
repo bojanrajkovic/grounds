@@ -9,7 +9,7 @@ set -euo pipefail
 
 # Create temp directory for the example
 WORK_DIR=$(mktemp -d)
-trap "rm -rf $WORK_DIR" EXIT
+trap 'rm -rf $WORK_DIR' EXIT
 
 cd "$WORK_DIR"
 
