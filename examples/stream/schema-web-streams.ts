@@ -85,9 +85,8 @@ async function example(): Promise<void> {
   while (true) {
     const { done, value } = await decodedReader.read();
     if (done) break;
-    decodedMessages.push(value as Message);
-    const msg = value as Message;
-    console.log(`  Decoded message from ${msg.sender}: "${msg.content}"`);
+    decodedMessages.push(value);
+    console.log(`  Decoded message from ${value.sender}: "${value.content}"`);
   }
 
   console.log(`\nSuccessfully decoded ${decodedMessages.length} messages\n`);

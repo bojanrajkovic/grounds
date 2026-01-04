@@ -2,7 +2,7 @@
 // pattern: Imperative Shell
 // Demonstrates: Schema-aware streaming with async generators using toRelish
 
-import { RStruct, RString, field, createCodec, type TRelishSchema } from "@grounds/schema";
+import { RStruct, RString, field, createCodec } from "@grounds/schema";
 import { type Static } from "@sinclair/typebox";
 
 // Define a Message schema using RStruct
