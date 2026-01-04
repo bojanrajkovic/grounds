@@ -7,11 +7,14 @@
     "build": "pnpm -r build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "oxlint --deny-warnings"
+    "lint": "oxlint --deny-warnings",
+    "docs:build": "pnpm build && mdbook build docs",
+    "docs:serve": "mdbook serve docs"
   },
   "devDependencies": {
     "@tsconfig/strictest": "^2.0.5",
     "oxlint": "^0.16.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },

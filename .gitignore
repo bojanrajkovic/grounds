@@ -27,3 +27,6 @@ coverage/
 
 # Claude Code
 .claude/
+
+# mdBook build output
+docs/book/
