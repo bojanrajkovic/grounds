@@ -6,7 +6,7 @@ Define structured data types with `RStruct` and `field()`.
 
 Use `RStruct` to define a schema with named fields:
 
-```typescript
+```typescript validator=typescript
 {{#include ../../../examples/schema/defining-structs.ts}}
 ```
 

@@ -6,7 +6,7 @@ Decode bytes back to typed values.
 
 Chain encoding and decoding operations:
 
-```typescript
+```typescript validator=typescript
 {{#include ../../../examples/core/encode-roundtrip.ts}}
 ```
 

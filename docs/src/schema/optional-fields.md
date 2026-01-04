@@ -6,7 +6,7 @@ Handle nullable values with `ROptional`.
 
 Use `ROptional` to wrap any schema type:
 
-```typescript
+```typescript validator=typescript
 {{#include ../../../examples/schema/optional-fields.ts}}
 ```
 

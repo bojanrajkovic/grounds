@@ -6,7 +6,7 @@ Grounds uses [neverthrow](https://github.com/supermacro/neverthrow) for type-saf
 
 The `.match()` method provides exhaustive handling of success and error cases:
 
-```typescript
+```typescript validator=typescript
 {{#include ../../../examples/core/encode-error.ts}}
 ```
 
