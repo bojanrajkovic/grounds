@@ -8,6 +8,10 @@ WORKDIR /validator
 # These are created by `npm pack` during the build process
 COPY packages/*.tgz ./packages/
 
+# Copy validator script
+COPY validators/validate-typescript.sh ./validate-typescript.sh
+RUN chmod +x ./validate-typescript.sh
+
 # Install tsx globally for running TypeScript
 RUN npm install -g tsx
 
