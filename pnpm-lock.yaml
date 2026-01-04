@@ -35,6 +35,13 @@ importers:
       '@grounds/stream':
         specifier: workspace:*
         version: link:../packages/stream
+      luxon:
+        specifier: ^3.5.0
+        version: 3.7.2
+    devDependencies:
+      '@types/luxon':
+        specifier: ^3.4.2
+        version: 3.7.1
 
   packages/core:
     dependencies:

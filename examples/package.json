@@ -10,6 +10,10 @@
   "dependencies": {
     "@grounds/core": "workspace:*",
     "@grounds/schema": "workspace:*",
-    "@grounds/stream": "workspace:*"
+    "@grounds/stream": "workspace:*",
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.4.2"
   }
 }
