@@ -1,0 +1,15 @@
+{
+  "name": "@grounds/examples",
+  "version": "0.0.0",
+  "description": "Example TypeScript files demonstrating @grounds/core usage",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo 'Examples are not unit tested - run individually with tsx'"
+  },
+  "dependencies": {
+    "@grounds/core": "workspace:*",
+    "@grounds/schema": "workspace:*",
+    "@grounds/stream": "workspace:*"
+  }
+}
