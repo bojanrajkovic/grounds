@@ -1,5 +1,4 @@
 // examples/stream/web-streams.ts
-// pattern: Imperative Shell
 // Demonstrates: Web Streams API for encode/decode pipelines
 
 import { createEncoderStream, createDecoderStream } from "@grounds/stream";

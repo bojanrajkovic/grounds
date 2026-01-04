@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 // Demonstrates: Defining struct schemas with RStruct and field()
 
 import { RStruct, RString, RU32, RBool, field } from "@grounds/schema";

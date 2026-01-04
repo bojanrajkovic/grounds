@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 // Demonstrates: Optional fields with ROptional and null handling
 
 import { RStruct, RString, ROptional, field, createCodec } from "@grounds/schema";

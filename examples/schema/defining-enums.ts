@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 // Demonstrates: Defining enum schemas with REnum and variant()
 
 import { REnum, RStruct, RString, RU32, field, variant } from "@grounds/schema";

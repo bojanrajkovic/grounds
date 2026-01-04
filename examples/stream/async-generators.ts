@@ -1,5 +1,4 @@
 // examples/stream/async-generators.ts
-// pattern: Imperative Shell
 // Demonstrates: Streaming encode/decode with async generators
 
 import { encodeIterable, decodeIterable } from "@grounds/stream";

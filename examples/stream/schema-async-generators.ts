@@ -1,5 +1,4 @@
 // examples/stream/schema-async-generators.ts
-// pattern: Imperative Shell
 // Demonstrates: Schema-aware streaming with async generators using toRelish
 
 import { RStruct, RString, field, createCodec } from "@grounds/schema";

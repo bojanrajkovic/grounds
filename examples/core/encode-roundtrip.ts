@@ -1,5 +1,4 @@
 // examples/core/encode-roundtrip.ts
-// pattern: Imperative Shell
 // Demonstrates: Chaining encode and decode with .andThen()
 
 import { encode, decode, String_ } from "@grounds/core";

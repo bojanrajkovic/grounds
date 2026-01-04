@@ -1,5 +1,4 @@
 // examples/stream/schema-web-streams.ts
-// pattern: Imperative Shell
 // Demonstrates: Schema-aware Web Streams with automatic type conversion
 
 import {

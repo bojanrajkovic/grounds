@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 // Demonstrates: Creating and using codecs for encode/decode
 
 import { RStruct, RString, RU32, field, createCodec } from "@grounds/schema";

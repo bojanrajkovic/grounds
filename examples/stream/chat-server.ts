@@ -1,5 +1,4 @@
 // examples/stream/chat-server.ts
-// pattern: Imperative Shell
 // Demonstrates: WebSocket chat server using schemas and streaming with Web Streams
 
 import { RStruct, RString, RTimestamp, field } from "@grounds/schema";

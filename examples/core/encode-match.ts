@@ -1,5 +1,4 @@
 // examples/core/encode-match.ts
-// pattern: Imperative Shell
 // Demonstrates: Basic encoding with .match() for result handling
 
 import { encode, String_ } from "@grounds/core";

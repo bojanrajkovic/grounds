@@ -1,5 +1,4 @@
 // examples/core/encode-error.ts
-// pattern: Imperative Shell
 // Demonstrates: Handling encoding errors with .match() and .mapErr()
 
 import { encode, Struct, String_ } from "@grounds/core";

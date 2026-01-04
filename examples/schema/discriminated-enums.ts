@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 // Demonstrates: Using enums with discriminant fields for sensor data
 
 import {

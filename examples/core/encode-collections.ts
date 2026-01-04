@@ -1,5 +1,4 @@
 // examples/core/encode-collections.ts
-// pattern: Imperative Shell
 // Demonstrates: Encoding arrays and maps
 
 import { encode, decode, Array_, Map_, TypeCode } from "@grounds/core";

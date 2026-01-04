@@ -1,5 +1,4 @@
 // examples/core/encode-transform.ts
-// pattern: Imperative Shell
 // Demonstrates: Transforming successful results with .map()
 
 import { encode, U32 } from "@grounds/core";

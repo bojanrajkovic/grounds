@@ -78,7 +78,7 @@ pnpm --filter @grounds/core build  # Build specific package
 
 ### File Classification (MANDATORY)
 
-Every source file MUST have a pattern comment:
+Every source file in `packages/*/src/` MUST have a pattern comment:
 ```typescript
 // pattern: Functional Core
 // pattern: Imperative Shell
@@ -86,6 +86,8 @@ Every source file MUST have a pattern comment:
 
 - **Functional Core**: Pure functions, no I/O, returns Result types
 - **Imperative Shell**: I/O orchestration, may throw exceptions
+
+**Scope:** Pattern comments are required only for source code in `packages/*/src/`. Test files (`packages/*/tests/`) and example files (`examples/`) do not require pattern comments.
 
 ### TypeScript Style
 
