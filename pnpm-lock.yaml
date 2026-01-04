@@ -35,6 +35,9 @@ importers:
       '@grounds/stream':
         specifier: workspace:*
         version: link:../packages/stream
+      '@sinclair/typebox':
+        specifier: ^0.34.12
+        version: 0.34.46
       luxon:
         specifier: ^3.5.0
         version: 3.7.2

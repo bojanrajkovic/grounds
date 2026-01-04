@@ -11,6 +11,7 @@
     "@grounds/core": "workspace:*",
     "@grounds/schema": "workspace:*",
     "@grounds/stream": "workspace:*",
+    "@sinclair/typebox": "^0.34.12",
     "luxon": "^3.5.0",
     "ws": "^8.18.3"
   },
