@@ -15,17 +15,21 @@ import type { Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
 
 // Define different data payloads for each sensor type
-// The field names act as discriminants - "temperature" vs "humidity"
+// Each variant includes a sensorType field for explicit discrimination
+// The unique value fields (temperature vs humidity) allow schema matching
 const TemperatureDataSchema = RStruct({
-  temperature: field(0, RF32()), // Celsius
+  sensorType: field(0, RString()), // "temperature"
+  temperature: field(1, RF32()), // Celsius
 });
 
 const HumidityDataSchema = RStruct({
-  humidity: field(0, RF32()), // Percentage (0-100)
+  sensorType: field(0, RString()), // "humidity"
+  humidity: field(1, RF32()), // Percentage (0-100)
 });
 
 // Create an enum for the sensor data variants
-// Each variant has a unique ID for wire format and a unique structure
+// The schema system matches variants by structure (temperature vs humidity field)
+// The sensorType field provides explicit runtime discrimination after decoding
 const SensorDataSchema = REnum({
   temperature: variant(0, TemperatureDataSchema),
   humidity: variant(1, HumidityDataSchema),
@@ -41,6 +45,7 @@ const SensorReadingSchema = RStruct({
 // Extract types for use in application code
 type TemperatureData = Static<typeof TemperatureDataSchema>;
 type HumidityData = Static<typeof HumidityDataSchema>;
+type SensorData = TemperatureData | HumidityData;
 type SensorReading = Static<typeof SensorReadingSchema>;
 
 // Create codec for encoding/decoding
@@ -50,24 +55,34 @@ const codec = createCodec(SensorReadingSchema);
 const tempReading: SensorReading = {
   sensorId: "sensor-001",
   timestamp: DateTime.now(),
-  data: { temperature: 23.5 },
+  data: { sensorType: "temperature", temperature: 23.5 },
 };
 
 const humidityReading: SensorReading = {
   sensorId: "sensor-002",
   timestamp: DateTime.now(),
-  data: { humidity: 65.2 },
+  data: { sensorType: "humidity", humidity: 65.2 },
 };
 
-// Helper to identify sensor type from decoded data
-function getSensorType(data: TemperatureData | HumidityData): string {
-  if ("temperature" in data) {
-    return "temperature";
+// Type guard using the sensorType discriminant field
+function isTemperatureData(data: SensorData): data is TemperatureData {
+  return data.sensorType === "temperature";
+}
+
+function isHumidityData(data: SensorData): data is HumidityData {
+  return data.sensorType === "humidity";
+}
+
+// Process a decoded sensor reading using the discriminant field
+function processSensorReading(reading: SensorReading): void {
+  console.log("Sensor ID:", reading.sensorId);
+  console.log("Sensor Type:", reading.data.sensorType);
+
+  if (isTemperatureData(reading.data)) {
+    console.log("Temperature:", reading.data.temperature, "°C");
+  } else if (isHumidityData(reading.data)) {
+    console.log("Humidity:", reading.data.humidity, "%");
   }
-  if ("humidity" in data) {
-    return "humidity";
-  }
-  return "unknown";
 }
 
 // Encode and decode temperature reading
@@ -79,13 +94,7 @@ codec
     return codec.decode(bytes);
   })
   .match(
-    (decoded) => {
-      console.log("Sensor ID:", decoded.sensorId);
-      console.log("Type:", getSensorType(decoded.data));
-      if ("temperature" in decoded.data) {
-        console.log("Temperature:", decoded.data.temperature, "°C");
-      }
-    },
+    (decoded) => processSensorReading(decoded),
     (err) => console.error("Failed:", err.message),
   );
 
@@ -98,12 +107,6 @@ codec
     return codec.decode(bytes);
   })
   .match(
-    (decoded) => {
-      console.log("Sensor ID:", decoded.sensorId);
-      console.log("Type:", getSensorType(decoded.data));
-      if ("humidity" in decoded.data) {
-        console.log("Humidity:", decoded.data.humidity, "%");
-      }
-    },
+    (decoded) => processSensorReading(decoded),
     (err) => console.error("Failed:", err.message),
   );
