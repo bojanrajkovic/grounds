@@ -182,6 +182,11 @@ The `docs/` directory should be updated during feature implementation:
 - Include code examples demonstrating key features
 - Update existing docs when behavior changes
 
+**README.md updates:** When updating CLAUDE.md or project structure, also consider whether README.md needs corresponding updates. The README is user-facing documentation and should reflect:
+- New packages or directories in the monorepo structure
+- New commands or workflows
+- Changes to examples or getting started instructions
+
 ### Future Work and Issues
 
 Track future work in GitHub issues:
