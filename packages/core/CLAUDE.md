@@ -22,6 +22,7 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - `DecodedValue` - Union type for decoder output (raw JS values: number | bigint | boolean | null | string | DateTime | ReadonlyArray | ReadonlyMap | object)
 - **Guarantees**:
   - All RelishValue types are readonly/immutable
+  - Integer value constructors (U8-U128, I8-I128) validate range at runtime, throw `Error` on invalid input
   - Array/Map constructors validate element types at runtime
   - 64-bit and 128-bit integers use BigInt
   - Timestamps use BigInt (Unix seconds) in encoding; Luxon DateTime in decoding
@@ -31,7 +32,7 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - Map keys validated for uniqueness
   - Enum length validated for correctness
 - **Expects**:
-  - Callers provide correctly-typed values to constructors for encoding
+  - Callers handle thrown `Error` from value constructors when passing invalid input (programmer error)
   - Decoder callers provide complete, valid binary data
   - BigInt for u64/u128/i64/i128/timestamp values in RelishValue
   - Struct field IDs in range 0-127
@@ -52,6 +53,7 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
 - Tagged varint for lengths: Short form (1 byte) for <128, long form (4 bytes) otherwise
 - Duplicate key detection via JSON serialization: Catches map encoding violations
 - Length validation for Enum: Ensures declared content length matches actual bytes read
+- Integer constructors throw on invalid input: Programmer error (invalid range, non-integer) is fail-fast, not Result
 
 ## Invariants
 
