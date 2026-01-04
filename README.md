@@ -122,12 +122,21 @@ Runnable examples are in the `examples/` directory, organized by package:
 # Run a core package example
 pnpm exec tsx examples/core/encode-match.ts
 
+# Run a schema package example
+pnpm exec tsx examples/schema/using-codecs.ts
+
 # Available core examples:
 # - encode-match.ts      - Basic encoding with .match() for result handling
 # - encode-roundtrip.ts  - Chaining encode/decode with .andThen()
 # - encode-transform.ts  - Transforming results with .map()
 # - encode-error.ts      - Error handling with .match() and .mapErr()
 # - encode-collections.ts - Encoding arrays and maps
+
+# Available schema examples:
+# - defining-structs.ts  - Defining struct schemas with RStruct and field()
+# - defining-enums.ts    - Defining enum schemas with REnum and variant()
+# - optional-fields.ts   - Optional fields with ROptional and null handling
+# - using-codecs.ts      - Creating and using codecs for encode/decode
 ```
 
 ## Documentation
