@@ -22,6 +22,7 @@ For the authoritative specification, see the [Relish Spec](https://github.com/al
 | i128 | 0x0b | `bigint` | 16 bytes little-endian |
 | f32 | 0x0c | `number` | IEEE 754 single |
 | f64 | 0x0d | `number` | IEEE 754 double |
+| Timestamp | 0x13 | `bigint` / `DateTime` | Unix seconds (8 bytes) |
 
 ## Variable-Length Types
 
@@ -37,7 +38,6 @@ For the authoritative specification, see the [Relish Spec](https://github.com/al
 |------|------|------------|-------|
 | Struct | 0x11 | `object` | Field ID + value pairs |
 | Enum | 0x12 | tagged union | Variant ID + value |
-| Timestamp | 0x13 | `bigint` / `DateTime` | Unix seconds |
 
 ## Reserved
 
