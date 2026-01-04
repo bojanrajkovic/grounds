@@ -1,8 +1,9 @@
 // examples/stream/chat-client.ts
 // pattern: Imperative Shell
-// Demonstrates: WebSocket chat client using schemas and streaming with readline
+// Demonstrates: WebSocket chat client using schemas and streaming with readline and Web Streams
 
-import { RStruct, RString, RTimestamp, field, createCodec } from "@grounds/schema";
+import { RStruct, RString, RTimestamp, field } from "@grounds/schema";
+import { createSchemaEncoderStream, createSchemaDecoderStream } from "@grounds/stream";
 import { type Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
 import { createInterface } from "readline";
@@ -16,9 +17,6 @@ const ChatMessageSchema = RStruct({
 });
 
 type ChatMessage = Static<typeof ChatMessageSchema>;
-
-// Create codec for encoding/decoding messages
-const codec = createCodec(ChatMessageSchema);
 
 async function main(): Promise<never> {
   // Prompt user for their name
@@ -39,28 +37,51 @@ async function main(): Promise<never> {
   // Connect to the WebSocket server
   const ws = new WebSocket("ws://localhost:8080");
 
+  // Create a readable stream from WebSocket messages
+  let decoderWriter: WritableStreamDefaultWriter<Uint8Array> | null = null;
+  const { readable: decoderInput, writable } = new TransformStream<Uint8Array, Uint8Array>();
+  decoderWriter = writable.getWriter();
+
+  // Pipe through decoder and start reading messages
+  const decoderStream = decoderInput.pipeThrough(createSchemaDecoderStream(ChatMessageSchema));
+  const decoderReader = decoderStream.getReader();
+
   ws.on("open", () => {
     console.log("Connected to chat server");
     startReadingInput(userName, ws);
   });
 
+  // Handle incoming messages through the decoder stream
   ws.on("message", (data) => {
-    // Decode received message
+    // Ensure data is a Uint8Array
     const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
 
-    const decodeResult = codec.decode(bytes);
+    // Write to decoder stream
+    if (decoderWriter) {
+      decoderWriter.write(bytes).catch((error) => {
+        console.error("Failed to write to decoder stream:", error instanceof Error ? error.message : String(error));
+      });
+    }
+  });
 
-    decodeResult.match(
-      (chatMessage: ChatMessage) => {
+  // Start async message reading loop
+  (async () => {
+    try {
+      while (true) {
+        const { done, value } = await decoderReader.read();
+        if (done) break;
+
+        const chatMessage: ChatMessage = value;
         const timestamp = chatMessage.timestamp.toISO();
         console.log(`\n[${timestamp}] ${chatMessage.name}: ${chatMessage.message}`);
         process.stdout.write("> ");
-      },
-      (error) => {
+      }
+    } catch (error) {
+      if (error instanceof Error) {
         console.error("Failed to decode message:", error.message);
       }
-    );
-  });
+    }
+  })();
 
   ws.on("error", (error) => {
     console.error("WebSocket error:", error.message);
@@ -68,6 +89,13 @@ async function main(): Promise<never> {
 
   ws.on("close", () => {
     console.log("Disconnected from chat server");
+    // Close the decoder stream
+    if (decoderWriter) {
+      decoderWriter.close().catch(() => {
+        // Stream already closed, ignore error
+      });
+    }
+    decoderReader.cancel();
     process.exit(0);
   });
 
@@ -98,17 +126,28 @@ function startReadingInput(userName: string, ws: WebSocket): void {
         message: input,
       };
 
-      // Encode and send the message
-      const encodeResult = codec.encode(chatMessage);
+      // Encode and send the message using encoder stream
+      (async () => {
+        try {
+          const { readable: encoderOutput, writable: encoderInput } = new TransformStream<ChatMessage, ChatMessage>();
+          const encodedStream = encoderOutput.pipeThrough(createSchemaEncoderStream(ChatMessageSchema));
 
-      encodeResult.match(
-        (encoded) => {
-          ws.send(encoded);
-        },
-        (error) => {
-          console.error("Failed to encode message:", error.message);
+          // Write message to encoder
+          const encoderInputWriter = encoderInput.getWriter();
+          encoderInputWriter.write(chatMessage);
+          encoderInputWriter.close();
+
+          // Read the encoded bytes and send to server
+          const encodedReader = encodedStream.getReader();
+          const { done: encodeDone, value: encodedBytes } = await encodedReader.read();
+          if (!encodeDone && encodedBytes) {
+            ws.send(encodedBytes);
+          }
+          encodedReader.cancel();
+        } catch (error) {
+          console.error("Failed to encode message:", error instanceof Error ? error.message : String(error));
         }
-      );
+      })();
 
       prompt();
     });
