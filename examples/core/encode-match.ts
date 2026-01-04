@@ -2,8 +2,7 @@
 // pattern: Imperative Shell
 // Demonstrates: Basic encoding with .match() for result handling
 
-import { encode } from "@grounds/core";
-import { String_ } from "@grounds/core";
+import { encode, String_ } from "@grounds/core";
 
 // Encode a string value
 const result = encode(String_("hello world"));

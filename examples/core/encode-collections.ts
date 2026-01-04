@@ -2,9 +2,7 @@
 // pattern: Imperative Shell
 // Demonstrates: Encoding arrays and maps
 
-import { encode, decode } from "@grounds/core";
-import { Array_, Map_, String_ } from "@grounds/core";
-import { TypeCode } from "@grounds/core";
+import { encode, decode, Array_, Map_, TypeCode } from "@grounds/core";
 
 // Encode an array of values (primitive U8 elements use raw numbers)
 const arrayResult = encode(

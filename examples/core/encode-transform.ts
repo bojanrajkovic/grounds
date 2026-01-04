@@ -2,8 +2,7 @@
 // pattern: Imperative Shell
 // Demonstrates: Transforming successful results with .map()
 
-import { encode } from "@grounds/core";
-import { U32 } from "@grounds/core";
+import { encode, U32 } from "@grounds/core";
 
 // Encode a value and transform the result to hex string
 const hexResult = encode(U32(42))

@@ -2,8 +2,7 @@
 // pattern: Imperative Shell
 // Demonstrates: Chaining encode and decode with .andThen()
 
-import { encode, decode } from "@grounds/core";
-import { String_ } from "@grounds/core";
+import { encode, decode, String_ } from "@grounds/core";
 
 // Chain encode -> decode using .andThen()
 // If encode fails, decode is skipped and the error propagates
