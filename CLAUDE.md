@@ -12,6 +12,7 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/schema` - TypeBox integration (@grounds/schema)
 - `packages/stream` - Streaming utilities (@grounds/stream)
 - `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
+- `examples/` - Runnable usage examples organized by package (e.g., `examples/core/`)
 
 ## Versioning
 
