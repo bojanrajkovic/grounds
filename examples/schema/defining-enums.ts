@@ -18,7 +18,7 @@ const ImageMessageSchema = RStruct({
 
 // Define an enum with named variants
 // Each variant has a numeric ID (for wire format) and a schema
-const MessageSchema = REnum({
+const _MessageSchema = REnum({
   text: variant(0, TextMessageSchema),
   image: variant(1, ImageMessageSchema),
 });
