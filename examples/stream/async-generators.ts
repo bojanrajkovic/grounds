@@ -3,7 +3,7 @@
 // Demonstrates: Streaming encode/decode with async generators
 
 import { encodeIterable, decodeIterable } from "@grounds/stream";
-import { String_, U32, Bool, type RelishValue } from "@grounds/core";
+import { String_, U32, Bool, type RelishValue, type DecodedValue } from "@grounds/core";
 
 // Generate values using an async generator
 async function* generateValues(): AsyncGenerator<RelishValue> {
@@ -33,9 +33,9 @@ async function example(): Promise<void> {
     }
   }
 
-  const values: Array<RelishValue> = [];
+  const values: Array<DecodedValue> = [];
 
-  // decodeIterable yields Result<RelishValue, DecodeError> for each value
+  // decodeIterable yields Result<DecodedValue, DecodeError> for each value
   for await (const result of decodeIterable(yieldChunks())) {
     result.match(
       (value) => values.push(value),
