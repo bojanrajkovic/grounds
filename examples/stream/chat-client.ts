@@ -6,6 +6,7 @@ import { RStruct, RString, RTimestamp, field, createCodec } from "@grounds/schem
 import { type Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
 import { createInterface } from "readline";
+import { WebSocket } from "ws";
 
 // Define ChatMessage schema using RStruct
 const ChatMessageSchema = RStruct({
@@ -19,7 +20,7 @@ type ChatMessage = Static<typeof ChatMessageSchema>;
 // Create codec for encoding/decoding messages
 const codec = createCodec(ChatMessageSchema);
 
-async function main(): Promise<void> {
+async function main(): Promise<never> {
   // Prompt user for their name
   const userNamePromise = new Promise<string>((resolve) => {
     const readline = createInterface({
@@ -37,17 +38,15 @@ async function main(): Promise<void> {
 
   // Connect to the WebSocket server
   const ws = new WebSocket("ws://localhost:8080");
-  let isConnected = false;
 
-  ws.onopen = () => {
+  ws.on("open", () => {
     console.log("Connected to chat server");
-    isConnected = true;
     startReadingInput(userName, ws);
-  };
+  });
 
-  ws.onmessage = (event) => {
+  ws.on("message", (data) => {
     // Decode received message
-    const bytes = new Uint8Array(event.data);
+    const bytes = data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer);
 
     const decodeResult = codec.decode(bytes);
 
@@ -61,20 +60,20 @@ async function main(): Promise<void> {
         console.error("Failed to decode message:", error.message);
       }
     );
-  };
+  });
 
-  ws.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
+  ws.on("error", (error) => {
+    console.error("WebSocket error:", error.message);
+  });
 
-  ws.onclose = () => {
+  ws.on("close", () => {
     console.log("Disconnected from chat server");
     process.exit(0);
-  };
+  });
 
-  // Keep the process alive
-  await new Promise(() => {
-    /* never resolves */
+  // Keep the process alive - this promise never resolves
+  return new Promise(() => {
+    /* intentionally never resolves */
   });
 }
 
@@ -84,7 +83,7 @@ function startReadingInput(userName: string, ws: WebSocket): void {
     output: process.stdout,
   });
 
-  const prompt = () => {
+  const prompt = (): void => {
     readline.question("> ", (input) => {
       if (input.toLowerCase() === "exit") {
         readline.close();

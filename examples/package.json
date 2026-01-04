@@ -11,9 +11,11 @@
     "@grounds/core": "workspace:*",
     "@grounds/schema": "workspace:*",
     "@grounds/stream": "workspace:*",
-    "luxon": "^3.5.0"
+    "luxon": "^3.5.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/luxon": "^3.4.2"
+    "@types/luxon": "^3.4.2",
+    "@types/ws": "^8.18.1"
   }
 }
