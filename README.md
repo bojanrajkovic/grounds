@@ -133,10 +133,11 @@ pnpm exec tsx examples/schema/using-codecs.ts
 # - encode-collections.ts - Encoding arrays and maps
 
 # Available schema examples:
-# - defining-structs.ts  - Defining struct schemas with RStruct and field()
-# - defining-enums.ts    - Defining enum schemas with REnum and variant()
-# - optional-fields.ts   - Optional fields with ROptional and null handling
-# - using-codecs.ts      - Creating and using codecs for encode/decode
+# - defining-structs.ts     - Defining struct schemas with RStruct and field()
+# - defining-enums.ts       - Defining enum schemas with REnum and variant()
+# - discriminated-enums.ts  - Using enums with discriminant fields (sensor data)
+# - optional-fields.ts      - Optional fields with ROptional and null handling
+# - using-codecs.ts         - Creating and using codecs for encode/decode
 ```
 
 ## Documentation
