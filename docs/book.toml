@@ -6,12 +6,11 @@ language = "en"
 [build]
 build-dir = "book"
 
-# Validator preprocessor configuration
-# Disabled until Phase 7 when examples are ready
-# [preprocessor.validator]
-# command = "mdbook-validator"
-#
-# [preprocessor.validator.validators.typescript]
-# # IMPORTANT: Keep container version in sync with mise.toml node version
-# container = "node:24"
-# script = "validators/validate-typescript.sh"
+[preprocessor.validator]
+command = "mdbook-validator"
+
+[preprocessor.validator.validators.typescript]
+# Custom container with @grounds/* packages pre-installed
+# Build with: ./docs/build-validator.sh
+container = "grounds-example-validator:latest"
+script = "validators/validate-typescript.sh"
