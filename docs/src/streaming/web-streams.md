@@ -56,4 +56,6 @@ Web Streams are supported in:
 
 ## Next Steps
 
+For type-safe streaming with schemas, see [Schema with Web Streams](./schema-web-streams.md).
+
 See the [Reference](../reference/type-codes.md) section for wire format details.

@@ -56,3 +56,5 @@ Each yielded item is a `Result`, allowing per-item error handling:
 ## Next Steps
 
 Learn about [Web Streams](./web-streams.md) for the WHATWG Streams API.
+
+For type-safe streaming with schemas, see [Schema with Async Generators](./schema-async-generators.md).
