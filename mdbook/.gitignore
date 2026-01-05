@@ -1,2 +1,3 @@
-# Temporary package tarballs for validator build
+# Temporary build artifacts for validator
 packages/
+examples-package.json

@@ -24,12 +24,16 @@ for pkg in core schema stream; do
     pnpm pack --pack-destination "$SCRIPT_DIR/packages" --silent >/dev/null
 done
 
+# Copy examples package.json for Dockerfile to use
+cp "$ROOT_DIR/examples/package.json" "$SCRIPT_DIR/examples-package.json"
+
 echo "Building Docker image..."
 cd "$SCRIPT_DIR"
 docker build -q -t grounds-example-validator:latest . 2>&1 >/dev/null
 
 echo "Cleaning up..."
 rm -rf "$SCRIPT_DIR/packages"
+rm -f "$SCRIPT_DIR/examples-package.json"
 
 echo "Validator image built: grounds-example-validator:latest"
 echo
