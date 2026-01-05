@@ -77,6 +77,59 @@ pnpm docs:serve            # Serve documentation locally
 pnpm --filter @grounds/core build  # Build specific package
 ```
 
+## Documentation
+
+### Building Documentation
+
+```bash
+pnpm docs:build          # Build validator container + mdbook docs
+pnpm docs:build-validator # Build only the validator container
+pnpm docs:serve          # Serve docs locally (no validation)
+```
+
+### Documentation Structure
+
+- `docs/src/` - mdBook source files
+- `docs/book/` - Generated output (gitignored)
+- `docs/validators/` - Validation scripts for examples
+- `examples/` - Runnable example files, organized by package
+
+### Example Validation
+
+Examples are validated during doc build using mdbook-validator:
+- Examples run in a Docker container (`grounds-example-validator`)
+- Container includes pre-built @grounds/* packages
+- Build fails if any validated example throws an error
+- Mark examples for validation with `validator=typescript` on the code fence
+
+### Version Coupling
+
+**CRITICAL:** These versions must stay in sync:
+
+| Location | What | Must Match |
+|----------|------|------------|
+| `mise.toml` | `node = "24"` | Container base image |
+| `docs/Dockerfile` | `FROM node:24-slim` | mise.toml node version |
+
+When upgrading Node:
+1. Update `node` version in `mise.toml`
+2. Update `FROM node:XX-slim` in `docs/Dockerfile`
+3. Rebuild validator: `pnpm docs:build-validator`
+
+### Adding New Examples
+
+1. Create example file in `examples/<package>/<name>.ts`
+2. Add `// pattern: Imperative Shell` comment at top
+3. Use idiomatic neverthrow patterns (`.match()`, `.andThen()`, `.map()`)
+4. Test locally: `pnpm exec tsx examples/<package>/<name>.ts`
+5. Include in docs with:
+   ````markdown
+   ```typescript validator=typescript
+   {{#include ../../../examples/<package>/<name>.ts}}
+   ```
+   ````
+6. Build to validate: `pnpm docs:build`
+
 ## Code Patterns
 
 ### File Classification (MANDATORY)
