@@ -32,3 +32,4 @@ echo "Cleaning up..."
 rm -rf "$SCRIPT_DIR/packages"
 
 echo "Validator image built: grounds-example-validator:latest"
+echo
