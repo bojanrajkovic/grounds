@@ -7,7 +7,7 @@ Stream encode and decode with async generators.
 Use `encodeIterable` and `decodeIterable` for streaming:
 
 ```typescript validator=typescript
-{{#include ../../../examples/stream/async-generators.ts}}
+{{#include ../../examples/stream/async-generators.ts}}
 ```
 
 ## encodeIterable

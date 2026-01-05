@@ -7,7 +7,7 @@ Define tagged unions with `REnum` and `variant()`.
 Use `REnum` to define a schema with named variants:
 
 ```typescript validator=typescript
-{{#include ../../../examples/schema/defining-enums.ts}}
+{{#include ../../examples/schema/defining-enums.ts}}
 ```
 
 ## Variant IDs

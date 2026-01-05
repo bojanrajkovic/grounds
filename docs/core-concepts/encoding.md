@@ -7,7 +7,7 @@ The core package provides low-level encoding for all Relish types.
 Encode a value using `.match()` to handle the result:
 
 ```typescript validator=typescript
-{{#include ../../../examples/core/encode-match.ts}}
+{{#include ../../examples/core/encode-match.ts}}
 ```
 
 ## Transforming Results
@@ -15,7 +15,7 @@ Encode a value using `.match()` to handle the result:
 Use `.map()` to transform successful results without unwrapping:
 
 ```typescript validator=typescript
-{{#include ../../../examples/core/encode-transform.ts}}
+{{#include ../../examples/core/encode-transform.ts}}
 ```
 
 ## Collections
@@ -23,7 +23,7 @@ Use `.map()` to transform successful results without unwrapping:
 Encode arrays and maps:
 
 ```typescript validator=typescript
-{{#include ../../../examples/core/encode-collections.ts}}
+{{#include ../../examples/core/encode-collections.ts}}
 ```
 
 ## Tagged Values

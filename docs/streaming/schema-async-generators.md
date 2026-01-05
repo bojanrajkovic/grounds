@@ -7,7 +7,7 @@ Stream encode and decode with type-safe schemas using async generators.
 Use `createCodec` for schema-aware encoding and decoding:
 
 ```typescript validator=typescript
-{{#include ../../../examples/stream/schema-async-generators.ts}}
+{{#include ../../examples/stream/schema-async-generators.ts}}
 ```
 
 ## Creating a Codec

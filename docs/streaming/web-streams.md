@@ -7,7 +7,7 @@ Use the WHATWG Streams API for encode/decode pipelines.
 Use `createEncoderStream` and `createDecoderStream`:
 
 ```typescript validator=typescript
-{{#include ../../../examples/stream/web-streams.ts}}
+{{#include ../../examples/stream/web-streams.ts}}
 ```
 
 ## createEncoderStream

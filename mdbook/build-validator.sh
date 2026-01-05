@@ -11,26 +11,24 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-echo "=== Building packages ==="
+echo "Building packages..."
 cd "$ROOT_DIR"
-pnpm build
+pnpm build >/dev/null
 
-echo "=== Packing packages ==="
+echo "Packing packages..."
 mkdir -p "$SCRIPT_DIR/packages"
 
 # Pack each publishable package
 for pkg in core schema stream; do
-    echo "Packing @grounds/$pkg..."
     cd "$ROOT_DIR/packages/$pkg"
-    npm pack --pack-destination "$SCRIPT_DIR/packages"
+    pnpm pack --pack-destination "$SCRIPT_DIR/packages" --silent >/dev/null
 done
 
-echo "=== Building Docker image ==="
+echo "Building Docker image..."
 cd "$SCRIPT_DIR"
-docker build -t grounds-example-validator:latest .
+docker build -q -t grounds-example-validator:latest . 2>&1 >/dev/null
 
-echo "=== Cleaning up ==="
+echo "Cleaning up..."
 rm -rf "$SCRIPT_DIR/packages"
 
-echo "=== Done ==="
 echo "Validator image built: grounds-example-validator:latest"

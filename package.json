@@ -8,9 +8,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings",
-    "docs:build-validator": "./docs/build-validator.sh",
-    "docs:build": "pnpm docs:build-validator && mdbook build docs",
-    "docs:serve": "mdbook serve docs"
+    "docs:build-validator": "./mdbook/build-validator.sh",
+    "docs:build": "pnpm docs:build-validator && mdbook build mdbook",
+    "docs:serve": "mdbook serve mdbook"
   },
   "devDependencies": {
     "@tsconfig/strictest": "^2.0.5",

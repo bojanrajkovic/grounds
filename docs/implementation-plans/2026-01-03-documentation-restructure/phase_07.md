@@ -406,7 +406,7 @@ For each file, change code fences from:
 
 ````markdown
 ```typescript
-{{#include ../../../examples/core/encode-match.ts}}
+{{#include ../../examples/core/encode-match.ts}}
 ```
 ````
 
@@ -414,7 +414,7 @@ To:
 
 ````markdown
 ```typescript validator=typescript
-{{#include ../../../examples/core/encode-match.ts}}
+{{#include ../../examples/core/encode-match.ts}}
 ```
 ````
 

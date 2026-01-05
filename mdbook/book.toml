@@ -2,15 +2,15 @@
 title = "Grounds"
 authors = ["Bojan Rajkovic"]
 language = "en"
+src = "../docs"
 
 [build]
-build-dir = "book"
+build-dir = "../docs/book"
 
 [preprocessor.validator]
 command = "mdbook-validator"
 
 [preprocessor.validator.validators.typescript]
-# Custom container with @grounds/* packages pre-installed
-# Build with: ./docs/build-validator.sh
-container = "grounds-example-validator:latest"
+container = "grounds-example-validator"
 script = "validators/validate-typescript.sh"
+exec_command = "/example/validate-in-container.sh"
