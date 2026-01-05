@@ -10,17 +10,8 @@ WORKDIR /validator
 # These are created by `pnpm pack` during the build process
 COPY packages/*.tgz ./packages/
 
-# Copy and adapt examples package.json
-# Remove @grounds/* workspace deps (we'll install from tarballs) and add tsx
-COPY examples-package.json ./package.json
-RUN node -e "const pkg = require('./package.json'); \
-  pkg.name = 'validator'; \
-  delete pkg.devDependencies; \
-  delete pkg.dependencies['@grounds/core']; \
-  delete pkg.dependencies['@grounds/schema']; \
-  delete pkg.dependencies['@grounds/stream']; \
-  pkg.dependencies.tsx = '^4.21.0'; \
-  require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+# Copy pre-processed package.json (created from examples/package.json by build script)
+COPY validator-package.json ./package.json
 
 # Install dependencies
 RUN npm install

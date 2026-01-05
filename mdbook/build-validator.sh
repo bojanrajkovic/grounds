@@ -24,8 +24,17 @@ for pkg in core schema stream; do
     pnpm pack --pack-destination "$SCRIPT_DIR/packages" --silent >/dev/null
 done
 
-# Copy examples package.json for Dockerfile to use
-cp "$ROOT_DIR/examples/package.json" "$SCRIPT_DIR/examples-package.json"
+# Create validator package.json from examples/package.json
+# Remove @grounds/* workspace deps (installed from tarballs) and add tsx
+jq '{
+  name: "validator",
+  type: .type,
+  dependencies: (
+    .dependencies
+    | del(.["@grounds/core"], .["@grounds/schema"], .["@grounds/stream"])
+    | . + {"tsx": "^4.21.0"}
+  )
+}' "$ROOT_DIR/examples/package.json" > "$SCRIPT_DIR/validator-package.json"
 
 echo "Building Docker image..."
 cd "$SCRIPT_DIR"
@@ -33,7 +42,7 @@ docker build -q -t grounds-example-validator:latest . 2>&1 >/dev/null
 
 echo "Cleaning up..."
 rm -rf "$SCRIPT_DIR/packages"
-rm -f "$SCRIPT_DIR/examples-package.json"
+rm -f "$SCRIPT_DIR/validator-package.json"
 
 echo "Validator image built: grounds-example-validator:latest"
 echo
