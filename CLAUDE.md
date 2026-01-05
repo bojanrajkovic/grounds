@@ -89,9 +89,10 @@ pnpm docs:serve          # Serve docs locally (no validation)
 
 ### Documentation Structure
 
-- `docs/src/` - mdBook source files
+- `docs/` - mdBook content (markdown files, SUMMARY.md)
 - `docs/book/` - Generated output (gitignored)
-- `docs/validators/` - Validation scripts for examples
+- `mdbook/` - mdBook configuration (book.toml, Dockerfile)
+- `mdbook/validators/` - Validation scripts for examples
 - `examples/` - Runnable example files, organized by package
 
 ### Example Validation
@@ -109,26 +110,25 @@ Examples are validated during doc build using mdbook-validator:
 | Location | What | Must Match |
 |----------|------|------------|
 | `mise.toml` | `node = "24"` | Container base image |
-| `docs/Dockerfile` | `FROM node:24-slim` | mise.toml node version |
+| `mdbook/Dockerfile` | `FROM node:24-slim` | mise.toml node version |
 
 When upgrading Node:
 1. Update `node` version in `mise.toml`
-2. Update `FROM node:XX-slim` in `docs/Dockerfile`
+2. Update `FROM node:XX-slim` in `mdbook/Dockerfile`
 3. Rebuild validator: `pnpm docs:build-validator`
 
 ### Adding New Examples
 
 1. Create example file in `examples/<package>/<name>.ts`
-2. Add `// pattern: Imperative Shell` comment at top
-3. Use idiomatic neverthrow patterns (`.match()`, `.andThen()`, `.map()`)
-4. Test locally: `pnpm exec tsx examples/<package>/<name>.ts`
-5. Include in docs with:
+2. Use idiomatic neverthrow patterns (`.match()`, `.andThen()`, `.map()`)
+3. Test locally: `pnpm exec tsx examples/<package>/<name>.ts`
+4. Include in docs with:
    ````markdown
    ```typescript validator=typescript
    {{#include ../../../examples/<package>/<name>.ts}}
    ```
    ````
-6. Build to validate: `pnpm docs:build`
+5. Build to validate: `pnpm docs:build`
 
 ## Code Patterns
 
