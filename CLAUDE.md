@@ -13,6 +13,8 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 - `packages/stream` - Streaming utilities (@grounds/stream)
 - `packages/test-utils` - Shared test assertion helpers (@grounds/test-utils, private)
 - `examples/` - Runnable usage examples organized by package (e.g., `examples/core/`)
+- `docs/` - mdBook documentation content (markdown files)
+- `mdbook/` - mdBook build configuration and validators
 
 ## Versioning
 
@@ -65,12 +67,13 @@ Branches should be prefixed with username and conventional commit type:
 ## Commands
 
 ```bash
-pnpm install          # Install dependencies
-pnpm build            # Build all packages
-pnpm test             # Run all tests
-pnpm lint             # Run oxlint
-pnpm docs:build       # Build documentation (mdBook)
-pnpm docs:serve       # Serve documentation locally
+pnpm install               # Install dependencies
+pnpm build                 # Build all packages
+pnpm test                  # Run all tests
+pnpm lint                  # Run oxlint
+pnpm docs:build-validator  # Build Docker container for doc validation
+pnpm docs:build            # Build documentation (mdBook)
+pnpm docs:serve            # Serve documentation locally
 pnpm --filter @grounds/core build  # Build specific package
 ```
 

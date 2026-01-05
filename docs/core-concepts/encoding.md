@@ -6,24 +6,24 @@ The core package provides low-level encoding for all Relish types.
 
 Encode a value using `.match()` to handle the result:
 
-```typescript
-{{#include ../../../examples/core/encode-match.ts}}
+```typescript validator=typescript
+{{#include ../../examples/core/encode-match.ts}}
 ```
 
 ## Transforming Results
 
 Use `.map()` to transform successful results without unwrapping:
 
-```typescript
-{{#include ../../../examples/core/encode-transform.ts}}
+```typescript validator=typescript
+{{#include ../../examples/core/encode-transform.ts}}
 ```
 
 ## Collections
 
 Encode arrays and maps:
 
-```typescript
-{{#include ../../../examples/core/encode-collections.ts}}
+```typescript validator=typescript
+{{#include ../../examples/core/encode-collections.ts}}
 ```
 
 ## Tagged Values

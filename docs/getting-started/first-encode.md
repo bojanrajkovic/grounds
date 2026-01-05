@@ -6,8 +6,8 @@ Let's encode your first value using the low-level core API.
 
 The `encode` function takes a tagged value and returns a `Result`:
 
-```typescript
-{{#include ../../../examples/core/encode-match.ts}}
+```typescript validator=typescript
+{{#include ../../examples/core/encode-match.ts}}
 ```
 
 Run this example:

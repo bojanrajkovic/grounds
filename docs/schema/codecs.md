@@ -6,8 +6,8 @@ Create type-safe encoders and decoders with `createCodec`.
 
 Use `createCodec` to create an encoder/decoder pair:
 
-```typescript
-{{#include ../../../examples/schema/using-codecs.ts}}
+```typescript validator=typescript
+{{#include ../../examples/schema/using-codecs.ts}}
 ```
 
 ## Codec API

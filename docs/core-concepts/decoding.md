@@ -6,8 +6,8 @@ Decode bytes back to typed values.
 
 Chain encoding and decoding operations:
 
-```typescript
-{{#include ../../../examples/core/encode-roundtrip.ts}}
+```typescript validator=typescript
+{{#include ../../examples/core/encode-roundtrip.ts}}
 ```
 
 The `.andThen()` method chains fallible operations. If encoding fails, decoding is skipped and the error propagates.

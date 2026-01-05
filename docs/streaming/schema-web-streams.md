@@ -6,8 +6,8 @@ Use the WHATWG Streams API with type-safe schema encoding and decoding.
 
 Use `createSchemaEncoderStream` and `createSchemaDecoderStream`:
 
-```typescript
-{{#include ../../../examples/stream/schema-web-streams.ts}}
+```typescript validator=typescript
+{{#include ../../examples/stream/schema-web-streams.ts}}
 ```
 
 ## createSchemaEncoderStream

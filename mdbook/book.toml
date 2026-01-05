@@ -1,0 +1,16 @@
+[book]
+title = "Grounds"
+authors = ["Bojan Rajkovic"]
+language = "en"
+src = "../docs"
+
+[build]
+build-dir = "../docs/book"
+
+[preprocessor.validator]
+command = "mdbook-validator"
+
+[preprocessor.validator.validators.typescript]
+container = "grounds-example-validator"
+script = "validators/validate-typescript.sh"
+exec_command = "/example/validate-in-container.sh"
