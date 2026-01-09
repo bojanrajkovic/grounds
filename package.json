@@ -10,10 +10,15 @@
     "lint": "oxlint --deny-warnings",
     "docs:build-validator": "./mdbook/build-validator.sh",
     "docs:build": "pnpm docs:build-validator && mdbook build mdbook",
-    "docs:serve": "mdbook serve mdbook"
+    "docs:serve": "mdbook serve mdbook",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
     "@tsconfig/strictest": "^2.0.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "oxlint": "^0.16.6",
     "tsx": "^4.21.0",
     "typescript": "^5.7.2",
