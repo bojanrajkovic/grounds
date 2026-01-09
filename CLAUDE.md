@@ -1,6 +1,6 @@
 # Grounds - Relish Serialization in TypeScript
 
-Last verified: 2026-01-04
+Last verified: 2026-01-09
 
 ## Project Overview
 
@@ -39,6 +39,20 @@ Branches should be prefixed with username and conventional commit type:
 - **AI agents:** MUST always work in worktrees (`.worktrees/<branch-name>`)
 - **Human developers:** MAY use worktrees if they choose to
 
+### Git Hooks (Enforced)
+
+The repository uses Husky git hooks that enforce quality gates:
+
+| Hook | Trigger | What It Does |
+|------|---------|--------------|
+| pre-commit | `git commit` | Runs oxlint + tsc on staged .ts/.tsx files |
+| commit-msg | `git commit` | Validates conventional commit format |
+| pre-push | `git push` | Runs full test suite |
+
+**These hooks cannot be bypassed in normal workflow.** If a hook fails:
+- Fix the issue before proceeding
+- Do not use `--no-verify` unless explicitly instructed
+
 ### Feature Branch Workflow
 
 1. **Create feature branch** named `<user>/<type>/<feature-name>`
@@ -50,14 +64,20 @@ Branches should be prefixed with username and conventional commit type:
    - When starting a new phase, check if previous phase's PR has been merged
    - If not merged, refuse to start and notify the user
 
+### Commit Message Format
+
+**Conventional commits are enforced by the commit-msg hook.**
+
+- Format: `<type>(<scope>): <description>`
+- Example: `feat(schema): add TypeBox-based schema types`
+- Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
+- Scope: package name without @grounds/ prefix (e.g., `core`, `schema`, `stream`, `test-utils`)
+
+Commits that don't follow this format will be rejected by the hook.
+
 ### Pull Request Requirements
 
-- **MANDATORY: Use conventional commit format for PR title**
-  - Format: `<type>(<scope>): <description>`
-  - Example: `feat(schema): add TypeBox-based schema types`
-  - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
-  - Scope: package name without @grounds/ prefix (e.g., `core`, `schema`, `stream`)
-  - **This is NOT optional** - all PRs must follow this format
+- **PR title must use conventional commit format** (same as commit messages)
 - Clear description of changes and their purpose
 - Links to relevant documentation or ADRs
 - Test results and verification steps
