@@ -1,0 +1,6 @@
+{
+  "*.{ts,tsx}": [
+    "oxlint --deny-warnings",
+    "tsc --noEmit --skipLibCheck"
+  ]
+}
