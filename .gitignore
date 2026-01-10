@@ -33,3 +33,6 @@ docs/book/
 
 # Implementation plans (execution scaffolding)
 docs/implementation-plans/
+
+# OIDC configuration tracking (local only)
+.oidc-config-status.txt
