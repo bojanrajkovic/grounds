@@ -36,3 +36,6 @@ docs/implementation-plans/
 
 # OIDC configuration tracking (local only)
 .oidc-config-status.txt
+
+# Alpha workflow testing status (local only)
+.alpha-workflow-status.txt
