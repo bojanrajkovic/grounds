@@ -32,6 +32,97 @@ Branches should be prefixed with username and conventional commit type:
 - Example: `brajkovic/feat/encoder-implementation`
 - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
 
+## Changesets & Release Workflow
+
+### Conventional Commits Required
+
+All commits MUST follow conventional commit format (enforced via hooks and PR title validation):
+
+| Commit Type | Version Bump | Packages Affected |
+|-------------|--------------|-------------------|
+| `feat(core):` | Minor | core, schema, stream (all dependents) |
+| `feat(schema):` | Minor | schema, stream (stream depends on schema) |
+| `feat(stream):` | Minor | stream only |
+| `fix(core):` | Patch | core, schema, stream (all dependents) |
+| `fix(schema):` | Patch | schema, stream |
+| `fix(stream):` | Patch | stream only |
+| `feat(core)!:` or `BREAKING CHANGE:` | Major | core, schema, stream |
+| `docs:`, `chore:`, `test:`, `ci:` | None | No version bump |
+
+**Scope determines affected packages.** Breaking changes (`!` or `BREAKING CHANGE:`) trigger major bumps. During 0.x phase, breaking changes may occur in minor versions.
+
+### Linked Versioning
+
+Packages use **linked versioning** via Changesets:
+- Changes to `@grounds/core` bump core, schema, and stream
+- Changes to `@grounds/schema` bump schema and stream
+- Changes to `@grounds/stream` bump stream only
+
+Packages can have different versions (e.g., core@1.2.0, schema@1.1.0, stream@1.0.5) but dependencies stay compatible.
+
+### Alpha Publishing
+
+**Automatic alpha packages** publish to npm after CI passes on `feat/*` and `fix/*` branches:
+
+- **Version format:** `{version}-{branch-name}-{shortSha}`
+- **Example:** `0.2.0-streaming-api-abc1234`
+- **Dist-tag:** `@alpha`
+- **Install:** `pnpm add @grounds/core@alpha`
+
+Alpha packages let you test PR changes before merging:
+
+```bash
+# Install specific alpha version
+pnpm add @grounds/core@0.2.0-my-feature-abc1234
+
+# Or always use latest alpha
+pnpm add @grounds/core@alpha
+```
+
+**All three packages** (@grounds/core, @grounds/schema, @grounds/stream) publish together with the same alpha version.
+
+### Production Releases
+
+**Automated workflow:**
+
+1. **Merge PR to main** (squash-and-merge, PR title is commit message)
+2. **Changesets auto-generates** changeset files from conventional commit
+3. **"Version Packages" PR** created automatically with:
+   - Updated package.json versions
+   - Updated CHANGELOG.md entries
+   - Linked version bumps for dependent packages
+4. **Review Version Packages PR** to verify versions and changelog
+5. **Merge Version Packages PR** → packages publish to npm with `@latest` tag
+
+**No manual changeset creation needed** - conventional commits drive everything.
+
+### Manual Changeset Creation (Optional)
+
+If you need to create a changeset manually (rare):
+
+```bash
+pnpm run changeset
+```
+
+Follow prompts to select packages and version bump type.
+
+### Installing Published Packages
+
+```bash
+# Latest stable release
+pnpm add @grounds/core
+
+# Specific version
+pnpm add @grounds/core@0.1.0
+
+# Latest alpha (pre-release from PR)
+pnpm add @grounds/core@alpha
+```
+
+### Version Evolution
+
+All packages start at **0.0.1** (pre-1.0 unstable API). Breaking changes permitted in minor versions during 0.x phase per semver. Once API stabilizes, move to 1.0.0 with strict semver enforcement.
+
 ## Development Workflow
 
 ### Worktree Usage
