@@ -1,0 +1,33 @@
+name: PR Title Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            docs
+            chore
+            refactor
+            test
+            ci
+          requireScope: false
+          subjectPattern: ^[a-z].+$
+          subjectPatternError: |
+            The subject "{subject}" found in the PR title "{title}"
+            didn't match the configured pattern. Please ensure that the subject
+            starts with a lowercase letter.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
