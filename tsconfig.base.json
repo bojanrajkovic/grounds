@@ -12,6 +12,8 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
-    "noPropertyAccessFromIndexSignature": true
+    "noPropertyAccessFromIndexSignature": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true
   }
 }

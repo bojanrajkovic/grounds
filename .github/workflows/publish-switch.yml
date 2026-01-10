@@ -1,0 +1,29 @@
+name: Publish Packages
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-alpha:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (startsWith(github.event.workflow_run.head_branch, 'feat/') || startsWith(github.event.workflow_run.head_branch, 'fix/'))
+    uses: ./.github/workflows/publish-alpha.yml
+    permissions:
+      id-token: write
+      contents: read
+    secrets: inherit
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/publish-release.yml
+    permissions:
+      id-token: write
+      contents: write
+    secrets: inherit

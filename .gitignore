@@ -33,3 +33,12 @@ docs/book/
 
 # Implementation plans (execution scaffolding)
 docs/implementation-plans/
+
+# OIDC configuration tracking (local only)
+.oidc-config-status.txt
+
+# Alpha workflow testing status (local only)
+.alpha-workflow-status.txt
+
+# Release workflow testing status (local only)
+.release-workflow-status.txt

@@ -1,0 +1,55 @@
+name: Publish Alpha Packages
+
+on:
+  workflow_call:
+
+jobs:
+  publish-alpha:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Extract branch name and commit SHA
+        run: |
+          BRANCH_NAME="${{ github.event.workflow_run.head_branch }}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/^feat\///' | sed 's/^fix\///' | sed 's/\//-/g')
+          SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
+          echo "SNAPSHOT_TAG=${SANITIZED_BRANCH}-${SHORT_SHA}" >> $GITHUB_ENV
+
+      - name: Create snapshot version
+        run: pnpm exec changeset version --snapshot ${{ env.SNAPSHOT_TAG }}
+
+      - name: Publish alpha packages
+        run: pnpm exec changeset publish --tag alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
