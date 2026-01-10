@@ -39,3 +39,6 @@ docs/implementation-plans/
 
 # Alpha workflow testing status (local only)
 .alpha-workflow-status.txt
+
+# Release workflow testing status (local only)
+.release-workflow-status.txt
