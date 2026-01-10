@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
+    "changeset": "changeset",
+    "changeset-version": "changeset version",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings",
     "docs:build-validator": "./mdbook/build-validator.sh",
     "docs:build": "pnpm docs:build-validator && mdbook build mdbook",
     "docs:serve": "mdbook serve mdbook",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@bob-obringer/conventional-changesets": "^0.1.0",
