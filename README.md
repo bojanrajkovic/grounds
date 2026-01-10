@@ -10,16 +10,27 @@ TypeScript implementation of [Relish](https://github.com/alex/relish), a compact
 
 ## Installation
 
+Install from npm:
+
 ```bash
-# Core package only
-npm install @grounds/core
+# Latest stable release (recommended)
+npm install @grounds/core @grounds/schema @grounds/stream
 
-# With schema support (recommended)
-npm install @grounds/schema @sinclair/typebox luxon
-
-# With streaming
-npm install @grounds/stream
+# Or with pnpm
+pnpm add @grounds/core @grounds/schema @grounds/stream
 ```
+
+**Alpha packages** (pre-release from pull requests):
+
+```bash
+# Latest alpha version (updates with each PR)
+pnpm add @grounds/core@alpha @grounds/schema@alpha @grounds/stream@alpha
+
+# Specific alpha version (from a particular PR)
+pnpm add @grounds/core@0.1.0-my-feature-abc1234
+```
+
+Alpha packages publish automatically when CI passes on `feat/*` or `fix/*` branches. Use them to test unreleased features before they merge to main.
 
 ## Quick start
 
