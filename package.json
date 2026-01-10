@@ -17,9 +17,11 @@
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "@bob-obringer/conventional-changesets": "^0.1.0",
     "@changesets/cli": "^2.27.0",
     "@commitlint/cli": "^20.3.1",
+    "@types/conventional-commits-parser": "^5.0.2",
+    "@types/node": "^20.10.5",
+    "conventional-commits-parser": "^5.0.0",
     "@commitlint/config-conventional": "^20.3.1",
     "@tsconfig/strictest": "^2.0.5",
     "husky": "^9.1.7",
