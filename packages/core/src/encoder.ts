@@ -85,6 +85,11 @@ function toValidationResult(
  * are captured in the Result and never thrown. The signature is `never -> throws`
  * (uses error handling at callsite, not exceptions).
  *
+ * **Defense-in-depth validation**: The encoder re-validates integer ranges even
+ * if a value somehow bypasses constructor validation. This ensures wire format
+ * correctness by catching non-integer floats (e.g., 3.14) and out-of-range values
+ * before they are encoded.
+ *
  * For encoding composite types, ensure:
  * - Struct fields are in ascending field ID order (0-127)
  * - Array/Map element types match the type specification
@@ -129,6 +134,10 @@ export function encode(value: RelishValue): Result<Uint8Array, EncodeError> {
  * accommodate larger values. The buffer is NOT cleared between calls; only the
  * position is reset. This design prioritizes performance over memory footprint
  * for the common case of encoding multiple similar-sized values.
+ *
+ * **Integer validation**: The encoder performs defense-in-depth validation on
+ * all integer values, re-checking ranges and rejecting non-integer floats even
+ * if value constructors are somehow bypassed. This ensures wire format integrity.
  *
  * Initialize with a custom size for better memory efficiency if encoding many
  * small values: `new Encoder(256)` instead of the default 1024 bytes.

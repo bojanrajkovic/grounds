@@ -68,6 +68,7 @@ function throwValidationError(typeName: string, error: IntegerValidationError): 
 
 /**
  * Singleton null value.
+ * @group Value Constructors
  *
  * @example
  * ```typescript

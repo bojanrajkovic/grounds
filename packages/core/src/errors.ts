@@ -62,12 +62,36 @@ export class EncodeError extends Error {
     return new EncodeError(`unknown enum variant: ${variantName}`);
   }
 
+  /**
+   * Error for integer values that exceed type-specific bounds.
+   *
+   * This error is part of encoder defense-in-depth validation: even if a value
+   * somehow bypasses value constructor validation, the encoder re-validates integer
+   * ranges before writing bytes. This ensures wire format correctness.
+   *
+   * @param typeName - The integer type name (e.g., "u8", "i64")
+   * @param value - The out-of-range value that failed validation
+   * @param min - The minimum valid value for the type
+   * @param max - The maximum valid value for the type
+   * @returns EncodeError describing the range violation
+   */
   static integerOutOfRange(typeName: string, value: number | bigint, min: number | bigint, max: number | bigint): EncodeError {
     return new EncodeError(
       `${typeName} value ${value} is out of range (${min} to ${max})`
     );
   }
 
+  /**
+   * Error for non-integer number values in integer types.
+   *
+   * This error is part of encoder defense-in-depth validation: the encoder validates
+   * that floating-point numbers like 3.14 are rejected for integer type codes.
+   * This ensures only whole numbers are encoded in integer fields.
+   *
+   * @param typeName - The integer type name (e.g., "u32", "i64")
+   * @param value - The non-integer number that failed validation
+   * @returns EncodeError describing the non-integer value
+   */
   static notAnInteger(typeName: string, value: number): EncodeError {
     return new EncodeError(
       `${typeName} value must be an integer, got ${value}`

@@ -67,16 +67,16 @@ decoded.match(
 ### Low-level API
 
 ```typescript
-import { encode, decode, TypeCode } from "@grounds/core";
+import { encode, decode, String_ } from "@grounds/core";
 
 // Encode a value
-const encoded = encode({ type: TypeCode.String, value: "hello" });
+const encoded = encode(String_("hello"));
 
 // Decode bytes
 const decoded = encoded.andThen((bytes) => decode(bytes));
 
 decoded.match(
-  (value) => console.log(value), // { type: TypeCode.String, value: "hello" }
+  (value) => console.log(value), // "hello"
   (err) => console.error("Failed:", err)
 );
 ```
