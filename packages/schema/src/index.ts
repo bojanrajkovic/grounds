@@ -1,5 +1,99 @@
 // pattern: Functional Core
-// @grounds/schema - TypeBox integration for schema-driven serialization
+
+/**
+ * TypeBox-integrated schema system for type-safe Relish encoding and decoding.
+ *
+ * Provides schema constructors that combine TypeBox's runtime validation with
+ * Relish's binary wire format, enabling full type safety from schema definition
+ * through encoding and decoding.
+ *
+ * @module @grounds/schema
+ * @packageDocumentation
+ *
+ * @example
+ * Defining and using a schema:
+ * ```typescript
+ * import {
+ *   RStruct,
+ *   field,
+ *   RString,
+ *   RU32,
+ *   createCodec,
+ *   type Static
+ * } from '@grounds/schema';
+ *
+ * // Define schema
+ * const UserSchema = RStruct({
+ *   name: field(0, RString()),
+ *   age: field(1, RU32()),
+ *   email: field(2, RString())
+ * });
+ *
+ * // Infer TypeScript type
+ * type User = Static<typeof UserSchema>;
+ * // { name: string, age: number, email: string }
+ *
+ * // Create codec
+ * const codec = createCodec(UserSchema);
+ *
+ * // Type-safe encoding
+ * const user: User = {
+ *   name: 'Alice',
+ *   age: 25,
+ *   email: 'alice@example.com'
+ * };
+ *
+ * codec.encode(user).match(
+ *   (bytes) => {
+ *     // Roundtrip
+ *     codec.decode(bytes).match(
+ *       (decoded) => console.log(decoded.name), // Alice
+ *       (error) => console.error(error.code)
+ *     );
+ *   },
+ *   (error) => console.error(error.message)
+ * );
+ * ```
+ *
+ * @example
+ * Working with enums:
+ * ```typescript
+ * import { REnum, RStruct, variant, field, RString, RNull } from '@grounds/schema';
+ *
+ * const ResultSchema = REnum({
+ *   success: variant(0, RStruct({
+ *     data: field(0, RString())
+ *   })),
+ *   error: variant(1, RStruct({
+ *     message: field(0, RString())
+ *   }))
+ * });
+ *
+ * const codec = createCodec(ResultSchema);
+ *
+ * // Variant inferred automatically
+ * codec.encode({ success: { data: 'OK' } });
+ * codec.encode({ error: { message: 'Failed' } });
+ * ```
+ *
+ * @remarks
+ * This package bridges TypeBox's JSON Schema ecosystem with Relish's binary
+ * serialization. Key features:
+ *
+ * - **Full type inference**: Static<T> extracts TypeScript types from schemas
+ * - **Runtime validation**: TypeBox validates values during encoding
+ * - **Symbol metadata**: Schemas carry Relish type codes without property conflicts
+ * - **API symmetry**: toRelish and fromRelish both work with bytes (ADR 0001)
+ *
+ * For streaming encoding/decoding, use `@grounds/stream`. For low-level wire
+ * format operations without schemas, use `@grounds/core`.
+ *
+ * @see {@link createCodec} for creating type-safe codecs
+ * @see {@link toRelish} for schema-based encoding
+ * @see {@link fromRelish} for schema-based decoding
+ * @see {@link RStruct} for struct schemas
+ * @see {@link REnum} for enum schemas
+ */
 
 // Primitive types
 export {

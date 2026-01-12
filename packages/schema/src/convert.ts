@@ -303,40 +303,93 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
 }
 
 /**
- * Convert JavaScript value to Relish binary format.
+ * Converts a JavaScript value to Relish binary bytes using a schema.
  *
- * This makes the API symmetric with fromRelish:
- * - toRelish: JavaScript value → Relish bytes
- * - fromRelish: Relish bytes → JavaScript value
+ * Validates the value against the schema, converts to Relish wire format,
+ * and encodes to bytes in a single operation.
  *
- * Implementation: Converts the value to RelishValue, then encodes it to bytes.
+ * @param value - JavaScript value matching the schema type
+ * @param schema - Relish schema defining the value structure
+ * @returns Result containing encoded bytes, or EncodeError on failure
+ * @group Conversion Functions
  *
- * @param value - JavaScript value matching the schema
- * @param schema - The Relish schema
- * @returns Encoded binary data suitable for transmission or storage
+ * @example
+ * ```typescript
+ * import { toRelish, RStruct, field, RString, RU32 } from '@grounds/schema';
+ *
+ * const schema = RStruct({
+ *   name: field(0, RString()),
+ *   age: field(1, RU32())
+ * });
+ *
+ * toRelish({ name: 'Alice', age: 25 }, schema).match(
+ *   (bytes) => {
+ *     // bytes: Uint8Array ready for transmission or storage
+ *     console.log('Encoded:', bytes.length, 'bytes');
+ *   },
+ *   (error) => console.error('Encoding failed:', error.message)
+ * );
+ * ```
+ *
+ * @remarks
+ * This function provides true API symmetry with {@link fromRelish} per ADR 0001:
+ * - toRelish: JS value → bytes
+ * - fromRelish: bytes → JS value
+ *
+ * Both take/return the same format (bytes), making the API intuitive and
+ * composable with streaming operations.
+ *
+ * @see {@link fromRelish} for the inverse operation (bytes → value)
+ * @see {@link createCodec} for a wrapped API with type inference
  */
 export function toRelish(value: unknown, schema: TRelishSchema): Result<Uint8Array, EncodeError> {
   return _toRelishValue(value, schema).andThen(relishValue => encode(relishValue));
 }
 
 /**
- * Convert bytes to schema-aware typed values.
+ * Converts Relish binary bytes to a JavaScript value using a schema.
  *
- * This function makes the API symmetric with toRelish:
- * - toRelish: JavaScript value → Relish bytes
- * - fromRelish: Relish bytes → JavaScript value
+ * Decodes bytes from Relish wire format and converts to the schema's
+ * JavaScript type in a single operation.
  *
- * Implementation: Decodes bytes using the core Decoder, then converts
- * the raw DecodedValue to schema-aware types using internal conversion logic.
+ * @param bytes - Binary data in Relish wire format
+ * @param schema - Relish schema defining the expected structure
+ * @returns Result containing decoded value, or DecodeError on failure
+ * @group Conversion Functions
  *
- * WARNING: Conversion logic is duplicated in @grounds/stream for byte tracking.
- * If you change the conversion algorithm here, update _decodeValueToTyped in
- * schema-streams.ts with the same changes. This duplication is intentional
- * to keep packages self-contained (see ADR 0001).
+ * @example
+ * ```typescript
+ * import { fromRelish, RArray, RU32 } from '@grounds/schema';
  *
- * @param bytes - Raw Relish binary data
- * @param schema - The Relish schema
- * @returns Schema-aware typed value
+ * const schema = RArray(RU32());
+ * const bytes = new Uint8Array([...]); // from network or storage
+ *
+ * fromRelish<Array<number>>(bytes, schema).match(
+ *   (value) => {
+ *     // value: Array<number> ready to use
+ *     console.log('Decoded array:', value);
+ *   },
+ *   (error) => {
+ *     if (error.code === 'UNEXPECTED_EOF') {
+ *       console.error('Incomplete data');
+ *     }
+ *   }
+ * );
+ * ```
+ *
+ * @remarks
+ * This function provides true API symmetry with {@link toRelish} per ADR 0001:
+ * - toRelish: JS value → bytes
+ * - fromRelish: bytes → JS value
+ *
+ * The symmetry simplifies reasoning about the API and enables clean composition
+ * with streaming operations in `@grounds/stream`.
+ *
+ * Internally decodes to raw JavaScript values (not wrapped RelishValue), then
+ * validates against the schema to ensure type safety.
+ *
+ * @see {@link toRelish} for the inverse operation (value → bytes)
+ * @see {@link createCodec} for a wrapped API with type inference
  */
 export function fromRelish<T>(bytes: Uint8Array, schema: TRelishSchema): Result<T, DecodeError> {
   // Decode raw bytes to get the core DecodedValue

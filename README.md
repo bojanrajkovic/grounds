@@ -67,16 +67,16 @@ decoded.match(
 ### Low-level API
 
 ```typescript
-import { encode, decode, TypeCode } from "@grounds/core";
+import { encode, decode, String_ } from "@grounds/core";
 
 // Encode a value
-const encoded = encode({ type: TypeCode.String, value: "hello" });
+const encoded = encode(String_("hello"));
 
 // Decode bytes
 const decoded = encoded.andThen((bytes) => decode(bytes));
 
 decoded.match(
-  (value) => console.log(value), // { type: TypeCode.String, value: "hello" }
+  (value) => console.log(value), // "hello"
   (err) => console.error("Failed:", err)
 );
 ```
@@ -153,9 +153,13 @@ pnpm exec tsx examples/schema/using-codecs.ts
 
 ## Documentation
 
+- **[Getting Started Guide](./docs/getting-started/installation.md)** - Installation and first encode
+- **[API Reference](./docs/api/README.md)** - Complete API documentation for all packages
+- **[Examples](./examples)** - Runnable code examples
 - **Conceptual docs**: See `docs/` directory for design documentation
 - **Architecture decisions**: See `docs/adrs/` directory for architectural decision records
-- **API reference**: Auto-generated from TSDoc (coming soon)
+
+Full documentation is available at [bojanrajkovic.github.io/grounds](https://bojanrajkovic.github.io/grounds/).
 
 ## Project structure
 

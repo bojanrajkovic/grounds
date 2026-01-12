@@ -29,7 +29,7 @@ coverage/
 .claude/
 
 # mdBook build output
-docs/book/
+mdbook/book/
 
 # Implementation plans (execution scaffolding)
 docs/implementation-plans/
@@ -42,3 +42,4 @@ docs/implementation-plans/
 
 # Release workflow testing status (local only)
 .release-workflow-status.txt
+docs/api/

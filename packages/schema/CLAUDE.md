@@ -1,6 +1,6 @@
 # @grounds/schema
 
-Last verified: 2026-01-03
+Last verified: 2026-01-10
 
 ## Purpose
 

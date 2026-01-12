@@ -52,7 +52,51 @@ function toValidationResult(
 }
 
 /**
- * Encode a RelishValue to bytes.
+ * Encodes a Relish value to binary bytes in wire format.
+ *
+ * Converts a typed Relish value into its binary representation using the Relish
+ * wire format. Uses a reusable internal Encoder with a pre-allocated buffer
+ * for efficient encoding.
+ *
+ * @param value - The RelishValue to encode (discriminated union of all Relish types)
+ * @returns A Result containing the encoded bytes on success, or an EncodeError on failure
+ * @group Encoding
+ *
+ * @example
+ * ```typescript
+ * import { encode, U32, String_ } from '@grounds/core';
+ *
+ * // Encode a simple value
+ * const result = encode(U32(42));
+ * result.match(
+ *   (bytes) => console.log('Encoded:', Array.from(bytes)),
+ *   (error) => console.error('Failed:', error.message)
+ * );
+ *
+ * // Encode a string
+ * encode(String_('hello')).match(
+ *   (bytes) => console.log('String encoded to', bytes.length, 'bytes'),
+ *   (error) => console.error(error)
+ * );
+ * ```
+ *
+ * @remarks
+ * The function uses neverthrow's `Result` type for error handling. All errors
+ * are captured in the Result and never thrown. The signature is `never -> throws`
+ * (uses error handling at callsite, not exceptions).
+ *
+ * **Defense-in-depth validation**: The encoder re-validates integer ranges even
+ * if a value somehow bypasses constructor validation. This ensures wire format
+ * correctness by catching non-integer floats (e.g., 3.14) and out-of-range values
+ * before they are encoded.
+ *
+ * For encoding composite types, ensure:
+ * - Struct fields are in ascending field ID order (0-127)
+ * - Array/Map element types match the type specification
+ * - All values are readonly RelishValue objects
+ *
+ * @see {@link Encoder} for reusable encoding with performance tuning
+ * @see {@link decode} for the inverse operation (bytes to value)
  */
 export function encode(value: RelishValue): Result<Uint8Array, EncodeError> {
   const encoder = new Encoder();
@@ -60,8 +104,43 @@ export function encode(value: RelishValue): Result<Uint8Array, EncodeError> {
 }
 
 /**
- * Encoder class with pre-allocated buffer for performance.
- * Can be reused for multiple encode operations.
+ * Reusable binary encoder with pre-allocated buffer for high-performance encoding.
+ *
+ * The Encoder class provides stateful encoding with an internal buffer that grows
+ * dynamically as needed. Reusing a single Encoder instance avoids repeated buffer
+ * allocation overhead for batch encoding operations.
+ * @group Encoding
+ *
+ * @example
+ * ```typescript
+ * import { Encoder, U8, String_ } from '@grounds/core';
+ *
+ * // Create encoder once, reuse for multiple values
+ * const encoder = new Encoder();
+ *
+ * const val1 = encoder.encode(U8(42));
+ * const val2 = encoder.encode(String_('hello'));
+ * const val3 = encoder.encode(U8(255));
+ *
+ * // Each .encode() call resets the internal position and returns fresh bytes
+ * val1.match(
+ *   (bytes1) => console.log('First:', bytes1.length),
+ *   (error) => console.error(error)
+ * );
+ * ```
+ *
+ * @remarks
+ * The Encoder maintains a resizable internal buffer that grows when needed to
+ * accommodate larger values. The buffer is NOT cleared between calls; only the
+ * position is reset. This design prioritizes performance over memory footprint
+ * for the common case of encoding multiple similar-sized values.
+ *
+ * **Integer validation**: The encoder performs defense-in-depth validation on
+ * all integer values, re-checking ranges and rejecting non-integer floats even
+ * if value constructors are somehow bypassed. This ensures wire format integrity.
+ *
+ * Initialize with a custom size for better memory efficiency if encoding many
+ * small values: `new Encoder(256)` instead of the default 1024 bytes.
  */
 export class Encoder {
   private buffer: Uint8Array;
@@ -74,6 +153,20 @@ export class Encoder {
     this.position = 0;
   }
 
+  /**
+   * Encodes a single RelishValue to bytes.
+   *
+   * Resets the internal position and encodes the value, returning a slice of
+   * the internal buffer containing only the bytes needed for this value. Each
+   * call produces fresh bytes independent of previous calls.
+   *
+   * @param value - The RelishValue to encode
+   * @returns A Result containing the encoded bytes, or an EncodeError on failure
+   *
+   * @remarks
+   * The returned bytes are a fresh slice, not a view into the internal buffer.
+   * Safe to retain across multiple .encode() calls without risk of data corruption.
+   */
   encode(value: RelishValue): Result<Uint8Array, EncodeError> {
     this.position = 0;
     return this.encodeValue(value).map(() => this.getResult());

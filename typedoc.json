@@ -1,0 +1,37 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Grounds",
+  "entryPointStrategy": "expand",
+  "entryPoints": [
+    "packages/core/src/index.ts",
+    "packages/schema/src/index.ts",
+    "packages/stream/src/index.ts"
+  ],
+  "out": "docs/api",
+  "readme": "docs/API_README.md",
+  "disableSources": true,
+  "hideGenerator": true,
+  "skipErrorChecking": false,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "navigation": {
+    "includeCategories": false,
+    "includeGroups": true
+  },
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Function",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Variable",
+    "Enum"
+  ]
+}

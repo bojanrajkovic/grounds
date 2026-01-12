@@ -1,6 +1,6 @@
 # Grounds - Relish Serialization in TypeScript
 
-Last verified: 2026-01-09
+Last verified: 2026-01-10
 
 ## Project Overview
 
@@ -201,8 +201,9 @@ pnpm docs:serve          # Serve docs locally (no validation)
 ### Documentation Structure
 
 - `docs/` - mdBook content (markdown files, SUMMARY.md)
-- `docs/book/` - Generated output (gitignored)
+- `docs/api/` - TypeDoc-generated API reference HTML (gitignored)
 - `mdbook/` - mdBook configuration (book.toml, Dockerfile)
+- `mdbook/book/` - Generated output (gitignored)
 - `mdbook/validators/` - Validation scripts for examples
 - `examples/` - Runnable example files, organized by package
 
@@ -240,6 +241,59 @@ When upgrading Node:
    ```
    ````
 5. Build to validate: `pnpm docs:build`
+
+### API Documentation
+
+API reference documentation is **auto-generated from TSDoc comments** using TypeDoc HTML output.
+
+**Documentation Structure:**
+- **Conceptual docs** (mdBook): Getting started, guides, examples in `docs/`
+- **API reference** (TypeDoc HTML): Complete API documentation in `docs/api/` (generated, gitignored)
+- **API index page**: `docs/API_README.md` provides landing page content for TypeDoc
+
+The API docs are accessible from the mdBook sidebar under "API Reference" and link to the TypeDoc HTML interface.
+
+**Build Process:**
+TypeDoc generates HTML into docs/, which mdBook copies to output:
+```bash
+pnpm docs:build  # Builds packages → TypeDoc HTML → mdBook (copies docs/ to output)
+```
+
+Build order is important:
+1. `pnpm build` - Compile packages (required for TypeDoc)
+2. `pnpm docs:generate-api` - Generate TypeDoc HTML into `docs/api/`
+3. `mdbook build mdbook` - Generate mdBook HTML, copies `docs/` (including `api/`) to output
+
+**TypeDoc Configuration** (`typedoc.json`):
+- **Entry point strategy**: `expand` - Generates full navigation trees with all exports
+- **Module naming**: `@module` tags in each package's `index.ts` define clean names (@grounds/core, @grounds/schema, @grounds/stream)
+- **Sidebar organization**: `@group` tags organize exports by semantic category (Encoding, Decoding, Schema Constructors: Primitives, etc.)
+- **No version display**: Version numbers hidden from generated output
+- **Index page**: Uses `docs/API_README.md` for landing page content
+
+**TSDoc Guidelines:**
+- Use active voice ("Encodes data" not "This function encodes data")
+- Don't repeat type information (TypeScript provides types)
+- Add `@param` for all parameters
+- Add `@returns` documenting both Ok and Err cases for Result types
+- Include `@example` blocks showing real neverthrow patterns (.match(), .andThen(), .map())
+- Use `@remarks` for implementation details users should know
+- Use `@see` for cross-references to related APIs
+- **Add `@group` tags** to organize exports in sidebar (e.g., `@group Encoding`, `@group Schema Constructors: Primitives`)
+- **Use `@module` tag** only in package index.ts files to set package display name
+
+**Sidebar Organization by Package:**
+- **@grounds/core**: Encoding, Decoding, Error Handling, Value Constructors
+- **@grounds/schema**: Schema Constructors (Primitives, Containers, Structs, Enums), Codec API, Conversion Functions
+- **@grounds/stream**: Encoding Streams, Decoding Streams
+
+**CI Validation:**
+- CI runs full docs build to verify TypeDoc succeeds
+- Validates TSDoc syntax and detects broken cross-references
+- No manual commit of generated HTML needed (output is gitignored)
+
+**See also:**
+- TypeDoc configuration in `typedoc.json`
 
 ## Code Patterns
 

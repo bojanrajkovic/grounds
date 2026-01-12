@@ -1,5 +1,9 @@
 // pattern: Functional Core
-// Decoder class with cursor management for Relish binary decoding
+
+/**
+ * Binary decoder for Relish wire format with cursor-based reading and validation.
+ * @module
+ */
 
 import { Result, ok, err } from "neverthrow";
 import { DateTime } from "luxon";
@@ -8,6 +12,39 @@ import { TypeCode, type DecodedValue } from "./types.js";
 
 type DecoderMethod = (decoder: Decoder) => Result<DecodedValue, DecodeError>;
 
+/**
+ * Cursor-based binary decoder with validation for Relish wire format.
+ *
+ * Reads bytes sequentially using an internal cursor, validating structure and
+ * constraints (field order, map key uniqueness, enum length, bit 7 rules).
+ * @group Decoding
+ *
+ * @example
+ * Decoding with error handling:
+ * ```typescript
+ * import { Decoder } from '@grounds/core';
+ *
+ * const bytes = new Uint8Array([0x02, 0x2a]); // U8(42)
+ * const decoder = new Decoder(bytes);
+ *
+ * decoder.decodeValue().match(
+ *   (value) => console.log('Decoded:', value), // 42
+ *   (error) => console.error('Decode failed:', error.code, error.message)
+ * );
+ * ```
+ *
+ * @remarks
+ * The Decoder validates all wire format constraints:
+ * - Struct fields must be in ascending field ID order
+ * - Map keys must be unique (checked via JSON serialization)
+ * - Enum content length must match declared length
+ * - Field IDs and variant IDs must have bit 7 clear (0-127 range)
+ *
+ * Decoding produces {@link DecodedValue} (raw JavaScript values), not wrapped
+ * RelishValue objects. This asymmetry simplifies consumption of decoded data.
+ *
+ * @see {@link decode} for one-shot decoding convenience function
+ */
 export class Decoder {
   private static readonly TYPE_DECODERS: Partial<Record<TypeCode, DecoderMethod>> = {
     [TypeCode.Null]: () => ok(null),
@@ -35,19 +72,51 @@ export class Decoder {
   private readonly view: DataView;
   private cursor: number = 0;
 
+  /**
+   * Creates a decoder for the given byte buffer.
+   *
+   * @param buffer - Binary data to decode
+   */
   constructor(buffer: Uint8Array) {
     this.buffer = buffer;
     this.view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   }
 
+  /**
+   * Current read position in the buffer (bytes consumed).
+   */
   get position(): number {
     return this.cursor;
   }
 
+  /**
+   * Bytes remaining to be read from current position.
+   */
   get remaining(): number {
     return this.buffer.length - this.cursor;
   }
 
+  /**
+   * Decodes a tagged variable-length integer (varint) from the buffer.
+   *
+   * The Relish wire format uses tagged varints for length fields. The encoding
+   * uses bit 0 as a flag: if 0, the upper 7 bits contain the length (short form);
+   * if 1, the next 4 bytes contain a 32-bit little-endian length (long form).
+   *
+   * Short form handles lengths 0-127 in a single byte. Long form handles lengths
+   * up to 2^31-1 in 4 bytes, supporting large payloads.
+   *
+   * @returns A Result containing the decoded length, or DecodeError if not enough data
+   *
+   * @remarks
+   * Advances the cursor past the varint bytes consumed (1 byte for short form,
+   * 4 bytes for long form). Returns `UNEXPECTED_EOF` if insufficient bytes remain.
+   *
+   * This is a public method since decoders in other packages need direct byte
+   * tracking during streaming operations.
+   *
+   * @see {@link decode} for full message decoding
+   */
   decodeVarsizeLength(): Result<number, DecodeError> {
     if (this.remaining < 1) {
       return err(DecodeError.unexpectedEnd(1, 0));
@@ -71,6 +140,30 @@ export class Decoder {
     return ok(encoded >> 1);
   }
 
+  /**
+   * Decodes the next value from the buffer at the current cursor position.
+   *
+   * Advances the cursor past the decoded value. Returns raw JavaScript values
+   * (number, bigint, boolean, null, string, DateTime, Array, Map, object) rather
+   * than wrapped RelishValue objects.
+   *
+   * @returns Result containing decoded value, or DecodeError on validation failure
+   *
+   * @example
+   * ```typescript
+   * import { Decoder } from '@grounds/core';
+   *
+   * const bytes = new Uint8Array([0x0e, 0x0a, 0x48, 0x65, 0x6c, 0x6c, 0x6f]); // String("Hello")
+   * const decoder = new Decoder(bytes);
+   *
+   * decoder.decodeValue().match(
+   *   (value) => {
+   *     console.log(value);
+   *   },
+   *   (error) => console.error(error.code)
+   * );
+   * ```
+   */
   decodeValue(): Result<DecodedValue, DecodeError> {
     if (this.remaining < 1) {
       return err(DecodeError.unexpectedEnd(1, 0));
@@ -425,6 +518,37 @@ export class Decoder {
   }
 }
 
+/**
+ * Decodes bytes to a raw JavaScript value using the Relish wire format.
+ *
+ * Convenience wrapper around {@link Decoder} for one-shot decoding. For decoding
+ * multiple values or streaming scenarios, use Decoder directly.
+ *
+ * @param bytes - Binary data to decode
+ * @returns Result containing decoded value, or DecodeError on validation failure
+ * @group Decoding
+ *
+ * @example
+ * Basic decoding:
+ * ```typescript
+ * import { decode } from '@grounds/core';
+ *
+ * const bytes = new Uint8Array([0x02, 0x2a]); // U8(42)
+ *
+ * decode(bytes).match(
+ *   (value) => console.log(value), // 42
+ *   (error) => console.error(error.message)
+ * );
+ * ```
+ *
+ * @remarks
+ * Returns raw JavaScript values ({@link DecodedValue}), not wrapped RelishValue objects.
+ * This differs from the encode API which accepts RelishValue wrappers. The asymmetry
+ * simplifies consumption: decoded data can be used directly without unwrapping.
+ *
+ * @see {@link Decoder} for cursor-based decoding with position tracking
+ * @see {@link encode} for encoding values to bytes
+ */
 export function decode(bytes: Uint8Array): Result<DecodedValue, DecodeError> {
   const decoder = new Decoder(bytes);
   return decoder.decodeValue();
