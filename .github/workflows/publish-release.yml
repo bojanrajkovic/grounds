@@ -39,7 +39,19 @@ jobs:
       - name: Build packages
         run: pnpm build
 
+      - name: Check if this is a release commit
+        id: check-release
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MSG" == "chore(release): version packages"* ]]; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+            echo "Skipping changeset generation - this is a release commit"
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate changesets from conventional commits
+        if: steps.check-release.outputs.is_release != 'true'
         run: pnpm exec tsx scripts/generate-changeset.ts -p main -i HEAD
 
       - name: Create Release Pull Request or Publish
