@@ -31,7 +31,9 @@ describe("createSchemaEncoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       chunks.push(value);
     }
 
@@ -55,7 +57,9 @@ describe("createSchemaEncoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       chunks.push(value);
     }
 
@@ -105,7 +109,9 @@ describe("createSchemaEncoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       chunks.push(value);
     }
 
@@ -145,7 +151,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       users.push(value);
     }
 
@@ -171,7 +179,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       values.push(value);
     }
 
@@ -244,7 +254,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       users.push(value);
     }
 
@@ -282,7 +294,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       decodedValues.push(value);
     }
 
@@ -314,7 +328,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       values.push(value);
     }
 
@@ -341,7 +357,9 @@ describe("createSchemaDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       values.push(value);
     }
 
@@ -381,7 +399,9 @@ describe("roundtrip: encoder -> decoder", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       result.push(value);
     }
 

@@ -413,3 +413,210 @@ describe("encode maps (Rust test vectors)", () => {
     );
   });
 });
+
+describe("encoder validation (defense in depth)", () => {
+  // These tests simulate runtime bypass of branded types using 'as unknown as RelishValue'
+  // to verify encoder validation catches invalid values even when type system is bypassed.
+
+  describe("u8 range validation", () => {
+    it("rejects value above u8 max (255)", () => {
+      const invalidValue = { type: "u8", value: 300 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects negative u8 value", () => {
+      const invalidValue = { type: "u8", value: -1 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer u8 value", () => {
+      const invalidValue = { type: "u8", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("u16 range validation", () => {
+    it("rejects value above u16 max (65535)", () => {
+      const invalidValue = { type: "u16", value: 70000 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects negative u16 value", () => {
+      const invalidValue = { type: "u16", value: -1 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer u16 value", () => {
+      const invalidValue = { type: "u16", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("u32 range validation", () => {
+    it("rejects value above u32 max (4294967295)", () => {
+      const invalidValue = { type: "u32", value: 4294967296 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects negative u32 value", () => {
+      const invalidValue = { type: "u32", value: -1 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer u32 value", () => {
+      const invalidValue = { type: "u32", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("u64 range validation", () => {
+    it("rejects value above u64 max", () => {
+      const invalidValue = { type: "u64", value: 18446744073709551616n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects negative u64 value", () => {
+      const invalidValue = { type: "u64", value: -1n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+  });
+
+  describe("u128 range validation", () => {
+    it("rejects value above u128 max", () => {
+      const invalidValue = { type: "u128", value: 340282366920938463463374607431768211456n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects negative u128 value", () => {
+      const invalidValue = { type: "u128", value: -1n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+  });
+
+  describe("i8 range validation", () => {
+    it("rejects value above i8 max (127)", () => {
+      const invalidValue = { type: "i8", value: 128 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects value below i8 min (-128)", () => {
+      const invalidValue = { type: "i8", value: -129 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer i8 value", () => {
+      const invalidValue = { type: "i8", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("i16 range validation", () => {
+    it("rejects value above i16 max (32767)", () => {
+      const invalidValue = { type: "i16", value: 32768 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects value below i16 min (-32768)", () => {
+      const invalidValue = { type: "i16", value: -32769 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer i16 value", () => {
+      const invalidValue = { type: "i16", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("i32 range validation", () => {
+    it("rejects value above i32 max (2147483647)", () => {
+      const invalidValue = { type: "i32", value: 2147483648 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects value below i32 min (-2147483648)", () => {
+      const invalidValue = { type: "i32", value: -2147483649 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects non-integer i32 value", () => {
+      const invalidValue = { type: "i32", value: 3.14 } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("integer");
+    });
+  });
+
+  describe("i64 range validation", () => {
+    it("rejects value above i64 max", () => {
+      const invalidValue = { type: "i64", value: 9223372036854775808n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects value below i64 min", () => {
+      const invalidValue = { type: "i64", value: -9223372036854775809n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+  });
+
+  describe("i128 range validation", () => {
+    it("rejects value above i128 max", () => {
+      const invalidValue = { type: "i128", value: 170141183460469231731687303715884105728n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+
+    it("rejects value below i128 min", () => {
+      const invalidValue = { type: "i128", value: -170141183460469231731687303715884105729n } as unknown as RelishValue;
+      const result = encode(invalidValue);
+      expectErr(result);
+      expect(result._unsafeUnwrapErr().message).toContain("out of range");
+    });
+  });
+});

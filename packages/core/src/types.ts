@@ -2,6 +2,14 @@
 import { DateTime } from "luxon";
 
 /**
+ * Unique symbol used to brand RelishValue types.
+ * This prevents direct object literal construction - values must be
+ * created through the value constructor functions (U8, U32, etc.).
+ * @internal
+ */
+export const RELISH_BRAND: unique symbol = Symbol("RelishValue");
+
+/**
  * Relish type codes as defined in the specification.
  * Each type has a unique 1-byte identifier (0x00-0x13).
  * Bit 7 is reserved and must not be set.
@@ -73,75 +81,90 @@ export type RelishValue =
   | RelishTimestamp;
 
 export type RelishNull = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "null";
 };
 
 export type RelishBool = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "bool";
   readonly value: boolean;
 };
 
 export type RelishU8 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "u8";
   readonly value: number;
 };
 
 export type RelishU16 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "u16";
   readonly value: number;
 };
 
 export type RelishU32 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "u32";
   readonly value: number;
 };
 
 export type RelishU64 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "u64";
   readonly value: bigint;
 };
 
 export type RelishU128 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "u128";
   readonly value: bigint;
 };
 
 export type RelishI8 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "i8";
   readonly value: number;
 };
 
 export type RelishI16 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "i16";
   readonly value: number;
 };
 
 export type RelishI32 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "i32";
   readonly value: number;
 };
 
 export type RelishI64 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "i64";
   readonly value: bigint;
 };
 
 export type RelishI128 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "i128";
   readonly value: bigint;
 };
 
 export type RelishF32 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "f32";
   readonly value: number;
 };
 
 export type RelishF64 = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "f64";
   readonly value: number;
 };
 
 export type RelishString = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "string";
   readonly value: string;
 };
@@ -201,6 +224,7 @@ export type TypeCodeToJsType<T extends TypeCode> =
  * For composite element types, elements are RelishValue.
  */
 export type RelishArray<T extends TypeCode = TypeCode> = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "array";
   readonly elementType: T;
   readonly elements: ReadonlyArray<TypeCodeToJsType<T>>;
@@ -212,6 +236,7 @@ export type RelishArray<T extends TypeCode = TypeCode> = {
  * For composite key/value types, entries hold RelishValue.
  */
 export type RelishMap<K extends TypeCode = TypeCode, V extends TypeCode = TypeCode> = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "map";
   readonly keyType: K;
   readonly valueType: V;
@@ -249,17 +274,20 @@ export type DecodedValue =
 export { DateTime } from "luxon";
 
 export type RelishStruct = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "struct";
   readonly fields: ReadonlyMap<number, RelishValue>;
 };
 
 export type RelishEnum = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "enum";
   readonly variantId: number;
   readonly value: RelishValue;
 };
 
 export type RelishTimestamp = {
+  readonly [RELISH_BRAND]: true;
   readonly type: "timestamp";
   readonly unixSeconds: bigint;
 };

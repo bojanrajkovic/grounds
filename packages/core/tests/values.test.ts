@@ -27,27 +27,27 @@ import { TypeCode } from "../src/types.js";
 describe("Value constructors", () => {
   describe("Null", () => {
     it("creates null value", () => {
-      expect(Null).toEqual({ type: "null" });
+      expect(Null).toMatchObject({ type: "null" });
     });
   });
 
   describe("Bool", () => {
     it("creates true value", () => {
-      expect(Bool(true)).toEqual({ type: "bool", value: true });
+      expect(Bool(true)).toMatchObject({ type: "bool", value: true });
     });
 
     it("creates false value", () => {
-      expect(Bool(false)).toEqual({ type: "bool", value: false });
+      expect(Bool(false)).toMatchObject({ type: "bool", value: false });
     });
   });
 
   describe("unsigned integers", () => {
     it("creates U8 value", () => {
-      expect(U8(255)).toEqual({ type: "u8", value: 255 });
+      expect(U8(255)).toMatchObject({ type: "u8", value: 255 });
     });
 
     it("creates U8 with zero", () => {
-      expect(U8(0)).toEqual({ type: "u8", value: 0 });
+      expect(U8(0)).toMatchObject({ type: "u8", value: 0 });
     });
 
     it("throws on U8 overflow", () => {
@@ -63,11 +63,11 @@ describe("Value constructors", () => {
     });
 
     it("creates U16 value", () => {
-      expect(U16(65535)).toEqual({ type: "u16", value: 65535 });
+      expect(U16(65535)).toMatchObject({ type: "u16", value: 65535 });
     });
 
     it("creates U16 with zero", () => {
-      expect(U16(0)).toEqual({ type: "u16", value: 0 });
+      expect(U16(0)).toMatchObject({ type: "u16", value: 0 });
     });
 
     it("throws on U16 overflow", () => {
@@ -83,11 +83,11 @@ describe("Value constructors", () => {
     });
 
     it("creates U32 value", () => {
-      expect(U32(4294967295)).toEqual({ type: "u32", value: 4294967295 });
+      expect(U32(4294967295)).toMatchObject({ type: "u32", value: 4294967295 });
     });
 
     it("creates U32 with zero", () => {
-      expect(U32(0)).toEqual({ type: "u32", value: 0 });
+      expect(U32(0)).toMatchObject({ type: "u32", value: 0 });
     });
 
     it("throws on U32 overflow", () => {
@@ -103,14 +103,14 @@ describe("Value constructors", () => {
     });
 
     it("creates U64 value", () => {
-      expect(U64(18446744073709551615n)).toEqual({
+      expect(U64(18446744073709551615n)).toMatchObject({
         type: "u64",
         value: 18446744073709551615n,
       });
     });
 
     it("creates U64 with zero", () => {
-      expect(U64(0n)).toEqual({ type: "u64", value: 0n });
+      expect(U64(0n)).toMatchObject({ type: "u64", value: 0n });
     });
 
     it("throws on U64 overflow", () => {
@@ -123,11 +123,11 @@ describe("Value constructors", () => {
 
     it("creates U128 value", () => {
       const max = 340282366920938463463374607431768211455n;
-      expect(U128(max)).toEqual({ type: "u128", value: max });
+      expect(U128(max)).toMatchObject({ type: "u128", value: max });
     });
 
     it("creates U128 with zero", () => {
-      expect(U128(0n)).toEqual({ type: "u128", value: 0n });
+      expect(U128(0n)).toMatchObject({ type: "u128", value: 0n });
     });
 
     it("throws on U128 overflow", () => {
@@ -142,15 +142,15 @@ describe("Value constructors", () => {
 
   describe("signed integers", () => {
     it("creates I8 value at min", () => {
-      expect(I8(-128)).toEqual({ type: "i8", value: -128 });
+      expect(I8(-128)).toMatchObject({ type: "i8", value: -128 });
     });
 
     it("creates I8 value at max", () => {
-      expect(I8(127)).toEqual({ type: "i8", value: 127 });
+      expect(I8(127)).toMatchObject({ type: "i8", value: 127 });
     });
 
     it("creates I8 with zero", () => {
-      expect(I8(0)).toEqual({ type: "i8", value: 0 });
+      expect(I8(0)).toMatchObject({ type: "i8", value: 0 });
     });
 
     it("throws on I8 overflow", () => {
@@ -166,15 +166,15 @@ describe("Value constructors", () => {
     });
 
     it("creates I16 value at min", () => {
-      expect(I16(-32768)).toEqual({ type: "i16", value: -32768 });
+      expect(I16(-32768)).toMatchObject({ type: "i16", value: -32768 });
     });
 
     it("creates I16 value at max", () => {
-      expect(I16(32767)).toEqual({ type: "i16", value: 32767 });
+      expect(I16(32767)).toMatchObject({ type: "i16", value: 32767 });
     });
 
     it("creates I16 with zero", () => {
-      expect(I16(0)).toEqual({ type: "i16", value: 0 });
+      expect(I16(0)).toMatchObject({ type: "i16", value: 0 });
     });
 
     it("throws on I16 overflow", () => {
@@ -190,15 +190,15 @@ describe("Value constructors", () => {
     });
 
     it("creates I32 value at min", () => {
-      expect(I32(-2147483648)).toEqual({ type: "i32", value: -2147483648 });
+      expect(I32(-2147483648)).toMatchObject({ type: "i32", value: -2147483648 });
     });
 
     it("creates I32 value at max", () => {
-      expect(I32(2147483647)).toEqual({ type: "i32", value: 2147483647 });
+      expect(I32(2147483647)).toMatchObject({ type: "i32", value: 2147483647 });
     });
 
     it("creates I32 with zero", () => {
-      expect(I32(0)).toEqual({ type: "i32", value: 0 });
+      expect(I32(0)).toMatchObject({ type: "i32", value: 0 });
     });
 
     it("throws on I32 overflow", () => {
@@ -214,21 +214,21 @@ describe("Value constructors", () => {
     });
 
     it("creates I64 value at min", () => {
-      expect(I64(-9223372036854775808n)).toEqual({
+      expect(I64(-9223372036854775808n)).toMatchObject({
         type: "i64",
         value: -9223372036854775808n,
       });
     });
 
     it("creates I64 value at max", () => {
-      expect(I64(9223372036854775807n)).toEqual({
+      expect(I64(9223372036854775807n)).toMatchObject({
         type: "i64",
         value: 9223372036854775807n,
       });
     });
 
     it("creates I64 with zero", () => {
-      expect(I64(0n)).toEqual({ type: "i64", value: 0n });
+      expect(I64(0n)).toMatchObject({ type: "i64", value: 0n });
     });
 
     it("throws on I64 overflow", () => {
@@ -241,16 +241,16 @@ describe("Value constructors", () => {
 
     it("creates I128 value at min", () => {
       const min = -170141183460469231731687303715884105728n;
-      expect(I128(min)).toEqual({ type: "i128", value: min });
+      expect(I128(min)).toMatchObject({ type: "i128", value: min });
     });
 
     it("creates I128 value at max", () => {
       const max = 170141183460469231731687303715884105727n;
-      expect(I128(max)).toEqual({ type: "i128", value: max });
+      expect(I128(max)).toMatchObject({ type: "i128", value: max });
     });
 
     it("creates I128 with zero", () => {
-      expect(I128(0n)).toEqual({ type: "i128", value: 0n });
+      expect(I128(0n)).toMatchObject({ type: "i128", value: 0n });
     });
 
     it("throws on I128 overflow", () => {
@@ -266,11 +266,11 @@ describe("Value constructors", () => {
 
   describe("floating point", () => {
     it("creates F32 value", () => {
-      expect(F32(3.14)).toEqual({ type: "f32", value: 3.14 });
+      expect(F32(3.14)).toMatchObject({ type: "f32", value: 3.14 });
     });
 
     it("creates F64 value", () => {
-      expect(F64(3.141592653589793)).toEqual({
+      expect(F64(3.141592653589793)).toMatchObject({
         type: "f64",
         value: 3.141592653589793,
       });
@@ -279,18 +279,18 @@ describe("Value constructors", () => {
 
   describe("String_", () => {
     it("creates string value", () => {
-      expect(String_("hello")).toEqual({ type: "string", value: "hello" });
+      expect(String_("hello")).toMatchObject({ type: "string", value: "hello" });
     });
 
     it("creates empty string value", () => {
-      expect(String_("")).toEqual({ type: "string", value: "" });
+      expect(String_("")).toMatchObject({ type: "string", value: "" });
     });
   });
 
   describe("Array_", () => {
     it("creates array of u32 with raw number elements", () => {
       // Elements are raw JS values, not wrapped RelishValue
-      expect(Array_(TypeCode.U32, [1, 2, 3])).toEqual({
+      expect(Array_(TypeCode.U32, [1, 2, 3])).toMatchObject({
         type: "array",
         elementType: TypeCode.U32,
         elements: [1, 2, 3],
@@ -298,7 +298,7 @@ describe("Value constructors", () => {
     });
 
     it("creates array of strings with raw string elements", () => {
-      expect(Array_(TypeCode.String, ["hello", "world"])).toEqual({
+      expect(Array_(TypeCode.String, ["hello", "world"])).toMatchObject({
         type: "array",
         elementType: TypeCode.String,
         elements: ["hello", "world"],
@@ -306,7 +306,7 @@ describe("Value constructors", () => {
     });
 
     it("creates array of bigint types with raw bigint elements", () => {
-      expect(Array_(TypeCode.U64, [1n, 2n, 3n])).toEqual({
+      expect(Array_(TypeCode.U64, [1n, 2n, 3n])).toMatchObject({
         type: "array",
         elementType: TypeCode.U64,
         elements: [1n, 2n, 3n],
@@ -314,7 +314,7 @@ describe("Value constructors", () => {
     });
 
     it("creates empty array", () => {
-      expect(Array_(TypeCode.String, [])).toEqual({
+      expect(Array_(TypeCode.String, [])).toMatchObject({
         type: "array",
         elementType: TypeCode.String,
         elements: [],
@@ -325,7 +325,7 @@ describe("Value constructors", () => {
       // Composite element types hold RelishValue
       const inner1 = Array_(TypeCode.U8, [1, 2]);
       const inner2 = Array_(TypeCode.U8, [3, 4]);
-      expect(Array_(TypeCode.Array, [inner1, inner2])).toEqual({
+      expect(Array_(TypeCode.Array, [inner1, inner2])).toMatchObject({
         type: "array",
         elementType: TypeCode.Array,
         elements: [inner1, inner2],
@@ -410,7 +410,7 @@ describe("Value constructors", () => {
         [1, String_("name")],
         [2, U32(42)],
       ]);
-      expect(Struct(fields)).toEqual({
+      expect(Struct(fields)).toMatchObject({
         type: "struct",
         fields,
       });
@@ -419,7 +419,7 @@ describe("Value constructors", () => {
 
   describe("Enum", () => {
     it("creates enum value", () => {
-      expect(Enum(1, String_("data"))).toEqual({
+      expect(Enum(1, String_("data"))).toMatchObject({
         type: "enum",
         variantId: 1,
         value: { type: "string", value: "data" },
@@ -429,7 +429,7 @@ describe("Value constructors", () => {
 
   describe("Timestamp", () => {
     it("creates timestamp value", () => {
-      expect(Timestamp(1704067200n)).toEqual({
+      expect(Timestamp(1704067200n)).toMatchObject({
         type: "timestamp",
         unixSeconds: 1704067200n,
       });

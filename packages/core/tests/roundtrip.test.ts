@@ -255,14 +255,24 @@ describe("Roundtrip encode/decode", () => {
           const uniqueEntries = new Map(entries);
           const value = Map_(TypeCode.U32, TypeCode.String, uniqueEntries);
           const encoded = encode(value);
-          if (encoded.isErr()) return false;
+          if (encoded.isErr()) {
+            return false;
+          }
           const decoded = decode(encoded.value);
-          if (decoded.isErr()) return false;
+          if (decoded.isErr()) {
+            return false;
+          }
           const decodedMap = decoded.value;
-          if (!(decodedMap instanceof Map)) return false;
-          if (decodedMap.size !== uniqueEntries.size) return false;
+          if (!(decodedMap instanceof Map)) {
+            return false;
+          }
+          if (decodedMap.size !== uniqueEntries.size) {
+            return false;
+          }
           for (const [k, v] of uniqueEntries) {
-            if (decodedMap.get(k) !== v) return false;
+            if (decodedMap.get(k) !== v) {
+              return false;
+            }
           }
           return true;
         }

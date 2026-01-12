@@ -22,7 +22,9 @@ describe("createEncoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       chunks.push(value);
     }
 
@@ -46,7 +48,9 @@ describe("createDecoderStream", () => {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       values.push(value);
     }
 
