@@ -1,6 +1,6 @@
 {
   "name": "@grounds/stream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Streaming encode/decode utilities for Relish serialization",
   "keywords": [
     "relish",
