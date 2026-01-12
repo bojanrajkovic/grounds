@@ -1,5 +1,36 @@
 # @grounds/core
 
+## 1.0.1
+
+### Patch Changes
+
+- add branded types and encoder validation for input safety (#27)
+
+  ## Summary
+
+  - **Branded types**: All `RelishValue` types now include a
+    `RELISH_BRAND` symbol that prevents direct object literal construction -
+    values must be created through constructor functions (`U8()`,
+    `String_()`, etc.)
+  - **Encoder validation**: Defense-in-depth validation catches invalid
+    integer values at encoding time, returning `EncodeError` for
+    out-of-range or non-integer values
+  - **Consolidated validation**: Extracted shared integer bounds and
+    validation functions to `integer-bounds.ts`, eliminating duplication
+    between `values.ts` and `encoder.ts`
+
+  ## Test plan
+
+  - [x] All 382 existing tests pass
+  - [x] 26 new encoder validation tests verify defense-in-depth catches
+        invalid values
+  - [x] TypeScript compilation succeeds with no errors
+  - [x] Pre-push hook runs full test suite
+
+  🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+  Co-authored-by: Claude Opus 4.5 <noreply@anthropic.com>
+
 ## 1.0.0
 
 ### Major Changes

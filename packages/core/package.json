@@ -1,6 +1,6 @@
 {
   "name": "@grounds/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Low-level Relish binary serialization for TypeScript",
   "keywords": [
     "relish",
