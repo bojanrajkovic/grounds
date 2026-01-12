@@ -1,8 +1,14 @@
 {
   "name": "@grounds/core",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Low-level Relish binary serialization for TypeScript",
-  "keywords": ["relish", "serialization", "binary", "encoding", "decoding"],
+  "keywords": [
+    "relish",
+    "serialization",
+    "binary",
+    "encoding",
+    "decoding"
+  ],
   "author": "Bojan Rajkovic",
   "license": "Apache-2.0",
   "type": "module",
