@@ -35,6 +35,18 @@ export class EncodeError extends Error {
   static unknownVariant(variantName: string): EncodeError {
     return new EncodeError(`unknown enum variant: ${variantName}`);
   }
+
+  static integerOutOfRange(typeName: string, value: number | bigint, min: number | bigint, max: number | bigint): EncodeError {
+    return new EncodeError(
+      `${typeName} value ${value} is out of range (${min} to ${max})`
+    );
+  }
+
+  static notAnInteger(typeName: string, value: number): EncodeError {
+    return new EncodeError(
+      `${typeName} value must be an integer, got ${value}`
+    );
+  }
 }
 
 export type DecodeErrorCode =

@@ -10,6 +10,46 @@ import type {
 import { TypeCode } from "./types.js";
 import { EncodeError } from "./errors.js";
 import { encodeTaggedVarint, getTypeCodeForValue } from "./encoding-helpers.js";
+import {
+  U8_MAX,
+  U16_MAX,
+  U32_MAX,
+  U64_MAX,
+  U128_MAX,
+  I8_MIN,
+  I8_MAX,
+  I16_MIN,
+  I16_MAX,
+  I32_MIN,
+  I32_MAX,
+  I64_MIN,
+  I64_MAX,
+  I128_MIN,
+  I128_MAX,
+  validateUnsignedNumber,
+  validateSignedNumber,
+  validateUnsignedBigInt,
+  validateSignedBigInt,
+  type IntegerValidationError,
+} from "./integer-bounds.js";
+
+/**
+ * Convert an IntegerValidationError to a Result with EncodeError.
+ * Returns ok(undefined) if no error, or err(EncodeError) if validation failed.
+ */
+function toValidationResult(
+  typeName: string,
+  error: IntegerValidationError | null
+): Result<void, EncodeError> {
+  if (error === null) {
+    return ok(undefined);
+  }
+  if (error.kind === "not_integer") {
+    return err(EncodeError.notAnInteger(typeName, error.value));
+  } else {
+    return err(EncodeError.integerOutOfRange(typeName, error.value, error.min, error.max));
+  }
+}
 
 /**
  * Encode a RelishValue to bytes.
@@ -79,52 +119,62 @@ export class Encoder {
         return ok(undefined);
 
       case "u8":
-        this.writeByte(value.value);
-        return ok(undefined);
+        return toValidationResult("u8", validateUnsignedNumber(value.value, U8_MAX)).map(() => {
+          this.writeByte(value.value);
+        });
 
       case "u16":
-        this.ensureCapacity(2);
-        this.view.setUint16(this.position, value.value, true);
-        this.position += 2;
-        return ok(undefined);
+        return toValidationResult("u16", validateUnsignedNumber(value.value, U16_MAX)).map(() => {
+          this.ensureCapacity(2);
+          this.view.setUint16(this.position, value.value, true);
+          this.position += 2;
+        });
 
       case "u32":
-        this.ensureCapacity(4);
-        this.view.setUint32(this.position, value.value, true);
-        this.position += 4;
-        return ok(undefined);
+        return toValidationResult("u32", validateUnsignedNumber(value.value, U32_MAX)).map(() => {
+          this.ensureCapacity(4);
+          this.view.setUint32(this.position, value.value, true);
+          this.position += 4;
+        });
 
       case "u64":
-        this.encodeBigIntLE(value.value, 8);
-        return ok(undefined);
+        return toValidationResult("u64", validateUnsignedBigInt(value.value, U64_MAX)).map(() => {
+          this.encodeBigIntLE(value.value, 8);
+        });
 
       case "u128":
-        this.encodeBigIntLE(value.value, 16);
-        return ok(undefined);
+        return toValidationResult("u128", validateUnsignedBigInt(value.value, U128_MAX)).map(() => {
+          this.encodeBigIntLE(value.value, 16);
+        });
 
       case "i8":
-        this.writeByte(value.value & 0xff);
-        return ok(undefined);
+        return toValidationResult("i8", validateSignedNumber(value.value, I8_MIN, I8_MAX)).map(() => {
+          this.writeByte(value.value & 0xff);
+        });
 
       case "i16":
-        this.ensureCapacity(2);
-        this.view.setInt16(this.position, value.value, true);
-        this.position += 2;
-        return ok(undefined);
+        return toValidationResult("i16", validateSignedNumber(value.value, I16_MIN, I16_MAX)).map(() => {
+          this.ensureCapacity(2);
+          this.view.setInt16(this.position, value.value, true);
+          this.position += 2;
+        });
 
       case "i32":
-        this.ensureCapacity(4);
-        this.view.setInt32(this.position, value.value, true);
-        this.position += 4;
-        return ok(undefined);
+        return toValidationResult("i32", validateSignedNumber(value.value, I32_MIN, I32_MAX)).map(() => {
+          this.ensureCapacity(4);
+          this.view.setInt32(this.position, value.value, true);
+          this.position += 4;
+        });
 
       case "i64":
-        this.encodeBigIntLE(value.value, 8);
-        return ok(undefined);
+        return toValidationResult("i64", validateSignedBigInt(value.value, I64_MIN, I64_MAX)).map(() => {
+          this.encodeBigIntLE(value.value, 8);
+        });
 
       case "i128":
-        this.encodeBigIntLE(value.value, 16);
-        return ok(undefined);
+        return toValidationResult("i128", validateSignedBigInt(value.value, I128_MIN, I128_MAX)).map(() => {
+          this.encodeBigIntLE(value.value, 16);
+        });
 
       case "f32":
         this.ensureCapacity(4);

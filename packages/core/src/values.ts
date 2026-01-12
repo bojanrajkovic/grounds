@@ -24,145 +24,184 @@ import type {
   TypeCodeToJsType,
   MapInput,
 } from "./types.js";
-import { TypeCode } from "./types.js";
+import { TypeCode, RELISH_BRAND } from "./types.js";
+import {
+  U8_MAX,
+  U16_MAX,
+  U32_MAX,
+  U64_MAX,
+  U128_MAX,
+  I8_MIN,
+  I8_MAX,
+  I16_MIN,
+  I16_MAX,
+  I32_MIN,
+  I32_MAX,
+  I64_MIN,
+  I64_MAX,
+  I128_MIN,
+  I128_MAX,
+  validateUnsignedNumber,
+  validateSignedNumber,
+  validateUnsignedBigInt,
+  validateSignedBigInt,
+  type IntegerValidationError,
+} from "./integer-bounds.js";
 
-/** Singleton null value */
-export const Null: RelishNull = { type: "null" };
+/**
+ * Convert a validation error to a thrown Error for value constructors.
+ * @internal
+ */
+function throwValidationError(typeName: string, error: IntegerValidationError): never {
+  if (error.kind === "not_integer") {
+    throw new Error(`${typeName} value must be an integer: ${error.value}`);
+  } else {
+    throw new Error(`${typeName} value out of range: ${error.value}`);
+  }
+}
+
+/**
+ * Singleton null value.
+ *
+ * @example
+ * ```typescript
+ * import { Null, encode } from '@grounds/core';
+ *
+ * const result = encode(Null);
+ * ```
+ */
+export const Null: RelishNull = { [RELISH_BRAND]: true, type: "null" };
 
 /** Create a boolean value */
 export function Bool(value: boolean): RelishBool {
-  return { type: "bool", value };
+  return { [RELISH_BRAND]: true, type: "bool", value };
 }
 
-// Integer range constants
-const U8_MAX = 255;
-const U16_MAX = 65535;
-const U32_MAX = 4294967295;
-const U64_MAX = 18446744073709551615n;
-const U128_MAX = 340282366920938463463374607431768211455n;
-
-const I8_MIN = -128;
-const I8_MAX = 127;
-const I16_MIN = -32768;
-const I16_MAX = 32767;
-const I32_MIN = -2147483648;
-const I32_MAX = 2147483647;
-const I64_MIN = -9223372036854775808n;
-const I64_MAX = 9223372036854775807n;
-const I128_MIN = -170141183460469231731687303715884105728n;
-const I128_MAX = 170141183460469231731687303715884105727n;
-
-/** Create an unsigned 8-bit integer value */
+/**
+ * Creates an unsigned 8-bit integer Relish value.
+ *
+ * @group Value Constructors
+ *
+ * @param value - Integer in range 0-255
+ * @returns RelishU8 value
+ * @throws Error if value is not an integer or out of range
+ *
+ * @example
+ * ```typescript
+ * import { U8 } from '@grounds/core';
+ *
+ * const valid = U8(42);     // OK
+ * const edge = U8(255);     // OK (max value)
+ * const zero = U8(0);       // OK (min value)
+ *
+ * // Runtime errors:
+ * // U8(-1)    // Error: out of range
+ * // U8(256)   // Error: out of range
+ * // U8(3.14)  // Error: not an integer
+ * ```
+ */
 export function U8(value: number): RelishU8 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`U8 value must be an integer: ${value}`);
+  const error = validateUnsignedNumber(value, U8_MAX);
+  if (error) {
+    throwValidationError("U8", error);
   }
-  if (value < 0 || value > U8_MAX) {
-    throw new Error(`U8 value out of range: ${value}`);
-  }
-  return { type: "u8", value };
+  return { [RELISH_BRAND]: true, type: "u8", value };
 }
 
 /** Create an unsigned 16-bit integer value */
 export function U16(value: number): RelishU16 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`U16 value must be an integer: ${value}`);
+  const error = validateUnsignedNumber(value, U16_MAX);
+  if (error) {
+    throwValidationError("U16", error);
   }
-  if (value < 0 || value > U16_MAX) {
-    throw new Error(`U16 value out of range: ${value}`);
-  }
-  return { type: "u16", value };
+  return { [RELISH_BRAND]: true, type: "u16", value };
 }
 
 /** Create an unsigned 32-bit integer value */
 export function U32(value: number): RelishU32 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`U32 value must be an integer: ${value}`);
+  const error = validateUnsignedNumber(value, U32_MAX);
+  if (error) {
+    throwValidationError("U32", error);
   }
-  if (value < 0 || value > U32_MAX) {
-    throw new Error(`U32 value out of range: ${value}`);
-  }
-  return { type: "u32", value };
+  return { [RELISH_BRAND]: true, type: "u32", value };
 }
 
 /** Create an unsigned 64-bit integer value */
 export function U64(value: bigint): RelishU64 {
-  if (value < 0n || value > U64_MAX) {
-    throw new Error(`U64 value out of range: ${value}`);
+  const error = validateUnsignedBigInt(value, U64_MAX);
+  if (error) {
+    throwValidationError("U64", error);
   }
-  return { type: "u64", value };
+  return { [RELISH_BRAND]: true, type: "u64", value };
 }
 
 /** Create an unsigned 128-bit integer value */
 export function U128(value: bigint): RelishU128 {
-  if (value < 0n || value > U128_MAX) {
-    throw new Error(`U128 value out of range: ${value}`);
+  const error = validateUnsignedBigInt(value, U128_MAX);
+  if (error) {
+    throwValidationError("U128", error);
   }
-  return { type: "u128", value };
+  return { [RELISH_BRAND]: true, type: "u128", value };
 }
 
 /** Create a signed 8-bit integer value */
 export function I8(value: number): RelishI8 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`I8 value must be an integer: ${value}`);
+  const error = validateSignedNumber(value, I8_MIN, I8_MAX);
+  if (error) {
+    throwValidationError("I8", error);
   }
-  if (value < I8_MIN || value > I8_MAX) {
-    throw new Error(`I8 value out of range: ${value}`);
-  }
-  return { type: "i8", value };
+  return { [RELISH_BRAND]: true, type: "i8", value };
 }
 
 /** Create a signed 16-bit integer value */
 export function I16(value: number): RelishI16 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`I16 value must be an integer: ${value}`);
+  const error = validateSignedNumber(value, I16_MIN, I16_MAX);
+  if (error) {
+    throwValidationError("I16", error);
   }
-  if (value < I16_MIN || value > I16_MAX) {
-    throw new Error(`I16 value out of range: ${value}`);
-  }
-  return { type: "i16", value };
+  return { [RELISH_BRAND]: true, type: "i16", value };
 }
 
 /** Create a signed 32-bit integer value */
 export function I32(value: number): RelishI32 {
-  if (!Number.isInteger(value)) {
-    throw new Error(`I32 value must be an integer: ${value}`);
+  const error = validateSignedNumber(value, I32_MIN, I32_MAX);
+  if (error) {
+    throwValidationError("I32", error);
   }
-  if (value < I32_MIN || value > I32_MAX) {
-    throw new Error(`I32 value out of range: ${value}`);
-  }
-  return { type: "i32", value };
+  return { [RELISH_BRAND]: true, type: "i32", value };
 }
 
 /** Create a signed 64-bit integer value */
 export function I64(value: bigint): RelishI64 {
-  if (value < I64_MIN || value > I64_MAX) {
-    throw new Error(`I64 value out of range: ${value}`);
+  const error = validateSignedBigInt(value, I64_MIN, I64_MAX);
+  if (error) {
+    throwValidationError("I64", error);
   }
-  return { type: "i64", value };
+  return { [RELISH_BRAND]: true, type: "i64", value };
 }
 
 /** Create a signed 128-bit integer value */
 export function I128(value: bigint): RelishI128 {
-  if (value < I128_MIN || value > I128_MAX) {
-    throw new Error(`I128 value out of range: ${value}`);
+  const error = validateSignedBigInt(value, I128_MIN, I128_MAX);
+  if (error) {
+    throwValidationError("I128", error);
   }
-  return { type: "i128", value };
+  return { [RELISH_BRAND]: true, type: "i128", value };
 }
 
 /** Create a 32-bit floating point value */
 export function F32(value: number): RelishF32 {
-  return { type: "f32", value };
+  return { [RELISH_BRAND]: true, type: "f32", value };
 }
 
 /** Create a 64-bit floating point value */
 export function F64(value: number): RelishF64 {
-  return { type: "f64", value };
+  return { [RELISH_BRAND]: true, type: "f64", value };
 }
 
 /** Create a string value (named String_ to avoid conflict with global String) */
 export function String_(value: string): RelishString {
-  return { type: "string", value };
+  return { [RELISH_BRAND]: true, type: "string", value };
 }
 
 /**
@@ -227,7 +266,7 @@ export function Array_<T extends TypeCode>(
       );
     }
   }
-  return { type: "array", elementType, elements };
+  return { [RELISH_BRAND]: true, type: "array", elementType, elements };
 }
 
 /**
@@ -262,20 +301,20 @@ export function Map_<K extends TypeCode, V extends TypeCode>(
       );
     }
   }
-  return { type: "map", keyType, valueType, entries };
+  return { [RELISH_BRAND]: true, type: "map", keyType, valueType, entries };
 }
 
 /** Create a struct value */
 export function Struct(fields: ReadonlyMap<number, RelishValue>): RelishStruct {
-  return { type: "struct", fields };
+  return { [RELISH_BRAND]: true, type: "struct", fields };
 }
 
 /** Create an enum value */
 export function Enum(variantId: number, value: RelishValue): RelishEnum {
-  return { type: "enum", variantId, value };
+  return { [RELISH_BRAND]: true, type: "enum", variantId, value };
 }
 
 /** Create a timestamp value */
 export function Timestamp(unixSeconds: bigint): RelishTimestamp {
-  return { type: "timestamp", unixSeconds };
+  return { [RELISH_BRAND]: true, type: "timestamp", unixSeconds };
 }
