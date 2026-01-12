@@ -40,7 +40,7 @@ jobs:
         run: pnpm build
 
       - name: Generate changesets from conventional commits
-        run: pnpm exec tsx scripts/generate-changeset.ts -p main -i develop
+        run: pnpm exec tsx scripts/generate-changeset.ts -p main -i HEAD
 
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v1

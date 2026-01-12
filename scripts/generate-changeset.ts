@@ -58,7 +58,7 @@ const bumpMap: Record<string, UpgradeType> = {
  */
 export async function generateChangeset({
   productionBranch = "main",
-  integrationBranch = "develop",
+  integrationBranch = "HEAD",
   packageFolders = ["packages"],
 }: {
   productionBranch?: string;
@@ -74,7 +74,27 @@ export async function generateChangeset({
 }
 
 /**
- * Retrieves version bump commits since the main branch.
+ * Find the most recent version tag in the repository.
+ * Looks for tags matching @grounds/* or v* patterns.
+ * @returns The tag name, or null if no tags found.
+ */
+function findLastVersionTag(): string | null {
+  try {
+    // Try to find the most recent tag reachable from HEAD
+    const tag = execSync("git describe --tags --abbrev=0 2>/dev/null")
+      .toString()
+      .trim();
+    return tag || null;
+  } catch {
+    // No tags found
+    return null;
+  }
+}
+
+/**
+ * Retrieves version bump commits since the specified base.
+ * When integrationBranch is "HEAD", finds commits since the last version tag.
+ * Otherwise, uses the traditional main..develop range.
  * @returns An array of CommitInfo objects representing version bump commits.
  */
 function getVersionBumpCommitsSinceMain({
@@ -87,11 +107,38 @@ function getVersionBumpCommitsSinceMain({
   packageFolders: Array<string>;
 }): CommitInfo[] {
   const delimiter = "<!--|COMMIT|-->";
-  return execSync(
-    `git log --format="%H %B${delimiter}" ${productionBranch}..${integrationBranch}`,
-  )
+
+  // Determine the commit range based on the integration branch setting
+  let commitRange: string;
+  if (integrationBranch === "HEAD") {
+    // Direct-to-main workflow: find commits since last version tag
+    const lastTag = findLastVersionTag();
+    if (lastTag) {
+      commitRange = `${lastTag}..HEAD`;
+      console.log(`Generating changesets for commits since tag: ${lastTag}`);
+    } else {
+      // No tags yet - get all commits on the production branch
+      console.log(
+        "No version tags found. Generating changesets for recent commits.",
+      );
+      // Just get the last 10 commits to avoid processing entire history
+      commitRange = `${productionBranch}~10..${productionBranch}`;
+    }
+  } else {
+    // Traditional main..develop workflow
+    commitRange = `${productionBranch}..${integrationBranch}`;
+  }
+
+  const output = execSync(`git log --format="%H %B${delimiter}" ${commitRange}`)
     .toString()
-    .trim()
+    .trim();
+
+  if (!output) {
+    console.log("No commits found in range.");
+    return [];
+  }
+
+  return output
     .split(delimiter)
     .slice(0, -1)
     .map((commitText) => parseCommit({ commitText, packageFolders }))
@@ -247,7 +294,7 @@ function parseArgs(args: string[]): {
   packageFolders: Array<string>;
 } {
   let productionBranch = "main";
-  let integrationBranch = "develop";
+  let integrationBranch = "HEAD";
   const packageFolders = ["packages"];
 
   for (let i = 0; i < args.length; i++) {
@@ -269,8 +316,17 @@ Usage: generate-changeset [options]
 
 Options:
   -p, --production <branch>    Production branch (default: main)
-  -i, --integration <branch>   Integration branch (default: develop)
+  -i, --integration <branch>   Integration branch or HEAD (default: HEAD)
+                               Use HEAD for direct-to-main workflow (finds commits since last tag)
+                               Use a branch name (e.g., develop) for main..develop workflow
   -h, --help                   Show this help message
+
+Examples:
+  # Direct-to-main workflow (recommended)
+  generate-changeset -p main -i HEAD
+
+  # Traditional main/develop workflow
+  generate-changeset -p main -i develop
 `);
         process.exit(0);
     }

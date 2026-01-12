@@ -4,6 +4,6 @@
   ],
   "scripts/**/*.{ts,tsx}": [
     "oxlint --deny-warnings",
-    "tsc --noEmit --skipLibCheck -p scripts/"
+    "bash -c 'tsc --noEmit --skipLibCheck -p scripts/'"
   ]
 }
