@@ -11,8 +11,26 @@ export const RELISH_BRAND: unique symbol = Symbol("RelishValue");
 
 /**
  * Relish type codes as defined in the specification.
- * Each type has a unique 1-byte identifier (0x00-0x13).
- * Bit 7 is reserved and must not be set.
+ *
+ * Each type has a unique 1-byte identifier (0x00-0x13). Bit 7 is reserved
+ * and must not be set in valid type codes.
+ *
+ * @example
+ * Using type codes:
+ * ```typescript
+ * import { TypeCode } from '@grounds/core';
+ *
+ * console.log(TypeCode.U32); // 0x04
+ * console.log(TypeCode.String); // 0x0e
+ *
+ * // Check if a byte is a valid type code
+ * const byte = 0x02;
+ * if (byte in TypeCode) {
+ *   console.log('Valid type code');
+ * }
+ * ```
+ *
+ * @see {@link https://github.com/alex/relish/blob/main/SPEC.md | Relish Specification}
  */
 export const TypeCode = {
   Null: 0x00,
@@ -47,6 +65,16 @@ export type TypeCode = (typeof TypeCode)[keyof typeof TypeCode];
  *
  * @param typeCode - The type code to check
  * @returns true if the type is primitive, false if composite
+ *
+ * @example
+ * ```typescript
+ * import { TypeCode, isPrimitiveTypeCode } from '@grounds/core';
+ *
+ * isPrimitiveTypeCode(TypeCode.U32);    // true
+ * isPrimitiveTypeCode(TypeCode.String); // true
+ * isPrimitiveTypeCode(TypeCode.Array);  // false (composite)
+ * isPrimitiveTypeCode(TypeCode.Struct); // false (composite)
+ * ```
  */
 export function isPrimitiveTypeCode(typeCode: number): boolean {
   // Primitives: 0x00-0x0e (Null through String) and 0x13 (Timestamp)
@@ -56,7 +84,16 @@ export function isPrimitiveTypeCode(typeCode: number): boolean {
 
 /**
  * Discriminated union representing all possible Relish values.
- * Each variant corresponds to a Relish type code.
+ *
+ * Each variant corresponds to a Relish type code and includes a readonly `type`
+ * discriminator for exhaustive pattern matching. Primitive variants have a `.value`
+ * property; composite variants have `.elements`, `.entries`, `.fields`, or `.value`.
+ *
+ * @remarks
+ * All RelishValue types are deeply readonly/immutable. Use value constructors
+ * from the values module to create instances.
+ *
+ * @see {@link DecodedValue} for the raw JS types produced by decoding
  */
 export type RelishValue =
   | RelishNull
@@ -80,89 +117,104 @@ export type RelishValue =
   | RelishEnum
   | RelishTimestamp;
 
+/** Null value variant */
 export type RelishNull = {
   readonly [RELISH_BRAND]: true;
   readonly type: "null";
 };
 
+/** Boolean value variant */
 export type RelishBool = {
   readonly [RELISH_BRAND]: true;
   readonly type: "bool";
   readonly value: boolean;
 };
 
+/** Unsigned 8-bit integer value variant (0-255) */
 export type RelishU8 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "u8";
   readonly value: number;
 };
 
+/** Unsigned 16-bit integer value variant (0-65535) */
 export type RelishU16 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "u16";
   readonly value: number;
 };
 
+/** Unsigned 32-bit integer value variant (0-4294967295) */
 export type RelishU32 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "u32";
   readonly value: number;
 };
 
+/** Unsigned 64-bit integer value variant using BigInt */
 export type RelishU64 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "u64";
   readonly value: bigint;
 };
 
+/** Unsigned 128-bit integer value variant using BigInt */
 export type RelishU128 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "u128";
   readonly value: bigint;
 };
 
+/** Signed 8-bit integer value variant (-128 to 127) */
 export type RelishI8 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "i8";
   readonly value: number;
 };
 
+/** Signed 16-bit integer value variant (-32768 to 32767) */
 export type RelishI16 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "i16";
   readonly value: number;
 };
 
+/** Signed 32-bit integer value variant (-2147483648 to 2147483647) */
 export type RelishI32 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "i32";
   readonly value: number;
 };
 
+/** Signed 64-bit integer value variant using BigInt */
 export type RelishI64 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "i64";
   readonly value: bigint;
 };
 
+/** Signed 128-bit integer value variant using BigInt */
 export type RelishI128 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "i128";
   readonly value: bigint;
 };
 
+/** 32-bit floating point value variant (precision loss may occur in JavaScript) */
 export type RelishF32 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "f32";
   readonly value: number;
 };
 
+/** 64-bit floating point value variant matching JavaScript's native number type */
 export type RelishF64 = {
   readonly [RELISH_BRAND]: true;
   readonly type: "f64";
   readonly value: number;
 };
 
+/** UTF-8 string value variant */
 export type RelishString = {
   readonly [RELISH_BRAND]: true;
   readonly type: "string";

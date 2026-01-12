@@ -27,6 +27,10 @@
 - [Schema with Async Generators](./streaming/schema-async-generators.md)
 - [Schema with Web Streams](./streaming/schema-web-streams.md)
 
+# API Reference
+
+- [API Documentation](./api-reference.md)
+
 # Reference
 
 - [Type Codes](./reference/type-codes.md)

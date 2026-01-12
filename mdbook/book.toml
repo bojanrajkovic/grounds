@@ -5,7 +5,7 @@ language = "en"
 src = "../docs"
 
 [build]
-build-dir = "../docs/book"
+build-dir = "book"
 
 [preprocessor.validator]
 command = "mdbook-validator"

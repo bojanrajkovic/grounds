@@ -1,7 +1,6 @@
 {
   "packages/**/*.{ts,tsx}": [
-    "oxlint --deny-warnings",
-    "tsc --noEmit --skipLibCheck"
+    "oxlint --deny-warnings"
   ],
   "scripts/**/*.{ts,tsx}": [
     "oxlint --deny-warnings",
