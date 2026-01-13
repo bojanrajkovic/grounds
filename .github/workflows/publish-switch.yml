@@ -5,15 +5,16 @@ on:
     workflows: ["CI"]
     types: [completed]
     branches:
-      - "feat/**"
-      - "fix/**"
+      - "**/feat/**"
+      - "**/fix/**"
   push:
     branches:
       - main
 
 jobs:
   publish-alpha:
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (startsWith(github.event.workflow_run.head_branch, 'feat/') || startsWith(github.event.workflow_run.head_branch, 'fix/'))
+    # Trigger on feat/ or fix/ anywhere in branch name (e.g., brajkovic/feat/something)
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && (contains(github.event.workflow_run.head_branch, '/feat/') || contains(github.event.workflow_run.head_branch, '/fix/'))
     uses: ./.github/workflows/publish-alpha.yml
     permissions:
       id-token: write
