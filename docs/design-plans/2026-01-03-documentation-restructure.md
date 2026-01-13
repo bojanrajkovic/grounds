@@ -5,6 +5,7 @@
 Restructure examples and documentation to improve clarity and maintainability. Each example demonstrates one concept, pairs with conceptual documentation, and is validated during build.
 
 **Goals:**
+
 - One concept per example file (currently multiple concepts per file)
 - Examples embedded in conceptual docs via `{{#include}}`
 - Examples validated by actual execution during doc build
@@ -16,24 +17,28 @@ Restructure examples and documentation to improve clarity and maintainability. E
 Three-layer documentation system:
 
 **1. Examples Layer** (`examples/`)
+
 - Standalone TypeScript files, one concept per file (~10-20 lines)
 - Runnable independently via `tsx examples/<path>.ts`
 - Organized by package: `examples/core/`, `examples/schema/`, `examples/stream/`
 - Idiomatic neverthrow usage (`.match()`, `.andThen()`, `.map()`)
 
 **2. Documentation Layer** (`docs/`)
+
 - mdBook-based documentation
 - Organized by user journey (Getting Started → Core → Schema → Streaming → Reference)
 - Embeds examples via `{{#include ../../examples/<path>.ts}}`
 - Narrative text explains concepts between example includes
 
 **3. Validation Layer** (mdbook-validator)
+
 - Runs during `mdbook build`
 - Executes TypeScript examples in Docker container (Node 24)
 - Custom validator script checks exit code and assertions
 - Build fails if any example throws
 
 **Data flow:**
+
 ```
 examples/*.ts → {{#include}} → mdBook → mdbook-validator → Docker → validate → HTML
 ```
@@ -41,6 +46,7 @@ examples/*.ts → {{#include}} → mdBook → mdbook-validator → Docker → va
 ## Existing Patterns
 
 Investigation found:
+
 - 3 existing example files in `examples/` covering multiple concepts each
 - Vitest for testing with property-based tests via fast-check
 - pnpm workspace with packages in `packages/`
@@ -48,11 +54,13 @@ Investigation found:
 - `mise.toml` manages Node.js tooling
 
 This design introduces new patterns:
+
 - mdBook for documentation (Rust-based, new toolchain)
 - Docker-based validation via mdbook-validator
 - Fine-grained example files (one concept each)
 
 Existing patterns followed:
+
 - Examples remain executable TypeScript in monorepo
 - Pattern comments (`// pattern: Imperative Shell`) on example files
 - Idiomatic neverthrow usage consistent with existing code
@@ -64,6 +72,7 @@ Existing patterns followed:
 **Goal:** Add mdBook and validation infrastructure
 
 **Components:**
+
 - Modify: `mise.toml` (add rust, cargo:mdbook, cargo:mdbook-validator)
 - Create: `docs/book.toml` (mdBook configuration with validator)
 - Create: `docs/validators/validate-typescript.sh` (TypeScript validator script)
@@ -74,6 +83,7 @@ Existing patterns followed:
 **Dependencies:** None (first phase)
 
 **Testing:**
+
 - `mise install` succeeds with new tools
 - `pnpm docs:build` runs (may fail on missing content, but tooling works)
 - Validator script is executable
@@ -83,6 +93,7 @@ Existing patterns followed:
 **Goal:** Break existing `examples/basic-usage.ts` into focused files
 
 **Components:**
+
 - Create: `examples/core/encode-match.ts` (basic encode + .match())
 - Create: `examples/core/encode-roundtrip.ts` (.andThen() chaining)
 - Create: `examples/core/encode-transform.ts` (.map() transformation)
@@ -93,6 +104,7 @@ Existing patterns followed:
 **Dependencies:** Phase 1 (tsx available)
 
 **Testing:**
+
 - Each example runs successfully: `tsx examples/core/<file>.ts`
 - No runtime errors, clean exit
 
@@ -101,6 +113,7 @@ Existing patterns followed:
 **Goal:** Break existing `examples/schema-usage.ts` into focused files
 
 **Components:**
+
 - Create: `examples/schema/defining-structs.ts` (RStruct, field())
 - Create: `examples/schema/defining-enums.ts` (REnum, variant())
 - Create: `examples/schema/using-codecs.ts` (createCodec, encode/decode)
@@ -110,6 +123,7 @@ Existing patterns followed:
 **Dependencies:** Phase 2 (pattern established)
 
 **Testing:**
+
 - Each example runs successfully: `tsx examples/schema/<file>.ts`
 - No runtime errors, clean exit
 
@@ -118,6 +132,7 @@ Existing patterns followed:
 **Goal:** Break existing `examples/streaming.ts` into focused files
 
 **Components:**
+
 - Create: `examples/stream/async-generators.ts` (encodeIterable, decodeIterable)
 - Create: `examples/stream/web-streams.ts` (createEncoderStream, createDecoderStream)
 - Delete: `examples/streaming.ts` (replaced by above)
@@ -125,6 +140,7 @@ Existing patterns followed:
 **Dependencies:** Phase 3 (pattern established)
 
 **Testing:**
+
 - Each example runs successfully: `tsx examples/stream/<file>.ts`
 - No runtime errors, clean exit
 
@@ -133,6 +149,7 @@ Existing patterns followed:
 **Goal:** Create mdBook documentation structure with user journey
 
 **Components:**
+
 - Create: `docs/src/introduction.md`
 - Create: `docs/src/getting-started/installation.md`
 - Create: `docs/src/getting-started/first-encode.md`
@@ -144,6 +161,7 @@ Existing patterns followed:
 **Dependencies:** Phase 2 (core examples exist)
 
 **Testing:**
+
 - `pnpm docs:build` produces HTML
 - Navigation works in generated site
 - Examples render correctly
@@ -153,6 +171,7 @@ Existing patterns followed:
 **Goal:** Complete documentation for schema and streaming packages
 
 **Components:**
+
 - Create: `docs/src/schema/structs.md` (includes schema examples)
 - Create: `docs/src/schema/enums.md`
 - Create: `docs/src/schema/codecs.md`
@@ -166,6 +185,7 @@ Existing patterns followed:
 **Dependencies:** Phases 3, 4, 5 (schema/stream examples exist, structure established)
 
 **Testing:**
+
 - `pnpm docs:build` produces complete HTML
 - All sections render correctly
 - All examples included and displayed
@@ -175,6 +195,7 @@ Existing patterns followed:
 **Goal:** Enable example validation during doc build
 
 **Components:**
+
 - Update: `docs/book.toml` (enable validator preprocessor)
 - Update: `docs/validators/validate-typescript.sh` (complete implementation)
 - Add assertion blocks to documentation markdown files
@@ -183,6 +204,7 @@ Existing patterns followed:
 **Dependencies:** Phase 6 (all content exists)
 
 **Testing:**
+
 - `pnpm docs:build` runs all examples in Docker
 - Intentionally broken example fails build
 - All examples pass validation
@@ -192,12 +214,14 @@ Existing patterns followed:
 **Goal:** Integrate with CI and document maintenance requirements
 
 **Components:**
+
 - Create: `.github/workflows/docs.yml` (build and deploy workflow)
 - Modify: `CLAUDE.md` (add documentation build section, version coupling notes)
 
 **Dependencies:** Phase 7 (validation working)
 
 **Testing:**
+
 - CI workflow runs successfully
 - GitHub Pages deployment works (on main branch)
 - CLAUDE.md documents version coupling

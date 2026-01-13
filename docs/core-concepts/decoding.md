@@ -33,7 +33,7 @@ Decoded values include their type code:
 ```typescript
 decode(bytes).match(
   (value) => {
-    console.log("Type:", value.type);  // e.g., TypeCode.String
+    console.log("Type:", value.type); // e.g., TypeCode.String
     console.log("Value:", value.value); // e.g., "hello"
   },
   (err) => console.error(err.message),

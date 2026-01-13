@@ -608,12 +608,12 @@ function validateElementType(elementType: TypeCode, value: unknown): boolean {
  */
 export function Array_<T extends TypeCode>(
   elementType: T,
-  elements: ReadonlyArray<TypeCodeToJsType<T>>
+  elements: ReadonlyArray<TypeCodeToJsType<T>>,
 ): RelishArray<T> {
   for (let i = 0; i < elements.length; i++) {
     if (!validateElementType(elementType, elements[i])) {
       throw new Error(
-        `array element at index ${i} does not match expected type for type code ${elementType}`
+        `array element at index ${i} does not match expected type for type code ${elementType}`,
       );
     }
   }
@@ -663,21 +663,18 @@ export function Array_<T extends TypeCode>(
 export function Map_<K extends TypeCode, V extends TypeCode>(
   keyType: K,
   valueType: V,
-  input: MapInput<TypeCodeToJsType<K>, TypeCodeToJsType<V>>
+  input: MapInput<TypeCodeToJsType<K>, TypeCodeToJsType<V>>,
 ): RelishMap<K, V> {
-  const entries: ReadonlyMap<TypeCodeToJsType<K>, TypeCodeToJsType<V>> =
-    input instanceof Map ? input : new Map(Object.entries(input) as Array<[TypeCodeToJsType<K>, TypeCodeToJsType<V>]>);
+  const entries: ReadonlyMap<TypeCodeToJsType<K>, TypeCodeToJsType<V>> = input instanceof Map
+    ? input
+    : new Map(Object.entries(input) as Array<[TypeCodeToJsType<K>, TypeCodeToJsType<V>]>);
 
   for (const [key, value] of entries) {
     if (!validateElementType(keyType, key)) {
-      throw new Error(
-        `map key does not match expected type for type code ${keyType}`
-      );
+      throw new Error(`map key does not match expected type for type code ${keyType}`);
     }
     if (!validateElementType(valueType, value)) {
-      throw new Error(
-        `map value does not match expected type for type code ${valueType}`
-      );
+      throw new Error(`map value does not match expected type for type code ${valueType}`);
     }
   }
   return { [RELISH_BRAND]: true, type: "map", keyType, valueType, entries };

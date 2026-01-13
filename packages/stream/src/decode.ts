@@ -72,7 +72,7 @@ import { StreamBuffer } from "./buffer.js";
  * @see {@link createDecoderStream} for Web Streams API version
  */
 export async function* decodeIterable(
-  chunks: AsyncIterable<Uint8Array>
+  chunks: AsyncIterable<Uint8Array>,
 ): AsyncGenerator<Result<DecodedValue, DecodeError>> {
   const buffer = new StreamBuffer();
 
@@ -107,9 +107,7 @@ export async function* decodeIterable(
     if (result.status === "needMore") {
       // Incomplete data at end of stream = TRUNCATED_STREAM (specific error)
       yield err(
-        DecodeErrorClass.truncatedStream(
-          `${buffer.length} bytes remaining, incomplete value`
-        )
+        DecodeErrorClass.truncatedStream(`${buffer.length} bytes remaining, incomplete value`),
       );
     } else if (result.status === "error") {
       yield err(result.error);

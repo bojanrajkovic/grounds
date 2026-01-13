@@ -1,9 +1,11 @@
 {
-  "packages/**/*.{ts,tsx}": [
-    "oxlint --deny-warnings"
-  ],
+  "packages/**/*.{ts,tsx}": ["oxfmt --write", "oxlint --deny-warnings"],
+  "examples/**/*.{ts,tsx}": ["oxfmt --write", "oxlint --deny-warnings"],
   "scripts/**/*.{ts,tsx}": [
+    "oxfmt --write",
     "oxlint --deny-warnings",
     "bash -c 'tsc --noEmit --skipLibCheck -p scripts/'"
-  ]
+  ],
+  "*.{md,json}": ["oxfmt --write"],
+  "docs/**/*.md": ["oxfmt --write"]
 }

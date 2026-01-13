@@ -61,9 +61,7 @@ async function example(): Promise<void> {
     );
   }
 
-  console.log(
-    `\nSuccessfully decoded ${decodedMessages.length} messages\n`,
-  );
+  console.log(`\nSuccessfully decoded ${decodedMessages.length} messages\n`);
 
   // Step 3: Verify round-trip
   console.log("=== Results ===");

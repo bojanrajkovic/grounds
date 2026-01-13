@@ -3,14 +3,26 @@
   "version": "1.0.0",
   "description": "Streaming encode/decode utilities for Relish serialization",
   "keywords": [
+    "async",
     "relish",
     "serialization",
     "streaming",
-    "async",
     "web-streams"
   ],
-  "author": "Bojan Rajkovic",
+  "homepage": "https://github.com/brajkovic/grounds#readme",
+  "bugs": {
+    "url": "https://github.com/brajkovic/grounds/issues"
+  },
   "license": "Apache-2.0",
+  "author": "Bojan Rajkovic",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brajkovic/grounds.git",
+    "directory": "packages/stream"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,21 +31,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/brajkovic/grounds.git",
-    "directory": "packages/stream"
-  },
-  "homepage": "https://github.com/brajkovic/grounds#readme",
-  "bugs": {
-    "url": "https://github.com/brajkovic/grounds/issues"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -44,11 +41,14 @@
     "@grounds/schema": "workspace:*",
     "neverthrow": "^8.1.1"
   },
-  "peerDependencies": {
-    "@sinclair/typebox": ">=0.34.0"
-  },
   "devDependencies": {
     "@grounds/test-utils": "workspace:*",
     "@sinclair/typebox": "^0.34.12"
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": ">=0.34.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

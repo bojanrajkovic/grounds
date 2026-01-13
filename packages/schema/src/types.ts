@@ -66,7 +66,7 @@ export type TRBool = TRelishSchema<boolean> & { [RelishKind]: "RBool" };
  * Booleans encode as a type byte followed by 0x00 for false or 0xFF for true.
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for boolean values
  * @group Schema Constructors: Primitives
  *
@@ -121,7 +121,7 @@ export type TRU128 = TRelishSchema<bigint> & { [RelishKind]: "RU128" };
  * Creates a schema for unsigned 8-bit integers (0-255).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for u8 values
  * @group Schema Constructors: Primitives
  *
@@ -151,7 +151,7 @@ export function RU8(): TRU8 {
  * Creates a schema for unsigned 16-bit integers (0-65535).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for u16 values
  * @group Schema Constructors: Primitives
  *
@@ -181,7 +181,7 @@ export function RU16(): TRU16 {
  * Creates a schema for unsigned 32-bit integers (0-4294967295).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for u32 values
  * @group Schema Constructors: Primitives
  *
@@ -201,7 +201,7 @@ export function RU16(): TRU16 {
  */
 export function RU32(): TRU32 {
   return {
-    ...Type.Integer({ minimum: 0, maximum: 0xFFFFFFFF }),
+    ...Type.Integer({ minimum: 0, maximum: 0xffffffff }),
     [RelishKind]: "RU32",
     [RelishTypeCode]: TypeCode.U32,
   } as TRU32;
@@ -213,7 +213,7 @@ export function RU32(): TRU32 {
  * Use this for large integers that exceed JavaScript's safe integer range (2^53-1).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for u64 values
  * @group Schema Constructors: Primitives
  *
@@ -245,7 +245,7 @@ export function RU64(): TRU64 {
  * Use for extremely large unsigned integers not representable in 64 bits.
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for u128 values
  * @group Schema Constructors: Primitives
  *
@@ -299,7 +299,7 @@ export type TRI128 = TRelishSchema<bigint> & { [RelishKind]: "RI128" };
  * Creates a schema for signed 8-bit integers (-128 to 127).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for i8 values
  * @group Schema Constructors: Primitives
  *
@@ -329,7 +329,7 @@ export function RI8(): TRI8 {
  * Creates a schema for signed 16-bit integers (-32768 to 32767).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for i16 values
  * @group Schema Constructors: Primitives
  *
@@ -359,7 +359,7 @@ export function RI16(): TRI16 {
  * Creates a schema for signed 32-bit integers (-2147483648 to 2147483647).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for i32 values
  * @group Schema Constructors: Primitives
  *
@@ -379,7 +379,7 @@ export function RI16(): TRI16 {
  */
 export function RI32(): TRI32 {
   return {
-    ...Type.Integer({ minimum: -0x80000000, maximum: 0x7FFFFFFF }),
+    ...Type.Integer({ minimum: -0x80000000, maximum: 0x7fffffff }),
     [RelishKind]: "RI32",
     [RelishTypeCode]: TypeCode.I32,
   } as TRI32;
@@ -391,7 +391,7 @@ export function RI32(): TRI32 {
  * Use for large signed integers that exceed JavaScript's safe integer range (±2^53-1).
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for i64 values
  * @group Schema Constructors: Primitives
  *
@@ -423,7 +423,7 @@ export function RI64(): TRI64 {
  * Use for extremely large signed integers not representable in 64 bits.
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for i128 values
  * @group Schema Constructors: Primitives
  *
@@ -466,7 +466,7 @@ export type TRF64 = TRelishSchema<number> & { [RelishKind]: "RF64" };
  * numbers are 64-bit internally. Decode may lose significant digits.
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for f32 values
  * @group Schema Constructors: Primitives
  *
@@ -503,7 +503,7 @@ export function RF32(): TRF32 {
  * of representable values.
  *
  * @group Schema Constructors: Primitives
- * 
+ *
  * @returns A Relish schema for f64 values
  * @group Schema Constructors: Primitives
  *
@@ -612,12 +612,13 @@ export function RArray<T extends TSchema>(elementSchema: T): TRArray<T> {
 /**
  * Map schema type with homogeneous key and value types.
  */
-export type TRMap<K extends TSchema = TSchema, V extends TSchema = TSchema> =
-  TRelishSchema<Map<Static<K>, Static<V>>> & {
-    [RelishKind]: "RMap";
-    [RelishKeyType]: K;
-    [RelishValueType]: V;
-  };
+export type TRMap<K extends TSchema = TSchema, V extends TSchema = TSchema> = TRelishSchema<
+  Map<Static<K>, Static<V>>
+> & {
+  [RelishKind]: "RMap";
+  [RelishKeyType]: K;
+  [RelishValueType]: V;
+};
 
 /**
  * Creates a schema for homogeneous maps with key type K and value type V.
@@ -733,7 +734,7 @@ export type TRTimestamp = TRelishSchema<DateTime> & {
  * convenient timezone and formatting operations.
  *
  * @group Schema Constructors: Containers
- * 
+ *
  * @returns A Relish schema for timestamp values
  * @group Schema Constructors: Primitives
  *

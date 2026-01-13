@@ -24,13 +24,19 @@ Variants can contain any schema type:
 
 ```typescript
 const ResultSchema = REnum({
-  success: variant(0, RStruct({
-    data: field(0, RString()),
-  })),
-  error: variant(1, RStruct({
-    code: field(0, RU32()),
-    message: field(1, RString()),
-  })),
+  success: variant(
+    0,
+    RStruct({
+      data: field(0, RString()),
+    }),
+  ),
+  error: variant(
+    1,
+    RStruct({
+      code: field(0, RU32()),
+      message: field(1, RString()),
+    }),
+  ),
 });
 ```
 

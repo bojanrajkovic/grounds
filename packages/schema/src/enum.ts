@@ -42,10 +42,7 @@ export type TEnumVariant<T extends TSchema = TSchema> = T & {
  *
  * @see {@link REnum} for combining variants into an enum schema
  */
-export function variant<T extends TSchema>(
-  variantId: number,
-  schema: T,
-): TEnumVariant<T> {
+export function variant<T extends TSchema>(variantId: number, schema: T): TEnumVariant<T> {
   return {
     ...schema,
     variantId,
@@ -56,12 +53,11 @@ export function variant<T extends TSchema>(
  * Schema type for a Relish enum (discriminated union).
  * The inferred type is a union of the variant inner types (unwrapped).
  */
-export type TREnum<
-  T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>,
-> = TRelishSchema<Static<T[keyof T]>> & {
-  [RelishKind]: "REnum";
-  variants: T;
-};
+export type TREnum<T extends Record<string, TEnumVariant> = Record<string, TEnumVariant>> =
+  TRelishSchema<Static<T[keyof T]>> & {
+    [RelishKind]: "REnum";
+    variants: T;
+  };
 
 /**
  * Creates an enum schema from tagged variant definitions.
@@ -128,9 +124,7 @@ export type TREnum<
  * @see {@link variant} for creating individual variant schemas
  * @see {@link https://github.com/grounds/docs/adrs/0002-unwrapped-enum-encode-decode.md | ADR 0002}
  */
-export function REnum<T extends Record<string, TEnumVariant>>(
-  variants: T,
-): TREnum<T> {
+export function REnum<T extends Record<string, TEnumVariant>>(variants: T): TREnum<T> {
   // Build a union of the variant inner schemas (unwrapped)
   const innerSchemas: Array<TSchema> = [];
   for (const variantSchema of Object.values(variants)) {

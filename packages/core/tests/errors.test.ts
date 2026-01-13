@@ -13,22 +13,18 @@ describe("EncodeError", () => {
   it("has static factory for unsorted fields", () => {
     const error = EncodeError.unsortedFields(5, 3);
     expect(error.message).toBe(
-      "struct fields must be in ascending order: field 5 followed by field 3"
+      "struct fields must be in ascending order: field 5 followed by field 3",
     );
   });
 
   it("has static factory for invalid field ID", () => {
     const error = EncodeError.invalidFieldId(128);
-    expect(error.message).toBe(
-      "field ID 128 is invalid: bit 7 must not be set"
-    );
+    expect(error.message).toBe("field ID 128 is invalid: bit 7 must not be set");
   });
 
   it("has static factory for invalid type code", () => {
     const error = EncodeError.invalidTypeCode(0x80);
-    expect(error.message).toBe(
-      "type code 0x80 is invalid: bit 7 must not be set"
-    );
+    expect(error.message).toBe("type code 0x80 is invalid: bit 7 must not be set");
   });
 });
 
@@ -53,15 +49,13 @@ describe("DecodeError", () => {
 
   it("has static factory for invalid type code (bit 7)", () => {
     const error = DecodeError.invalidTypeCode(0x80);
-    expect(error.message).toBe(
-      "type code 0x80 is invalid: bit 7 must not be set"
-    );
+    expect(error.message).toBe("type code 0x80 is invalid: bit 7 must not be set");
   });
 
   it("has static factory for unsorted fields", () => {
     const error = DecodeError.unsortedFields(5, 3);
     expect(error.message).toBe(
-      "struct fields must be in ascending order: field 5 followed by field 3"
+      "struct fields must be in ascending order: field 5 followed by field 3",
     );
   });
 
@@ -77,8 +71,6 @@ describe("DecodeError", () => {
 
   it("has static factory for enum length mismatch", () => {
     const error = DecodeError.enumLengthMismatch(10, 8);
-    expect(error.message).toBe(
-      "enum variant content length 8 does not match declared length 10"
-    );
+    expect(error.message).toBe("enum variant content length 8 does not match declared length 10");
   });
 });

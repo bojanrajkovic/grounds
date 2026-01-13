@@ -1,8 +1,8 @@
 {
   "name": "@grounds/examples",
   "version": "0.0.0",
-  "description": "Example TypeScript files demonstrating @grounds/core usage",
   "private": true,
+  "description": "Example TypeScript files demonstrating @grounds/core usage",
   "type": "module",
   "scripts": {
     "test": "echo 'Examples are not unit tested - run individually with tsx'"

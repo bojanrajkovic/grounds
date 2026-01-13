@@ -26,12 +26,5 @@
     "notDocumented": false
   },
   "sort": ["source-order"],
-  "kindSortOrder": [
-    "Function",
-    "Class",
-    "Interface",
-    "TypeAlias",
-    "Variable",
-    "Enum"
-  ]
+  "kindSortOrder": ["Function", "Class", "Interface", "TypeAlias", "Variable", "Enum"]
 }

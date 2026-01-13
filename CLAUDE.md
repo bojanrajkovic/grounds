@@ -19,6 +19,7 @@ TypeScript implementation of [Relish](https://github.com/alex/relish) binary ser
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/):
+
 - **Major (1.0.0)**: Breaking API changes
 - **Minor (0.1.0)**: New features, backward compatible
 - **Patch (0.0.1)**: Bug fixes, backward compatible
@@ -28,6 +29,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 ## Branch Naming
 
 Branches should be prefixed with username and conventional commit type:
+
 - `<username>/<type>/<feature-name>`
 - Example: `brajkovic/feat/encoder-implementation`
 - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
@@ -38,22 +40,23 @@ Branches should be prefixed with username and conventional commit type:
 
 All commits MUST follow conventional commit format (enforced via hooks and PR title validation):
 
-| Commit Type | Version Bump | Packages Affected |
-|-------------|--------------|-------------------|
-| `feat(core):` | Minor | core, schema, stream (all dependents) |
-| `feat(schema):` | Minor | schema, stream (stream depends on schema) |
-| `feat(stream):` | Minor | stream only |
-| `fix(core):` | Patch | core, schema, stream (all dependents) |
-| `fix(schema):` | Patch | schema, stream |
-| `fix(stream):` | Patch | stream only |
-| `feat(core)!:` or `BREAKING CHANGE:` | Major | core, schema, stream |
-| `docs:`, `chore:`, `test:`, `ci:` | None | No version bump |
+| Commit Type                          | Version Bump | Packages Affected                         |
+| ------------------------------------ | ------------ | ----------------------------------------- |
+| `feat(core):`                        | Minor        | core, schema, stream (all dependents)     |
+| `feat(schema):`                      | Minor        | schema, stream (stream depends on schema) |
+| `feat(stream):`                      | Minor        | stream only                               |
+| `fix(core):`                         | Patch        | core, schema, stream (all dependents)     |
+| `fix(schema):`                       | Patch        | schema, stream                            |
+| `fix(stream):`                       | Patch        | stream only                               |
+| `feat(core)!:` or `BREAKING CHANGE:` | Major        | core, schema, stream                      |
+| `docs:`, `chore:`, `test:`, `ci:`    | None         | No version bump                           |
 
 **Scope determines affected packages.** Breaking changes (`!` or `BREAKING CHANGE:`) trigger major bumps. During 0.x phase, breaking changes may occur in minor versions.
 
 ### Linked Versioning
 
 Packages use **linked versioning** via Changesets:
+
 - Changes to `@grounds/core` bump core, schema, and stream
 - Changes to `@grounds/schema` bump schema and stream
 - Changes to `@grounds/stream` bump stream only
@@ -134,13 +137,14 @@ All packages start at **0.0.1** (pre-1.0 unstable API). Breaking changes permitt
 
 The repository uses Husky git hooks that enforce quality gates:
 
-| Hook | Trigger | What It Does |
-|------|---------|--------------|
+| Hook       | Trigger      | What It Does                               |
+| ---------- | ------------ | ------------------------------------------ |
 | pre-commit | `git commit` | Runs oxlint + tsc on staged .ts/.tsx files |
-| commit-msg | `git commit` | Validates conventional commit format |
-| pre-push | `git push` | Runs full test suite |
+| commit-msg | `git commit` | Validates conventional commit format       |
+| pre-push   | `git push`   | Runs full test suite                       |
 
 **These hooks cannot be bypassed in normal workflow.** If a hook fails:
+
 - Fix the issue before proceeding
 - Do not use `--no-verify` unless explicitly instructed
 
@@ -210,8 +214,9 @@ pnpm docs:serve          # Serve docs locally (no validation)
 ### Example Validation
 
 Examples are validated during doc build using mdbook-validator:
+
 - Examples run in a Docker container (`grounds-example-validator`)
-- Container includes pre-built @grounds/* packages
+- Container includes pre-built @grounds/\* packages
 - Build fails if any validated example throws an error
 - Mark examples for validation with `validator=typescript` on the code fence
 
@@ -219,12 +224,13 @@ Examples are validated during doc build using mdbook-validator:
 
 **CRITICAL:** These versions must stay in sync:
 
-| Location | What | Must Match |
-|----------|------|------------|
-| `mise.toml` | `node = "24"` | Container base image |
+| Location            | What                | Must Match             |
+| ------------------- | ------------------- | ---------------------- |
+| `mise.toml`         | `node = "24"`       | Container base image   |
 | `mdbook/Dockerfile` | `FROM node:24-slim` | mise.toml node version |
 
 When upgrading Node:
+
 1. Update `node` version in `mise.toml`
 2. Update `FROM node:XX-slim` in `mdbook/Dockerfile`
 3. Rebuild validator: `pnpm docs:build-validator`
@@ -247,6 +253,7 @@ When upgrading Node:
 API reference documentation is **auto-generated from TSDoc comments** using TypeDoc HTML output.
 
 **Documentation Structure:**
+
 - **Conceptual docs** (mdBook): Getting started, guides, examples in `docs/`
 - **API reference** (TypeDoc HTML): Complete API documentation in `docs/api/` (generated, gitignored)
 - **API index page**: `docs/API_README.md` provides landing page content for TypeDoc
@@ -255,16 +262,19 @@ The API docs are accessible from the mdBook sidebar under "API Reference" and li
 
 **Build Process:**
 TypeDoc generates HTML into docs/, which mdBook copies to output:
+
 ```bash
 pnpm docs:build  # Builds packages → TypeDoc HTML → mdBook (copies docs/ to output)
 ```
 
 Build order is important:
+
 1. `pnpm build` - Compile packages (required for TypeDoc)
 2. `pnpm docs:generate-api` - Generate TypeDoc HTML into `docs/api/`
 3. `mdbook build mdbook` - Generate mdBook HTML, copies `docs/` (including `api/`) to output
 
 **TypeDoc Configuration** (`typedoc.json`):
+
 - **Entry point strategy**: `expand` - Generates full navigation trees with all exports
 - **Module naming**: `@module` tags in each package's `index.ts` define clean names (@grounds/core, @grounds/schema, @grounds/stream)
 - **Sidebar organization**: `@group` tags organize exports by semantic category (Encoding, Decoding, Schema Constructors: Primitives, etc.)
@@ -272,6 +282,7 @@ Build order is important:
 - **Index page**: Uses `docs/API_README.md` for landing page content
 
 **TSDoc Guidelines:**
+
 - Use active voice ("Encodes data" not "This function encodes data")
 - Don't repeat type information (TypeScript provides types)
 - Add `@param` for all parameters
@@ -283,16 +294,19 @@ Build order is important:
 - **Use `@module` tag** only in package index.ts files to set package display name
 
 **Sidebar Organization by Package:**
+
 - **@grounds/core**: Encoding, Decoding, Error Handling, Value Constructors
 - **@grounds/schema**: Schema Constructors (Primitives, Containers, Structs, Enums), Codec API, Conversion Functions
 - **@grounds/stream**: Encoding Streams, Decoding Streams
 
 **CI Validation:**
+
 - CI runs full docs build to verify TypeDoc succeeds
 - Validates TSDoc syntax and detects broken cross-references
 - No manual commit of generated HTML needed (output is gitignored)
 
 **See also:**
+
 - TypeDoc configuration in `typedoc.json`
 
 ## Code Patterns
@@ -300,6 +314,7 @@ Build order is important:
 ### File Classification (MANDATORY)
 
 Every source file in `packages/*/src/` MUST have a pattern comment:
+
 ```typescript
 // pattern: Functional Core
 // pattern: Imperative Shell
@@ -344,6 +359,7 @@ It's always easier to add things than to remove them. The first pass of any API 
 **Corollary**: Every export becomes a compatibility burden. If it's public, someone will use it in ways you didn't intend. Keep the public API minimal, and expand only when users demonstrate actual need.
 
 **Guidelines**:
+
 - Export only what users need to accomplish common tasks
 - Keep internal implementation details unexported
 - When users request advanced features, design a proper API (don't just export internals)
@@ -359,27 +375,27 @@ It's always easier to add things than to remove them. The first pass of any API 
 
 ## Relish Type Codes
 
-| Type | Code | JS Type |
-|------|------|---------|
-| Null | 0x00 | `null` |
-| Bool | 0x01 | `boolean` |
-| u8 | 0x02 | `number` |
-| u16 | 0x03 | `number` |
-| u32 | 0x04 | `number` |
-| u64 | 0x05 | `bigint` |
-| u128 | 0x06 | `bigint` |
-| i8 | 0x07 | `number` |
-| i16 | 0x08 | `number` |
-| i32 | 0x09 | `number` |
-| i64 | 0x0a | `bigint` |
-| i128 | 0x0b | `bigint` |
-| f32 | 0x0c | `number` |
-| f64 | 0x0d | `number` |
-| String | 0x0e | `string` |
-| Array | 0x0f | `Array<T>` |
-| Map | 0x10 | `Map<K, V>` |
-| Struct | 0x11 | `object` |
-| Enum | 0x12 | tagged union |
+| Type      | Code | JS Type               |
+| --------- | ---- | --------------------- |
+| Null      | 0x00 | `null`                |
+| Bool      | 0x01 | `boolean`             |
+| u8        | 0x02 | `number`              |
+| u16       | 0x03 | `number`              |
+| u32       | 0x04 | `number`              |
+| u64       | 0x05 | `bigint`              |
+| u128      | 0x06 | `bigint`              |
+| i8        | 0x07 | `number`              |
+| i16       | 0x08 | `number`              |
+| i32       | 0x09 | `number`              |
+| i64       | 0x0a | `bigint`              |
+| i128      | 0x0b | `bigint`              |
+| f32       | 0x0c | `number`              |
+| f64       | 0x0d | `number`              |
+| String    | 0x0e | `string`              |
+| Array     | 0x0f | `Array<T>`            |
+| Map       | 0x10 | `Map<K, V>`           |
+| Struct    | 0x11 | `object`              |
+| Enum      | 0x12 | tagged union          |
 | Timestamp | 0x13 | `bigint` / `DateTime` |
 
 ## Wire Format
@@ -394,6 +410,7 @@ It's always easier to add things than to remove them. The first pass of any API 
 ### Architecture Decision Records (ADRs)
 
 Record architectural decisions in `adrs/` directory using sequential naming:
+
 - Format: `NNNN-<decision-name>.md` (e.g., `0000-use-neverthrow-for-errors.md`)
 - Document context, decision, consequences, and alternatives considered
 - Create ADRs during feature implementation when making significant architectural choices
@@ -401,11 +418,13 @@ Record architectural decisions in `adrs/` directory using sequential naming:
 ### Documentation
 
 The `docs/` directory should be updated during feature implementation:
+
 - Add conceptual documentation explaining design and usage
 - Include code examples demonstrating key features
 - Update existing docs when behavior changes
 
 **README.md updates:** When updating CLAUDE.md or project structure, also consider whether README.md needs corresponding updates. The README is user-facing documentation and should reflect:
+
 - New packages or directories in the monorepo structure
 - New commands or workflows
 - Changes to examples or getting started instructions
@@ -413,6 +432,7 @@ The `docs/` directory should be updated during feature implementation:
 ### Future Work and Issues
 
 Track future work in GitHub issues:
+
 - **Before creating issues:** Show user proposed title, body, and labels for each issue
 - Get explicit approval before creating
 - Label appropriately (enhancement, bug, documentation, etc.)

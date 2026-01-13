@@ -18,7 +18,8 @@ const userCodec = createCodec(UserSchema);
 const user: User = { id: 42, name: "Bob" };
 
 // Encode and decode using .andThen() chaining
-userCodec.encode(user)
+userCodec
+  .encode(user)
   .andThen((bytes) => {
     console.log("Encoded:", bytes.length, "bytes");
     console.log("Hex:", Buffer.from(bytes).toString("hex"));

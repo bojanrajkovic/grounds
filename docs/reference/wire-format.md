@@ -28,6 +28,7 @@ Variable-length encoding of payload size:
 - **Bit 0 = 1**: 4-byte little-endian length (up to 2³¹-1 bytes)
 
 Examples:
+
 - `0x0A` → 5 bytes (5 << 1 = 10, bit 0 = 0)
 - `0x01 0x00 0x01 0x00 0x00` → 128 bytes (bit 0 = 1, then LE u32)
 

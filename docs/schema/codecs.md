@@ -35,7 +35,8 @@ const result: Result<T, DecodeError> = codec.decode(bytes);
 Use `.andThen()` for roundtrip operations:
 
 ```typescript
-codec.encode(value)
+codec
+  .encode(value)
   .andThen((bytes) => codec.decode(bytes))
   .match(
     (decoded) => console.log("Success:", decoded),

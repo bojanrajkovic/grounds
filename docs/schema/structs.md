@@ -31,16 +31,16 @@ type User = Static<typeof UserSchema>;
 
 ## Available Field Types
 
-| Schema Type | TypeScript Type | Relish Type |
-|-------------|-----------------|-------------|
-| `RString()` | `string` | String |
-| `RBool()` | `boolean` | Bool |
-| `RU8()` - `RU128()` | `number` / `bigint` | u8 - u128 |
-| `RI8()` - `RI128()` | `number` / `bigint` | i8 - i128 |
-| `RF32()`, `RF64()` | `number` | f32, f64 |
-| `RTimestamp()` | `DateTime` | Timestamp |
-| `ROptional(T)` | `T \| null` | Optional wrapper |
-| `RArray(T)` | `Array<T>` | Array |
+| Schema Type         | TypeScript Type     | Relish Type      |
+| ------------------- | ------------------- | ---------------- |
+| `RString()`         | `string`            | String           |
+| `RBool()`           | `boolean`           | Bool             |
+| `RU8()` - `RU128()` | `number` / `bigint` | u8 - u128        |
+| `RI8()` - `RI128()` | `number` / `bigint` | i8 - i128        |
+| `RF32()`, `RF64()`  | `number`            | f32, f64         |
+| `RTimestamp()`      | `DateTime`          | Timestamp        |
+| `ROptional(T)`      | `T \| null`         | Optional wrapper |
+| `RArray(T)`         | `Array<T>`          | Array            |
 
 ## Next Steps
 

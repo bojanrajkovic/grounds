@@ -16,7 +16,7 @@ Grounds uses `null` for absent values (not `undefined`):
 
 ```typescript
 type Profile = {
-  name: string;      // required
+  name: string; // required
   bio: string | null; // optional
 };
 

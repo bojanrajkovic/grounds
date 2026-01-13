@@ -63,7 +63,7 @@ import { encode, type RelishValue, type EncodeError } from "@grounds/core";
  * @see {@link createEncoderStream} for Web Streams API version
  */
 export async function* encodeIterable(
-  values: AsyncIterable<RelishValue>
+  values: AsyncIterable<RelishValue>,
 ): AsyncGenerator<Result<Uint8Array, EncodeError>> {
   for await (const value of values) {
     const result = encode(value);

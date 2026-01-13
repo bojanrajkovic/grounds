@@ -26,12 +26,11 @@ const MessageSchema = RStruct({
 const encoderStream = createSchemaEncoderStream(MessageSchema);
 
 // Stream accepts typed Message values, outputs Uint8Array
-messageStream
-  .pipeThrough(encoderStream)
-  .pipeTo(networkSink);
+messageStream.pipeThrough(encoderStream).pipeTo(networkSink);
 ```
 
 The encoder stream:
+
 - Accepts values matching the schema type
 - Automatically converts to Relish wire format
 - Outputs `Uint8Array` chunks
@@ -45,12 +44,11 @@ Creates a `TransformStream` that decodes `Uint8Array` to typed values:
 const decoderStream = createSchemaDecoderStream(MessageSchema);
 
 // Stream accepts Uint8Array, outputs typed Message values
-networkSource
-  .pipeThrough(decoderStream)
-  .pipeTo(messageHandler);
+networkSource.pipeThrough(decoderStream).pipeTo(messageHandler);
 ```
 
 The decoder stream:
+
 - Accepts `Uint8Array` chunks
 - Parses Relish wire format
 - Outputs typed values matching the schema

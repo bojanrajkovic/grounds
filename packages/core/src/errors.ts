@@ -38,19 +38,17 @@ export class EncodeError extends Error {
 
   static unsortedFields(previousId: number, currentId: number): EncodeError {
     return new EncodeError(
-      `struct fields must be in ascending order: field ${previousId} followed by field ${currentId}`
+      `struct fields must be in ascending order: field ${previousId} followed by field ${currentId}`,
     );
   }
 
   static invalidFieldId(fieldId: number): EncodeError {
-    return new EncodeError(
-      `field ID ${fieldId} is invalid: bit 7 must not be set`
-    );
+    return new EncodeError(`field ID ${fieldId} is invalid: bit 7 must not be set`);
   }
 
   static invalidTypeCode(typeCode: number): EncodeError {
     return new EncodeError(
-      `type code 0x${typeCode.toString(16)} is invalid: bit 7 must not be set`
+      `type code 0x${typeCode.toString(16)} is invalid: bit 7 must not be set`,
     );
   }
 
@@ -75,10 +73,13 @@ export class EncodeError extends Error {
    * @param max - The maximum valid value for the type
    * @returns EncodeError describing the range violation
    */
-  static integerOutOfRange(typeName: string, value: number | bigint, min: number | bigint, max: number | bigint): EncodeError {
-    return new EncodeError(
-      `${typeName} value ${value} is out of range (${min} to ${max})`
-    );
+  static integerOutOfRange(
+    typeName: string,
+    value: number | bigint,
+    min: number | bigint,
+    max: number | bigint,
+  ): EncodeError {
+    return new EncodeError(`${typeName} value ${value} is out of range (${min} to ${max})`);
   }
 
   /**
@@ -93,9 +94,7 @@ export class EncodeError extends Error {
    * @returns EncodeError describing the non-integer value
    */
   static notAnInteger(typeName: string, value: number): EncodeError {
-    return new EncodeError(
-      `${typeName} value must be an integer, got ${value}`
-    );
+    return new EncodeError(`${typeName} value must be an integer, got ${value}`);
   }
 }
 
@@ -189,28 +188,25 @@ export class DecodeError extends Error {
   static unexpectedEnd(expected: number, available: number): DecodeError {
     return new DecodeError(
       "UNEXPECTED_EOF",
-      `expected ${expected} bytes but only ${available} available`
+      `expected ${expected} bytes but only ${available} available`,
     );
   }
 
   static unknownTypeCode(typeCode: number): DecodeError {
-    return new DecodeError(
-      "INVALID_TYPE_CODE",
-      `unknown type code: 0x${typeCode.toString(16)}`
-    );
+    return new DecodeError("INVALID_TYPE_CODE", `unknown type code: 0x${typeCode.toString(16)}`);
   }
 
   static invalidTypeCode(typeCode: number): DecodeError {
     return new DecodeError(
       "INVALID_TYPE_CODE",
-      `type code 0x${typeCode.toString(16)} is invalid: bit 7 must not be set`
+      `type code 0x${typeCode.toString(16)} is invalid: bit 7 must not be set`,
     );
   }
 
   static unsortedFields(previousId: number, currentId: number): DecodeError {
     return new DecodeError(
       "UNSORTED_FIELDS",
-      `struct fields must be in ascending order: field ${previousId} followed by field ${currentId}`
+      `struct fields must be in ascending order: field ${previousId} followed by field ${currentId}`,
     );
   }
 
@@ -222,55 +218,43 @@ export class DecodeError extends Error {
     return new DecodeError("INVALID_UTF8", "string contains invalid UTF-8");
   }
 
-  static enumLengthMismatch(
-    declaredLength: number,
-    actualLength: number
-  ): DecodeError {
+  static enumLengthMismatch(declaredLength: number, actualLength: number): DecodeError {
     return new DecodeError(
       "ENUM_LENGTH_MISMATCH",
-      `enum variant content length ${actualLength} does not match declared length ${declaredLength}`
+      `enum variant content length ${actualLength} does not match declared length ${declaredLength}`,
     );
   }
 
   static invalidFieldId(fieldId: number): DecodeError {
     return new DecodeError(
       "INVALID_FIELD_ID",
-      `field ID ${fieldId} is invalid: bit 7 must not be set`
+      `field ID ${fieldId} is invalid: bit 7 must not be set`,
     );
   }
 
   static invalidVariantId(variantId: number): DecodeError {
     return new DecodeError(
       "INVALID_VARIANT_ID",
-      `variant ID ${variantId} is invalid: bit 7 must not be set`
+      `variant ID ${variantId} is invalid: bit 7 must not be set`,
     );
   }
 
   static missingRequiredField(fieldId: number): DecodeError {
-    return new DecodeError(
-      "MISSING_REQUIRED_FIELD",
-      `missing required field with ID ${fieldId}`
-    );
+    return new DecodeError("MISSING_REQUIRED_FIELD", `missing required field with ID ${fieldId}`);
   }
 
   static unknownVariantId(variantId: number): DecodeError {
-    return new DecodeError(
-      "UNKNOWN_VARIANT_ID",
-      `unknown variant ID ${variantId}`
-    );
+    return new DecodeError("UNKNOWN_VARIANT_ID", `unknown variant ID ${variantId}`);
   }
 
   static unsupportedType(typeName: string): DecodeError {
-    return new DecodeError(
-      "UNSUPPORTED_TYPE",
-      `unsupported schema type: ${typeName}`
-    );
+    return new DecodeError("UNSUPPORTED_TYPE", `unsupported schema type: ${typeName}`);
   }
 
   static truncatedStream(context: string): DecodeError {
     return new DecodeError(
       "TRUNCATED_STREAM",
-      `truncated stream: incomplete value at end of input (${context})`
+      `truncated stream: incomplete value at end of input (${context})`,
     );
   }
 }

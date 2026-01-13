@@ -14,13 +14,9 @@ describe("encodeTaggedVarint", () => {
 
   it("encodes lengths >= 128 as 4 bytes little-endian with LSB=1", () => {
     // length 128: (128 << 1) | 1 = 257 = 0x101
-    expect(encodeTaggedVarint(128)).toEqual(
-      new Uint8Array([0x01, 0x01, 0x00, 0x00])
-    );
+    expect(encodeTaggedVarint(128)).toEqual(new Uint8Array([0x01, 0x01, 0x00, 0x00]));
     // length 1000: (1000 << 1) | 1 = 2001 = 0x7D1
-    expect(encodeTaggedVarint(1000)).toEqual(
-      new Uint8Array([0xd1, 0x07, 0x00, 0x00])
-    );
+    expect(encodeTaggedVarint(1000)).toEqual(new Uint8Array([0xd1, 0x07, 0x00, 0x00]));
   });
 });
 

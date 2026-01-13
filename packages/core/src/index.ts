@@ -125,4 +125,3 @@ export { encode, Encoder } from "./encoder.js";
 
 // Decoder
 export { decode, Decoder } from "./decoder.js";
-

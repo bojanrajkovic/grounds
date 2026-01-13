@@ -30,6 +30,7 @@ coverage/
 
 # mdBook build output
 mdbook/book/
+docs/book/
 
 # Implementation plans (execution scaffolding)
 docs/implementation-plans/

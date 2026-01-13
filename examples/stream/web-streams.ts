@@ -6,11 +6,7 @@ import { Null, Bool, String_, type RelishValue, type DecodedValue } from "@groun
 
 async function example(): Promise<void> {
   // Create values to stream
-  const values: Array<RelishValue> = [
-    Null,
-    Bool(true),
-    String_("streaming!"),
-  ];
+  const values: Array<RelishValue> = [Null, Bool(true), String_("streaming!")];
 
   // Create a readable stream of values
   const valueStream = new ReadableStream<RelishValue>({

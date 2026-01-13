@@ -178,7 +178,7 @@ function _decodeValueToTyped<T>(decoded: unknown, schema: SchemaValue): Result<T
 }
 
 export function createSchemaEncoderStream<T extends PublicRelishSchema>(
-  schema: T
+  schema: T,
 ): TransformStream<Static<T>, Uint8Array> {
   const codec = createCodec(schema);
 
@@ -195,7 +195,7 @@ export function createSchemaEncoderStream<T extends PublicRelishSchema>(
 }
 
 export function createSchemaDecoderStream<T extends PublicRelishSchema>(
-  schema: T
+  schema: T,
 ): TransformStream<Uint8Array, Static<T>> {
   const buffer = new StreamBuffer();
 
@@ -224,7 +224,10 @@ export function createSchemaDecoderStream<T extends PublicRelishSchema>(
           // Convert raw DecodedValue to schema-typed value using internal helper
           // This uses the same conversion logic as @grounds/schema/convert.ts:fromRelish
           // (see ADR 0001 for duplication rationale)
-          const typedResult = _decodeValueToTyped<Static<T>>(result.value.value, schema as SchemaValue);
+          const typedResult = _decodeValueToTyped<Static<T>>(
+            result.value.value,
+            schema as SchemaValue,
+          );
           if (typedResult.isErr()) {
             controller.error(typedResult.error);
             return;
@@ -241,8 +244,8 @@ export function createSchemaDecoderStream<T extends PublicRelishSchema>(
         if (result.status === "needMore") {
           controller.error(
             DecodeErrorClass.truncatedStream(
-              `${buffer.length} bytes remaining at end of schema stream`
-            )
+              `${buffer.length} bytes remaining at end of schema stream`,
+            ),
           );
           return;
         }
@@ -259,7 +262,10 @@ export function createSchemaDecoderStream<T extends PublicRelishSchema>(
           }
 
           // Convert raw DecodedValue to schema-typed value using internal helper
-          const typedResult = _decodeValueToTyped<Static<T>>(result.value.value, schema as SchemaValue);
+          const typedResult = _decodeValueToTyped<Static<T>>(
+            result.value.value,
+            schema as SchemaValue,
+          );
           if (typedResult.isErr()) {
             controller.error(typedResult.error);
             return;

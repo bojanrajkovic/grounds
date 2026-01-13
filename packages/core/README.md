@@ -34,7 +34,10 @@ const arrayResult = encode({
 const mapResult = encode({
   type: TypeCode.Map,
   value: new Map([
-    [{ type: TypeCode.String, value: "key" }, { type: TypeCode.U32, value: 123 }],
+    [
+      { type: TypeCode.String, value: "key" },
+      { type: TypeCode.U32, value: 123 },
+    ],
   ]),
 });
 ```
@@ -47,7 +50,7 @@ import { decode } from "@grounds/core";
 const result = decode(bytes);
 result.match(
   (value) => console.log(value), // DecodedValue
-  (error) => console.error(error) // DecodeError
+  (error) => console.error(error), // DecodeError
 );
 ```
 
@@ -67,7 +70,7 @@ result.mapErr((error) => {
 // Or use match for both success and error cases
 result.match(
   (bytes) => console.log("Encoded:", bytes),
-  (error) => console.error("Failed:", error.message)
+  (error) => console.error("Failed:", error.message),
 );
 ```
 

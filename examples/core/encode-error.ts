@@ -5,11 +5,7 @@ import { encode, Struct, String_ } from "@grounds/core";
 
 // Attempt to encode a struct with an invalid field ID (>= 128)
 // The Relish wire format requires field IDs to have bit 7 clear (0-127)
-const invalidStruct = Struct(
-  new Map([
-    [128, String_("This field ID is invalid")],
-  ])
-);
+const invalidStruct = Struct(new Map([[128, String_("This field ID is invalid")]]));
 
 const result = encode(invalidStruct);
 

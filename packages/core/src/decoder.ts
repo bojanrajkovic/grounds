@@ -514,7 +514,10 @@ export class Decoder {
       return err(DecodeError.enumLengthMismatch(contentLength, actualLength));
     }
 
-    return ok({ variantId, value: valueResult.value } as Readonly<{ variantId: number; value: DecodedValue }>);
+    return ok({ variantId, value: valueResult.value } as Readonly<{
+      variantId: number;
+      value: DecodedValue;
+    }>);
   }
 }
 

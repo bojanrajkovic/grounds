@@ -257,18 +257,32 @@ export type CompositeTypeCode =
  * Map a TypeCode to its corresponding JavaScript type.
  * Primitive types map to raw JS values, composite types map to RelishValue.
  */
-export type TypeCodeToJsType<T extends TypeCode> =
-  T extends typeof TypeCode.Null ? null :
-  T extends typeof TypeCode.Bool ? boolean :
-  T extends typeof TypeCode.U8 | typeof TypeCode.U16 | typeof TypeCode.U32 |
-           typeof TypeCode.I8 | typeof TypeCode.I16 | typeof TypeCode.I32 |
-           typeof TypeCode.F32 | typeof TypeCode.F64 ? number :
-  T extends typeof TypeCode.U64 | typeof TypeCode.U128 |
-           typeof TypeCode.I64 | typeof TypeCode.I128 |
-           typeof TypeCode.Timestamp ? bigint :
-  T extends typeof TypeCode.String ? string :
-  T extends CompositeTypeCode ? RelishValue :
-  never;
+export type TypeCodeToJsType<T extends TypeCode> = T extends typeof TypeCode.Null
+  ? null
+  : T extends typeof TypeCode.Bool
+    ? boolean
+    : T extends
+          | typeof TypeCode.U8
+          | typeof TypeCode.U16
+          | typeof TypeCode.U32
+          | typeof TypeCode.I8
+          | typeof TypeCode.I16
+          | typeof TypeCode.I32
+          | typeof TypeCode.F32
+          | typeof TypeCode.F64
+      ? number
+      : T extends
+            | typeof TypeCode.U64
+            | typeof TypeCode.U128
+            | typeof TypeCode.I64
+            | typeof TypeCode.I128
+            | typeof TypeCode.Timestamp
+        ? bigint
+        : T extends typeof TypeCode.String
+          ? string
+          : T extends CompositeTypeCode
+            ? RelishValue
+            : never;
 
 /**
  * Homogeneous array with element type specified by TypeCode.
@@ -316,7 +330,7 @@ export type DecodedValue =
   | number
   | bigint
   | string
-  | DateTime  // Luxon DateTime for timestamps
+  | DateTime // Luxon DateTime for timestamps
   | ReadonlyArray<DecodedValue>
   | ReadonlyMap<DecodedValue, DecodedValue>
   | Readonly<{ readonly [fieldId: number]: DecodedValue }>

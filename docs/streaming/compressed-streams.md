@@ -48,12 +48,12 @@ networkSource
 
 ## Supported Algorithms
 
-| Algorithm | Description | Runtime Support |
-|-----------|-------------|-----------------|
-| `gzip` | Most compatible, includes header/checksum | All runtimes |
-| `deflate` | Raw deflate with zlib header | All runtimes |
-| `deflate-raw` | Raw deflate, no header | All runtimes |
-| `zstd` | Fast, high compression ratio | Bun only |
+| Algorithm     | Description                               | Runtime Support |
+| ------------- | ----------------------------------------- | --------------- |
+| `gzip`        | Most compatible, includes header/checksum | All runtimes    |
+| `deflate`     | Raw deflate with zlib header              | All runtimes    |
+| `deflate-raw` | Raw deflate, no header                    | All runtimes    |
+| `zstd`        | Fast, high compression ratio              | Bun only        |
 
 **Note:** Brotli is not currently supported by any runtime's native CompressionStream API.
 

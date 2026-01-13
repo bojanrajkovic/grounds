@@ -4,9 +4,7 @@
 import { encode, decode, Array_, Map_, TypeCode } from "@grounds/core";
 
 // Encode an array of values (primitive U8 elements use raw numbers)
-const arrayResult = encode(
-  Array_(TypeCode.U8, [1, 2, 3])
-);
+const arrayResult = encode(Array_(TypeCode.U8, [1, 2, 3]));
 
 arrayResult.match(
   (bytes) => console.log("Array encoded:", bytes.length, "bytes"),
@@ -29,8 +27,8 @@ const mapResult = encode(
     new Map([
       ["name", "Alice"],
       ["age", "30"],
-    ])
-  )
+    ]),
+  ),
 );
 
 mapResult.match(

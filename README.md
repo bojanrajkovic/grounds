@@ -53,14 +53,14 @@ const codec = createCodec(UserSchema);
 const encoded = codec.encode({ name: "Alice", age: 30, email: null });
 encoded.match(
   (bytes) => console.log("Encoded:", bytes), // Uint8Array
-  (err) => console.error("Encode failed:", err)
+  (err) => console.error("Encode failed:", err),
 );
 
 // Decode
 const decoded = codec.decode(encoded.unwrapOr(new Uint8Array()));
 decoded.match(
   (user) => console.log("Decoded:", user), // { name: "Alice", age: 30, email: null }
-  (err) => console.error("Decode failed:", err)
+  (err) => console.error("Decode failed:", err),
 );
 ```
 
@@ -77,7 +77,7 @@ const decoded = encoded.andThen((bytes) => decode(bytes));
 
 decoded.match(
   (value) => console.log(value), // "hello"
-  (err) => console.error("Failed:", err)
+  (err) => console.error("Failed:", err),
 );
 ```
 
@@ -95,23 +95,24 @@ const decoded = byteStream.pipeThrough(createDecoderStream());
 
 ## Type codes
 
-| Type | Code | JavaScript |
-|------|------|------------|
-| Null | 0x00 | `null` |
-| Bool | 0x01 | `boolean` |
-| u8-u128 | 0x02-0x06 | `number` / `bigint` |
-| i8-i128 | 0x07-0x0b | `number` / `bigint` |
-| f32/f64 | 0x0c-0x0d | `number` |
-| String | 0x0e | `string` |
-| Array | 0x0f | `Array<T>` |
-| Map | 0x10 | `Map<K, V>` |
-| Struct | 0x11 | `object` |
-| Enum | 0x12 | tagged union |
-| Timestamp | 0x13 | `bigint` / `DateTime` |
+| Type      | Code      | JavaScript            |
+| --------- | --------- | --------------------- |
+| Null      | 0x00      | `null`                |
+| Bool      | 0x01      | `boolean`             |
+| u8-u128   | 0x02-0x06 | `number` / `bigint`   |
+| i8-i128   | 0x07-0x0b | `number` / `bigint`   |
+| f32/f64   | 0x0c-0x0d | `number`              |
+| String    | 0x0e      | `string`              |
+| Array     | 0x0f      | `Array<T>`            |
+| Map       | 0x10      | `Map<K, V>`           |
+| Struct    | 0x11      | `object`              |
+| Enum      | 0x12      | tagged union          |
+| Timestamp | 0x13      | `bigint` / `DateTime` |
 
 ## Wire format
 
 Relish uses T[L]V (Type-Length-Value) encoding:
+
 - **Type**: 1 byte (0x00-0x13)
 - **Length**: Tagged varint (bit 0 = 0: 7-bit, bit 0 = 1: 4-byte little-endian)
 - **Value**: Type-specific encoding, all integers little-endian
@@ -197,6 +198,7 @@ All development should follow this workflow:
 ### Phase-based development
 
 When working on multi-phase projects:
+
 - Complete one phase fully before starting the next
 - Ensure previous phase's PR is merged before beginning subsequent phases
 - Document architectural decisions in `docs/adrs/` directory

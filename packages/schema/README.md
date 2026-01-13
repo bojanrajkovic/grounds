@@ -15,9 +15,21 @@ npm install -D @types/luxon
 
 ```typescript
 import {
-  RStruct, REnum, RArray, RMap, ROptional,
-  RNull, RBool, RU8, RU16, RU32, RU64, RString, RTimestamp,
-  field, variant,
+  RStruct,
+  REnum,
+  RArray,
+  RMap,
+  ROptional,
+  RNull,
+  RBool,
+  RU8,
+  RU16,
+  RU32,
+  RU64,
+  RString,
+  RTimestamp,
+  field,
+  variant,
 } from "@grounds/schema";
 
 // Struct with fields
@@ -57,14 +69,14 @@ const encoded = userCodec.encode({
 
 encoded.match(
   (bytes) => console.log("Encoded:", bytes),
-  (err) => console.error("Encode failed:", err)
+  (err) => console.error("Encode failed:", err),
 );
 
 // Decode
 const decoded = userCodec.decode(bytes);
 decoded.match(
   (user) => console.log("Decoded:", user),
-  (err) => console.error("Decode failed:", err)
+  (err) => console.error("Decode failed:", err),
 );
 ```
 

@@ -1,13 +1,7 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import { encodeIterable } from "../src/encode.js";
-import {
-  type RelishValue,
-  Null,
-  Bool,
-  Struct,
-  EncodeError,
-} from "@grounds/core";
+import { type RelishValue, Null, Bool, Struct, EncodeError } from "@grounds/core";
 
 describe("encodeIterable", () => {
   it("should yield Result types from encodeIterable", async () => {

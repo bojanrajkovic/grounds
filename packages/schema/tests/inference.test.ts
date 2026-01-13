@@ -25,11 +25,7 @@ import {
   RMap,
   ROptional,
 } from "../src/index.js";
-import {
-  RelishElementType,
-  RelishKeyType,
-  RelishValueType,
-} from "../src/symbols.js";
+import { RelishElementType, RelishKeyType, RelishValueType } from "../src/symbols.js";
 import { field, RStruct } from "../src/struct.js";
 import { variant, REnum } from "../src/enum.js";
 import { DateTime } from "luxon";
@@ -133,7 +129,10 @@ describe("Type Inference (compile-time)", () => {
     it("infers Map key and value types correctly", () => {
       const mapSchema = RMap(RString(), RU32());
       type MapType = Static<typeof mapSchema>;
-      const value: MapType = new Map([["one", 1], ["two", 2]]);
+      const value: MapType = new Map([
+        ["one", 1],
+        ["two", 2],
+      ]);
       expect(value instanceof Map).toBe(true);
     });
 
