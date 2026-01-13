@@ -54,7 +54,21 @@ jobs:
         if: steps.check-release.outputs.is_release != 'true'
         run: pnpm exec tsx scripts/generate-changeset.ts -p main -i HEAD
 
+      - name: Check for releasable changesets
+        id: check-changesets
+        run: |
+          # Check if any changesets would cause version bumps
+          # Changesets with "none" bump type don't count
+          if grep -r '"@grounds/.*": \(major\|minor\|patch\)' .changeset/*.md 2>/dev/null; then
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+            echo "Found releasable changesets"
+          else
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "No releasable changesets (only chore/docs/test commits)"
+          fi
+
       - name: Create Release Pull Request or Publish
+        if: steps.check-changesets.outputs.has_changesets == 'true'
         uses: changesets/action@v1
         with:
           version: pnpm run changeset-version
