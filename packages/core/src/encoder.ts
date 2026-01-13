@@ -1,12 +1,6 @@
 // pattern: Functional Core
 import { Result, ok, err } from "neverthrow";
-import type {
-  RelishValue,
-  RelishArray,
-  RelishMap,
-  RelishStruct,
-  RelishEnum,
-} from "./types.js";
+import type { RelishValue, RelishArray, RelishMap, RelishStruct, RelishEnum } from "./types.js";
 import { TypeCode } from "./types.js";
 import { EncodeError } from "./errors.js";
 import { encodeTaggedVarint, getTypeCodeForValue } from "./encoding-helpers.js";
@@ -39,7 +33,7 @@ import {
  */
 function toValidationResult(
   typeName: string,
-  error: IntegerValidationError | null
+  error: IntegerValidationError | null,
 ): Result<void, EncodeError> {
   if (error === null) {
     return ok(undefined);
@@ -241,31 +235,42 @@ export class Encoder {
         });
 
       case "i8":
-        return toValidationResult("i8", validateSignedNumber(value.value, I8_MIN, I8_MAX)).map(() => {
-          this.writeByte(value.value & 0xff);
-        });
+        return toValidationResult("i8", validateSignedNumber(value.value, I8_MIN, I8_MAX)).map(
+          () => {
+            this.writeByte(value.value & 0xff);
+          },
+        );
 
       case "i16":
-        return toValidationResult("i16", validateSignedNumber(value.value, I16_MIN, I16_MAX)).map(() => {
-          this.ensureCapacity(2);
-          this.view.setInt16(this.position, value.value, true);
-          this.position += 2;
-        });
+        return toValidationResult("i16", validateSignedNumber(value.value, I16_MIN, I16_MAX)).map(
+          () => {
+            this.ensureCapacity(2);
+            this.view.setInt16(this.position, value.value, true);
+            this.position += 2;
+          },
+        );
 
       case "i32":
-        return toValidationResult("i32", validateSignedNumber(value.value, I32_MIN, I32_MAX)).map(() => {
-          this.ensureCapacity(4);
-          this.view.setInt32(this.position, value.value, true);
-          this.position += 4;
-        });
+        return toValidationResult("i32", validateSignedNumber(value.value, I32_MIN, I32_MAX)).map(
+          () => {
+            this.ensureCapacity(4);
+            this.view.setInt32(this.position, value.value, true);
+            this.position += 4;
+          },
+        );
 
       case "i64":
-        return toValidationResult("i64", validateSignedBigInt(value.value, I64_MIN, I64_MAX)).map(() => {
-          this.encodeBigIntLE(value.value, 8);
-        });
+        return toValidationResult("i64", validateSignedBigInt(value.value, I64_MIN, I64_MAX)).map(
+          () => {
+            this.encodeBigIntLE(value.value, 8);
+          },
+        );
 
       case "i128":
-        return toValidationResult("i128", validateSignedBigInt(value.value, I128_MIN, I128_MAX)).map(() => {
+        return toValidationResult(
+          "i128",
+          validateSignedBigInt(value.value, I128_MIN, I128_MAX),
+        ).map(() => {
           this.encodeBigIntLE(value.value, 16);
         });
 
@@ -311,7 +316,7 @@ export class Encoder {
   private encodeBigIntLE(value: bigint, byteLength: number): void {
     this.ensureCapacity(byteLength);
     const mask = (1n << BigInt(byteLength * 8)) - 1n;
-    let unsigned = value < 0n ? (value & mask) : value;
+    let unsigned = value < 0n ? value & mask : value;
 
     for (let i = 0; i < byteLength; i++) {
       this.buffer[this.position++] = Number(unsigned & 0xffn);

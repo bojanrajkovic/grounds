@@ -47,7 +47,9 @@ export function expectDateTime(value: unknown): asserts value is DateTime {
 /**
  * Assert that a value is a struct (plain object with numeric field IDs).
  */
-export function expectStruct(value: unknown): asserts value is Readonly<{ [fieldId: number]: unknown }> {
+export function expectStruct(
+  value: unknown,
+): asserts value is Readonly<{ [fieldId: number]: unknown }> {
   expect(value).toBeTypeOf("object");
   expect(value).not.toBeNull();
   expect(Array.isArray(value)).toBe(false);
@@ -56,7 +58,9 @@ export function expectStruct(value: unknown): asserts value is Readonly<{ [field
 /**
  * Assert that a value is an enum (object with variantId and value).
  */
-export function expectEnum(value: unknown): asserts value is Readonly<{ variantId: number; value: unknown }> {
+export function expectEnum(
+  value: unknown,
+): asserts value is Readonly<{ variantId: number; value: unknown }> {
   expect(value).toBeTypeOf("object");
   expect(value).not.toBeNull();
   expect(value).toHaveProperty("variantId");

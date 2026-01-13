@@ -33,7 +33,13 @@ import {
 } from "@grounds/core";
 import { DateTime } from "luxon";
 import { Value } from "@sinclair/typebox/value";
-import { RelishKind, RelishTypeCode, RelishElementType, RelishKeyType, RelishValueType } from "./symbols.js";
+import {
+  RelishKind,
+  RelishTypeCode,
+  RelishElementType,
+  RelishKeyType,
+  RelishValueType,
+} from "./symbols.js";
 import type { TRelishSchema, TRArray, TRMap, TROptional } from "./types.js";
 import type { TRStruct, TStructField } from "./struct.js";
 import type { TREnum, TEnumVariant } from "./enum.js";
@@ -91,7 +97,9 @@ function getFieldId(fieldSchema: TStructField): number {
  * Type guard: Check if a field schema is optional.
  * Narrows the type to TROptional for safe .inner access.
  */
-function isOptionalField(fieldSchema: TStructField): fieldSchema is TStructField & TROptional<TRelishSchema> {
+function isOptionalField(
+  fieldSchema: TStructField,
+): fieldSchema is TStructField & TROptional<TRelishSchema> {
   return RelishKind in fieldSchema && fieldSchema[RelishKind] === "ROptional";
 }
 
@@ -247,7 +255,12 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
       const fields = new Map<number, RelishValue>();
 
       // Collect field entries with their IDs for sorting
-      const fieldEntries: Array<{ name: string; fieldId: number; fieldSchema: TStructField; innerSchema: TRelishSchema }> = [];
+      const fieldEntries: Array<{
+        name: string;
+        fieldId: number;
+        fieldSchema: TStructField;
+        innerSchema: TRelishSchema;
+      }> = [];
       for (const [name, fieldSchema] of Object.entries(structSchema.fields)) {
         fieldEntries.push({
           name,
@@ -343,7 +356,7 @@ function _toRelishValue(value: unknown, schema: TRelishSchema): Result<RelishVal
  * @see {@link createCodec} for a wrapped API with type inference
  */
 export function toRelish(value: unknown, schema: TRelishSchema): Result<Uint8Array, EncodeError> {
-  return _toRelishValue(value, schema).andThen(relishValue => encode(relishValue));
+  return _toRelishValue(value, schema).andThen((relishValue) => encode(relishValue));
 }
 
 /**
@@ -523,7 +536,10 @@ function _decodeValueToTyped<T>(value: unknown, schema: TRelishSchema): Result<T
       // Returns the unwrapped value directly - users handle discrimination
       for (const [_variantName, variantSchema] of Object.entries(enumSchema.variants)) {
         if (getVariantId(variantSchema) === variantId) {
-          const valueResult = _decodeValueToTyped(decodedEnum.value, variantSchema as unknown as TRelishSchema);
+          const valueResult = _decodeValueToTyped(
+            decodedEnum.value,
+            variantSchema as unknown as TRelishSchema,
+          );
           if (valueResult.isErr()) {
             return err(valueResult.error);
           }

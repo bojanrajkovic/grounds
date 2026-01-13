@@ -57,10 +57,12 @@ TypeBox-based schema definitions for Relish serialization. Bridges TypeBox's JSO
 Following project-wide API design principles (see root CLAUDE.md), this package exports a minimal public API.
 
 **Core conversion functions**:
+
 - `toRelish(value, schema)`: Converts JS value to Relish binary bytes. Returns `Result<Uint8Array, EncodeError>`.
 - `fromRelish(bytes, schema)`: Converts Relish binary bytes to schema-typed JS value. Returns `Result<T, DecodeError>`. Needed by `@grounds/stream` for schema-aware streaming.
 
 **Not exported (internal implementation details)**:
+
 - Symbols: `RelishKind`, `RelishTypeCode`, `RelishFieldId`, `RelishVariantId`, `RelishElementType`, `RelishKeyType`, `RelishValueType` (schema introspection)
 - Internal helper: `_toRelishValue` (Codec uses this internally; users work with bytes instead of intermediate RelishValue forms)
 

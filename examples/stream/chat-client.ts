@@ -58,7 +58,10 @@ async function main(): Promise<never> {
     // Write to decoder stream
     if (decoderWriter) {
       decoderWriter.write(bytes).catch((error) => {
-        console.error("Failed to write to decoder stream:", error instanceof Error ? error.message : String(error));
+        console.error(
+          "Failed to write to decoder stream:",
+          error instanceof Error ? error.message : String(error),
+        );
       });
     }
   });
@@ -128,8 +131,13 @@ function startReadingInput(userName: string, ws: WebSocket): void {
       // Encode and send the message using encoder stream
       (async () => {
         try {
-          const { readable: encoderOutput, writable: encoderInput } = new TransformStream<ChatMessage, ChatMessage>();
-          const encodedStream = encoderOutput.pipeThrough(createSchemaEncoderStream(ChatMessageSchema));
+          const { readable: encoderOutput, writable: encoderInput } = new TransformStream<
+            ChatMessage,
+            ChatMessage
+          >();
+          const encodedStream = encoderOutput.pipeThrough(
+            createSchemaEncoderStream(ChatMessageSchema),
+          );
 
           // Write message to encoder
           const encoderInputWriter = encoderInput.getWriter();
@@ -144,7 +152,10 @@ function startReadingInput(userName: string, ws: WebSocket): void {
           }
           encodedReader.cancel();
         } catch (error) {
-          console.error("Failed to encode message:", error instanceof Error ? error.message : String(error));
+          console.error(
+            "Failed to encode message:",
+            error instanceof Error ? error.message : String(error),
+          );
         }
       })();
 

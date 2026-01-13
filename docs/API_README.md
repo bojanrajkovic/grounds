@@ -42,10 +42,10 @@ Use the sidebar to browse exports by package. Each package's exports are organiz
 All packages use [neverthrow](https://github.com/supermacro/neverthrow) for error handling, returning `Result<T, E>` types instead of throwing exceptions. Use `.match()`, `.andThen()`, or `.map()` to handle success and error cases.
 
 ```typescript
-import { encode, U32 } from '@grounds/core';
+import { encode, U32 } from "@grounds/core";
 
 encode(U32(42)).match(
-  (bytes) => console.log('Success:', bytes),
-  (error) => console.error('Error:', error.message)
+  (bytes) => console.log("Success:", bytes),
+  (error) => console.error("Error:", error.message),
 );
 ```

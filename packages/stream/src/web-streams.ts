@@ -136,9 +136,7 @@ export function createDecoderStream(): TransformStream<Uint8Array, DecodedValue>
         if (result.status === "needMore") {
           // TRUNCATED_STREAM: specific error for incomplete data at end
           controller.error(
-            DecodeErrorClass.truncatedStream(
-              `${buffer.length} bytes remaining at end of stream`
-            )
+            DecodeErrorClass.truncatedStream(`${buffer.length} bytes remaining at end of stream`),
           );
           return;
         }

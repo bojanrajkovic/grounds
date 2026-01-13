@@ -4,8 +4,7 @@
 import { encode, U32 } from "@grounds/core";
 
 // Encode a value and transform the result to hex string
-const hexResult = encode(U32(42))
-  .map((bytes) => Buffer.from(bytes).toString("hex"));
+const hexResult = encode(U32(42)).map((bytes) => Buffer.from(bytes).toString("hex"));
 
 // Use .unwrapOr() to get value with fallback
 const hex = hexResult.unwrapOr("encoding failed");

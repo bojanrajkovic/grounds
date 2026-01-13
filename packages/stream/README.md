@@ -27,7 +27,7 @@ for await (const result of encodeIterable(values())) {
     (bytes) => {
       // Send bytes (Uint8Array) to network/file
     },
-    (err) => console.error("Encode failed:", err)
+    (err) => console.error("Encode failed:", err),
   );
 }
 
@@ -39,7 +39,7 @@ async function* chunks() {
 for await (const result of decodeIterable(chunks())) {
   result.match(
     (value) => console.log(value), // DecodedValue
-    (err) => console.error("Decode failed:", err)
+    (err) => console.error("Decode failed:", err),
   );
 }
 ```

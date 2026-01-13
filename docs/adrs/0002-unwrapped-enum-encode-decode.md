@@ -9,18 +9,21 @@
 The original enum encode/decode API required explicit variant specification:
 
 **Old encoding:**
+
 ```typescript
-codec.encode({ variant: "text", value: { content: "Hello", sender: "Alice" } })
+codec.encode({ variant: "text", value: { content: "Hello", sender: "Alice" } });
 // User must specify which variant they're encoding
 ```
 
 **Old decoding:**
+
 ```typescript
-codec.decode(bytes) // Returns { variant: "text", value: { content, sender } }
+codec.decode(bytes); // Returns { variant: "text", value: { content, sender } }
 // Or alternative: { text: { content, sender } }
 ```
 
 This created friction:
+
 - **Encoding**: Verbose - users must name the variant even though the value's shape uniquely identifies it
 - **Decoding**: Extra wrapper level - users must unwrap `{ text: {...} }` or `{ variant, value }` to get the actual data
 - **Type guards**: Library-provided discrimination via `"text" in message` couples user code to library's wrapper format
@@ -35,7 +38,7 @@ Use TypeBox's `Value.Check` to determine which variant schema the input value sa
 
 ```typescript
 // New encoding - variant inferred automatically
-codec.encode({ content: "Hello", sender: "Alice" })
+codec.encode({ content: "Hello", sender: "Alice" });
 // Library checks: Does this match variant 0's schema? Variant 1's? etc.
 ```
 
@@ -47,7 +50,7 @@ Return the raw decoded value without any wrapper:
 
 ```typescript
 // New decoding - raw value returned
-codec.decode(bytes) // Returns { content: "Hello", sender: "Alice" }
+codec.decode(bytes); // Returns { content: "Hello", sender: "Alice" }
 // Not { text: {...} } or { variant: "text", value: {...} }
 ```
 
@@ -55,17 +58,23 @@ Users who need to discriminate between variants add their own discriminator fiel
 
 ```typescript
 const MessageSchema = REnum({
-  text: variant(0, RStruct({
-    type: field(0, RString()),  // "text" - user-defined discriminator
-    content: field(1, RString()),
-    sender: field(2, RString()),
-  })),
-  image: variant(1, RStruct({
-    type: field(0, RString()),  // "image" - user-defined discriminator
-    url: field(1, RString()),
-    width: field(2, RU32()),
-    height: field(3, RU32()),
-  })),
+  text: variant(
+    0,
+    RStruct({
+      type: field(0, RString()), // "text" - user-defined discriminator
+      content: field(1, RString()),
+      sender: field(2, RString()),
+    }),
+  ),
+  image: variant(
+    1,
+    RStruct({
+      type: field(0, RString()), // "image" - user-defined discriminator
+      url: field(1, RString()),
+      width: field(2, RU32()),
+      height: field(3, RU32()),
+    }),
+  ),
 });
 
 // User writes their own type guard
@@ -143,6 +152,7 @@ Keep requiring `{ variant: "text", value: {...} }` for encoding:
 ## Validation
 
 After implementation:
+
 - `codec.encode({ content, sender })` infers text variant automatically
 - `codec.decode(bytes)` returns `{ content, sender }` directly
 - Users add discriminator fields to struct variants for type narrowing

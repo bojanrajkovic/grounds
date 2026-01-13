@@ -5,6 +5,7 @@
 Grounds is a TypeScript implementation of Alex Gaynor's [Relish](https://github.com/alex/relish) binary serialization format. The library provides efficient binary encoding with explicit backwards compatibility through field tagging.
 
 **Goals:**
+
 - Full Relish spec compliance (20 type IDs, T[L]V encoding, validation rules)
 - Cross-platform support (Node.js, browser, edge runtimes)
 - Two-layer architecture: low-level wire format + schema-driven TypeBox integration
@@ -12,6 +13,7 @@ Grounds is a TypeScript implementation of Alex Gaynor's [Relish](https://github.
 - Type-safe API with Result types (neverthrow) for all fallible operations
 
 **Success criteria:**
+
 - Byte-level compatibility with Rust reference implementation
 - All Rust test vectors pass
 - Full TypeScript type inference from schemas
@@ -37,6 +39,7 @@ grounds/
 Low-level Relish wire format implementation.
 
 **Exports:**
+
 - `TypeCode` - Enum of all 20 Relish type IDs (0x00-0x13)
 - `RelishValue` - Discriminated union of all value types
 - Value constructors: `Null`, `Bool()`, `U8()`, ..., `Struct()`, `Enum()`
@@ -52,6 +55,7 @@ Low-level Relish wire format implementation.
 TypeBox integration for schema-driven serialization.
 
 **Exports:**
+
 - Type constructors: `RNull()`, `RBool()`, `RU8()`, ..., `RTimestamp()`
 - Collection types: `RArray()`, `RMap()`, `ROptional()`
 - Composite types: `RStruct()`, `REnum()`, `field()`, `variant()`
@@ -66,6 +70,7 @@ TypeBox integration for schema-driven serialization.
 Streaming encode/decode utilities.
 
 **Exports:**
+
 - `encodeIterable(values): AsyncGenerator<Uint8Array>` - Primary streaming encoder
 - `decodeIterable(chunks): AsyncGenerator<Result<RelishValue, DecodeError>>` - Primary streaming decoder
 - `createEncoderStream()` / `createDecoderStream()` - Web Streams wrappers
@@ -112,6 +117,7 @@ JavaScript Value
 ### Wire Format Summary
 
 Relish uses Type-Length-Value encoding:
+
 - **Type ID**: 1 byte (0x00-0x13, bit 7 reserved)
 - **Length** (varsize types only): Tagged varint
   - Bit 0 = 0: 7-bit length (0-127 bytes)
@@ -120,27 +126,28 @@ Relish uses Type-Length-Value encoding:
 
 ### Type Mapping
 
-| Relish Type | TypeCode | JS Type | Schema Type |
-|-------------|----------|---------|-------------|
-| Null | 0x00 | `null` | `RNull()` |
-| Bool | 0x01 | `boolean` | `RBool()` |
-| u8-u32 | 0x02-0x04 | `number` | `RU8()`, `RU16()`, `RU32()` |
-| u64, u128 | 0x05-0x06 | `bigint` | `RU64()`, `RU128()` |
-| i8-i32 | 0x07-0x09 | `number` | `RI8()`, `RI16()`, `RI32()` |
-| i64, i128 | 0x0a-0x0b | `bigint` | `RI64()`, `RI128()` |
-| f32, f64 | 0x0c-0x0d | `number` | `RF32()`, `RF64()` |
-| String | 0x0e | `string` | `RString()` |
-| Array | 0x0f | `T[]` | `RArray(T)` |
-| Map | 0x10 | `Map<K, V>` | `RMap(K, V)` |
-| Struct | 0x11 | `object` | `RStruct({...})` |
-| Enum | 0x12 | tagged union | `REnum({...})` |
-| Timestamp | 0x13 | `DateTime` (Luxon) | `RTimestamp()` |
+| Relish Type | TypeCode  | JS Type            | Schema Type                 |
+| ----------- | --------- | ------------------ | --------------------------- |
+| Null        | 0x00      | `null`             | `RNull()`                   |
+| Bool        | 0x01      | `boolean`          | `RBool()`                   |
+| u8-u32      | 0x02-0x04 | `number`           | `RU8()`, `RU16()`, `RU32()` |
+| u64, u128   | 0x05-0x06 | `bigint`           | `RU64()`, `RU128()`         |
+| i8-i32      | 0x07-0x09 | `number`           | `RI8()`, `RI16()`, `RI32()` |
+| i64, i128   | 0x0a-0x0b | `bigint`           | `RI64()`, `RI128()`         |
+| f32, f64    | 0x0c-0x0d | `number`           | `RF32()`, `RF64()`          |
+| String      | 0x0e      | `string`           | `RString()`                 |
+| Array       | 0x0f      | `T[]`              | `RArray(T)`                 |
+| Map         | 0x10      | `Map<K, V>`        | `RMap(K, V)`                |
+| Struct      | 0x11      | `object`           | `RStruct({...})`            |
+| Enum        | 0x12      | tagged union       | `REnum({...})`              |
+| Timestamp   | 0x13      | `DateTime` (Luxon) | `RTimestamp()`              |
 
 ## Existing Patterns
 
 This is a greenfield project. No existing codebase patterns to follow.
 
 **Patterns adopted from user's other projects (~/Code):**
+
 - Vitest for testing
 - Oxlint for linting (strict rules)
 - Mise for tool management
@@ -150,6 +157,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 - `src/` for source, `tests/` for tests
 
 **Patterns from Relish ecosystem:**
+
 - Test vectors extracted from Rust reference implementation
 - Byte-level compatibility validation
 
@@ -160,6 +168,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Initialize monorepo with tooling and CLAUDE.md
 
 **Components:**
+
 - Create: `packages/core/package.json`
 - Create: `packages/schema/package.json`
 - Create: `packages/stream/package.json`
@@ -175,6 +184,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** None (first phase)
 
 **Testing:**
+
 - `pnpm install` succeeds
 - `pnpm build` succeeds (empty packages)
 - `pnpm lint` runs without error
@@ -185,6 +195,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement type system and value constructors
 
 **Components:**
+
 - Create: `packages/core/src/types.ts` (TypeCode enum, RelishValue union)
 - Create: `packages/core/src/values.ts` (Null, Bool, U8...Enum constructors)
 - Create: `packages/core/src/errors.ts` (EncodeError, DecodeError classes)
@@ -194,6 +205,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 1 complete
 
 **Testing:**
+
 - Value constructors create correct RelishValue objects
 - TypeCode constants match Relish spec (0x00-0x13)
 - Error classes have correct structure and static factory methods
@@ -203,6 +215,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement binary encoding for all types
 
 **Components:**
+
 - Create: `packages/core/src/encoder.ts`
   - `encode(value: RelishValue): Result<Uint8Array, EncodeError>`
   - `class Encoder` with pre-allocated buffer
@@ -215,6 +228,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 2 complete
 
 **Testing:**
+
 - All primitive types encode correctly
 - Structs encode with ascending field IDs
 - Maps encode with consistent key/value types
@@ -227,6 +241,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement binary decoding with full validation
 
 **Components:**
+
 - Create: `packages/core/src/decoder.ts`
   - `decode(bytes: Uint8Array): Result<RelishValue, DecodeError>`
   - `class Decoder` for instance reuse
@@ -241,6 +256,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 3 complete
 
 **Testing:**
+
 - All primitive types decode correctly
 - Invalid type IDs (bit 7 set) rejected
 - Unsorted struct field IDs rejected
@@ -255,6 +271,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement TypeBox-based schema type constructors
 
 **Components:**
+
 - Create: `packages/schema/src/types.ts`
   - `RNull()`, `RBool()`, `RU8()`...`RF64()`, `RString()`, `RTimestamp()`
   - `RArray<T>()`, `RMap<K, V>()`, `ROptional<T>()`
@@ -274,6 +291,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 4 complete
 
 **Testing:**
+
 - Schema types carry correct TypeCode metadata
 - TypeScript infers correct static types from schemas
 - ROptional wraps schemas correctly
@@ -284,6 +302,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement type-safe encoding/decoding with schema
 
 **Components:**
+
 - Create: `packages/schema/src/convert.ts`
   - `toRelish(value, schema): Result<RelishValue, EncodeError>`
   - `fromRelish(value, schema): Result<T, DecodeError>`
@@ -298,6 +317,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 5 complete
 
 **Testing:**
+
 - Struct encoding/decoding with type inference
 - Enum encoding/decoding with variant discrimination
 - Optional fields omitted when undefined
@@ -310,6 +330,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Implement streaming encode/decode
 
 **Components:**
+
 - Create: `packages/stream/src/buffer.ts`
   - `StreamBuffer` class for chunk accumulation
   - `append()`, `peek()`, `consume()`, `tryDecodeOne()`
@@ -330,6 +351,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 6 complete
 
 **Testing:**
+
 - Multiple values encode to stream correctly
 - Decoding handles chunk boundaries (value split across chunks)
 - Incomplete final value returns error
@@ -341,6 +363,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Goal:** Prepare for npm publish
 
 **Components:**
+
 - Create: `packages/core/README.md`
 - Create: `packages/schema/README.md`
 - Create: `packages/stream/README.md`
@@ -354,6 +377,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Dependencies:** Phase 7 complete
 
 **Testing:**
+
 - All READMEs render correctly
 - TSDoc generates API docs
 - Examples compile and run
@@ -371,6 +395,7 @@ This is a greenfield project. No existing codebase patterns to follow.
 **Browser compatibility:** Uses `Uint8Array` and `DataView` everywhere. No Node.js-specific APIs in core. Web Streams API (ReadableStream/WritableStream) for streaming.
 
 **Performance considerations:**
+
 - Pre-allocated buffers in `Encoder` class
 - Instance reuse for repeated encode/decode
 - DataView for multi-byte integers (V8 optimized)

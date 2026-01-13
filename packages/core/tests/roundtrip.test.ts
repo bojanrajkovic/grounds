@@ -1,7 +1,31 @@
 // pattern: Functional Core
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import { encode, decode, Null, Bool, U8, U16, U32, U64, U128, I8, I32, I64, I128, F64, String_ as Str, Timestamp, Array_, Map_, Struct, Enum, TypeCode, DateTime, type RelishValue } from "../src/index.js";
+import {
+  encode,
+  decode,
+  Null,
+  Bool,
+  U8,
+  U16,
+  U32,
+  U64,
+  U128,
+  I8,
+  I32,
+  I64,
+  I128,
+  F64,
+  String_ as Str,
+  Timestamp,
+  Array_,
+  Map_,
+  Struct,
+  Enum,
+  TypeCode,
+  DateTime,
+  type RelishValue,
+} from "../src/index.js";
 import { expectOk } from "@grounds/test-utils";
 
 describe("Roundtrip encode/decode", () => {
@@ -25,7 +49,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === b;
-      })
+      }),
     );
   });
 
@@ -42,7 +66,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
@@ -59,7 +83,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
@@ -76,7 +100,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
@@ -94,7 +118,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === bign;
-      })
+      }),
     );
   });
 
@@ -111,7 +135,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === bign;
-      })
+      }),
     );
   });
 
@@ -136,7 +160,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
@@ -153,25 +177,28 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
   it("roundtrips i64", () => {
     fc.assert(
-      fc.property(fc.integer({ min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }), (n) => {
-        const bign = BigInt(n);
-        const value = I64(bign);
-        const encoded = encode(value);
-        if (encoded.isErr()) {
-          return false;
-        }
-        const decoded = decode(encoded.value);
-        if (decoded.isErr()) {
-          return false;
-        }
-        return decoded.value === bign;
-      })
+      fc.property(
+        fc.integer({ min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER }),
+        (n) => {
+          const bign = BigInt(n);
+          const value = I64(bign);
+          const encoded = encode(value);
+          if (encoded.isErr()) {
+            return false;
+          }
+          const decoded = decode(encoded.value);
+          if (decoded.isErr()) {
+            return false;
+          }
+          return decoded.value === bign;
+        },
+      ),
     );
   });
 
@@ -188,7 +215,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === bign;
-      })
+      }),
     );
   });
 
@@ -221,7 +248,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === n;
-      })
+      }),
     );
   });
 
@@ -238,7 +265,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return decoded.value === s;
-      })
+      }),
     );
   });
 
@@ -259,7 +286,7 @@ describe("Roundtrip encode/decode", () => {
         }
         const dt = decoded.value;
         return DateTime.isDateTime(dt) && dt.toSeconds() === n;
-      })
+      }),
     );
   });
 
@@ -280,7 +307,7 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return JSON.stringify(decodedArr) === JSON.stringify(arr);
-      })
+      }),
     );
   });
 
@@ -301,19 +328,14 @@ describe("Roundtrip encode/decode", () => {
           return false;
         }
         return JSON.stringify(decodedArr) === JSON.stringify(arr);
-      })
+      }),
     );
   });
 
   it("roundtrips Map<u32, string> as ReadonlyMap", () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.tuple(
-            fc.integer({ min: 0, max: 0xffffffff }),
-            fc.string()
-          )
-        ),
+        fc.array(fc.tuple(fc.integer({ min: 0, max: 0xffffffff }), fc.string())),
         (entries) => {
           // Remove duplicate keys
           const uniqueEntries = new Map(entries);
@@ -339,8 +361,8 @@ describe("Roundtrip encode/decode", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 });
@@ -392,8 +414,8 @@ describe("Nested Arrays roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -401,17 +423,12 @@ describe("Nested Arrays roundtrip", () => {
     fc.assert(
       fc.property(
         fc.array(
-          fc.array(
-            fc.array(fc.string({ maxLength: 10 }), { maxLength: 3 }),
-            { maxLength: 3 }
-          ),
-          { maxLength: 3 }
+          fc.array(fc.array(fc.string({ maxLength: 10 }), { maxLength: 3 }), { maxLength: 3 }),
+          { maxLength: 3 },
         ),
         (cube) => {
           // Build 3D nested array structure
-          const innerMost = cube.map((plane) =>
-            plane.map((row) => Array_(TypeCode.String, row))
-          );
+          const innerMost = cube.map((plane) => plane.map((row) => Array_(TypeCode.String, row)));
           const middle = innerMost.map((plane) => Array_(TypeCode.Array, plane));
           const value = Array_(TypeCode.Array, middle);
 
@@ -427,8 +444,8 @@ describe("Nested Arrays roundtrip", () => {
 
           // Deep equality check
           return JSON.stringify(decoded.value) === JSON.stringify(cube);
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -460,8 +477,8 @@ describe("Nested Arrays roundtrip", () => {
             JSON.stringify(result[0]) === JSON.stringify(u32Array) &&
             JSON.stringify(result[1]) === JSON.stringify(u32Array)
           );
-        }
-      )
+        },
+      ),
     );
   });
 });
@@ -473,9 +490,9 @@ describe("Nested Maps roundtrip", () => {
         fc.array(
           fc.tuple(
             fc.string({ maxLength: 10 }),
-            fc.array(fc.integer({ min: 0, max: 0xffffffff }), { maxLength: 5 })
+            fc.array(fc.integer({ min: 0, max: 0xffffffff }), { maxLength: 5 }),
           ),
-          { maxLength: 5 }
+          { maxLength: 5 },
         ),
         (entries) => {
           // Remove duplicate keys
@@ -514,8 +531,8 @@ describe("Nested Maps roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -527,10 +544,10 @@ describe("Nested Maps roundtrip", () => {
             fc.string({ maxLength: 10 }),
             fc.array(
               fc.tuple(fc.string({ maxLength: 10 }), fc.integer({ min: 0, max: 0xffffffff })),
-              { maxLength: 3 }
-            )
+              { maxLength: 3 },
+            ),
           ),
-          { maxLength: 3 }
+          { maxLength: 3 },
         ),
         (outerEntries) => {
           // Remove duplicate keys at outer level
@@ -582,8 +599,8 @@ describe("Nested Maps roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 });
@@ -620,8 +637,8 @@ describe("Nested Structs roundtrip", () => {
             JSON.stringify(result[1]) === JSON.stringify(friends) &&
             result[2] === age
           );
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -629,10 +646,9 @@ describe("Nested Structs roundtrip", () => {
     fc.assert(
       fc.property(
         fc.string({ maxLength: 20 }),
-        fc.array(
-          fc.tuple(fc.string({ maxLength: 10 }), fc.string({ maxLength: 20 })),
-          { maxLength: 5 }
-        ),
+        fc.array(fc.tuple(fc.string({ maxLength: 10 }), fc.string({ maxLength: 20 })), {
+          maxLength: 5,
+        }),
         (name, settingsEntries) => {
           const settings = new Map(settingsEntries);
 
@@ -669,8 +685,8 @@ describe("Nested Structs roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -718,8 +734,8 @@ describe("Nested Structs roundtrip", () => {
             result[2][0] === street &&
             result[2][1] === city
           );
-        }
-      )
+        },
+      ),
     );
   });
 });
@@ -733,7 +749,7 @@ describe("Complex combinations roundtrip", () => {
             name: fc.string({ maxLength: 20 }),
             age: fc.integer({ min: 0, max: 150 }),
           }),
-          { maxLength: 5 }
+          { maxLength: 5 },
         ),
         (people) => {
           // Build array of struct values
@@ -742,8 +758,8 @@ describe("Complex combinations roundtrip", () => {
               new Map<number, RelishValue>([
                 [0, Str(p.name)],
                 [1, U8(p.age)],
-              ])
-            )
+              ]),
+            ),
           );
           const value = Array_(TypeCode.Struct, structs);
 
@@ -773,8 +789,8 @@ describe("Complex combinations roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -787,7 +803,7 @@ describe("Complex combinations roundtrip", () => {
             name: fc.string({ maxLength: 20 }),
             role: fc.string({ maxLength: 20 }),
           }),
-          { maxLength: 5 }
+          { maxLength: 5 },
         ),
         (teamName, members) => {
           // Build member structs
@@ -796,8 +812,8 @@ describe("Complex combinations roundtrip", () => {
               new Map<number, RelishValue>([
                 [0, Str(m.name)],
                 [1, Str(m.role)],
-              ])
-            )
+              ]),
+            ),
           );
 
           // Team struct: { 0: name, 1: members }
@@ -805,7 +821,7 @@ describe("Complex combinations roundtrip", () => {
             new Map<number, RelishValue>([
               [0, Str(teamName)],
               [1, Array_(TypeCode.Struct, memberStructs)],
-            ])
+            ]),
           );
 
           const encoded = encode(team);
@@ -840,8 +856,8 @@ describe("Complex combinations roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -854,9 +870,9 @@ describe("Complex combinations roundtrip", () => {
             fc.record({
               value: fc.integer({ min: 0, max: 0xffffffff }),
               enabled: fc.boolean(),
-            })
+            }),
           ),
-          { maxLength: 5 }
+          { maxLength: 5 },
         ),
         (entries) => {
           const uniqueEntries = new Map(entries);
@@ -870,8 +886,8 @@ describe("Complex combinations roundtrip", () => {
                 new Map<number, RelishValue>([
                   [0, U32(config.value)],
                   [1, Bool(config.enabled)],
-                ])
-              )
+                ]),
+              ),
             );
           }
 
@@ -887,10 +903,7 @@ describe("Complex combinations roundtrip", () => {
             return false;
           }
 
-          const result = decoded.value as ReadonlyMap<
-            string,
-            { 0: number; 1: boolean }
-          >;
+          const result = decoded.value as ReadonlyMap<string, { 0: number; 1: boolean }>;
           if (!(result instanceof Map)) {
             return false;
           }
@@ -911,8 +924,8 @@ describe("Complex combinations roundtrip", () => {
             }
           }
           return true;
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -921,7 +934,11 @@ describe("Complex combinations roundtrip", () => {
       fc.property(
         fc.oneof(
           fc.record({ type: fc.constant("success" as const), data: fc.string({ maxLength: 50 }) }),
-          fc.record({ type: fc.constant("error" as const), code: fc.integer({ min: 0, max: 1000 }), message: fc.string({ maxLength: 100 }) })
+          fc.record({
+            type: fc.constant("error" as const),
+            code: fc.integer({ min: 0, max: 1000 }),
+            message: fc.string({ maxLength: 100 }),
+          }),
         ),
         (result) => {
           let value: RelishValue;
@@ -930,10 +947,7 @@ describe("Complex combinations roundtrip", () => {
           if (result.type === "success") {
             // Variant 0: Success { 0: data }
             expectedVariantId = 0;
-            value = Enum(
-              0,
-              Struct(new Map<number, RelishValue>([[0, Str(result.data)]]))
-            );
+            value = Enum(0, Struct(new Map<number, RelishValue>([[0, Str(result.data)]])));
           } else {
             // Variant 1: Error { 0: code, 1: message }
             expectedVariantId = 1;
@@ -943,8 +957,8 @@ describe("Complex combinations roundtrip", () => {
                 new Map<number, RelishValue>([
                   [0, U32(result.code)],
                   [1, Str(result.message)],
-                ])
-              )
+                ]),
+              ),
             );
           }
 
@@ -970,8 +984,8 @@ describe("Complex combinations roundtrip", () => {
             const payload = decodedResult.value as { 0: number; 1: string };
             return payload[0] === result.code && payload[1] === result.message;
           }
-        }
-      )
+        },
+      ),
     );
   });
 
@@ -979,8 +993,14 @@ describe("Complex combinations roundtrip", () => {
     fc.assert(
       fc.property(
         fc.oneof(
-          fc.record({ variant: fc.constant(0 as const), values: fc.array(fc.integer({ min: 0, max: 255 }), { maxLength: 10 }) }),
-          fc.record({ variant: fc.constant(1 as const), values: fc.array(fc.string({ maxLength: 20 }), { maxLength: 5 }) })
+          fc.record({
+            variant: fc.constant(0 as const),
+            values: fc.array(fc.integer({ min: 0, max: 255 }), { maxLength: 10 }),
+          }),
+          fc.record({
+            variant: fc.constant(1 as const),
+            values: fc.array(fc.string({ maxLength: 20 }), { maxLength: 5 }),
+          }),
         ),
         (input) => {
           let value: RelishValue;
@@ -1001,14 +1021,17 @@ describe("Complex combinations roundtrip", () => {
             return false;
           }
 
-          const decodedResult = decoded.value as { variantId: number; value: ReadonlyArray<unknown> };
+          const decodedResult = decoded.value as {
+            variantId: number;
+            value: ReadonlyArray<unknown>;
+          };
           if (decodedResult.variantId !== input.variant) {
             return false;
           }
 
           return JSON.stringify(decodedResult.value) === JSON.stringify(input.values);
-        }
-      )
+        },
+      ),
     );
   });
 });
@@ -1022,10 +1045,7 @@ describe("Edge cases roundtrip", () => {
     expect(decoded1).toEqual([]);
 
     // 2D array with empty inner arrays
-    const emptyRows = Array_(TypeCode.Array, [
-      Array_(TypeCode.U8, []),
-      Array_(TypeCode.U8, []),
-    ]);
+    const emptyRows = Array_(TypeCode.Array, [Array_(TypeCode.U8, []), Array_(TypeCode.U8, [])]);
     const encoded2 = expectOk(encode(emptyRows));
     const decoded2 = expectOk(decode(encoded2));
     expect(decoded2).toEqual([[], []]);
@@ -1045,7 +1065,7 @@ describe("Edge cases roundtrip", () => {
       new Map([
         ["a", Map_(TypeCode.String, TypeCode.U32, new Map())],
         ["b", Map_(TypeCode.String, TypeCode.U32, new Map())],
-      ])
+      ]),
     );
     const encoded2 = expectOk(encode(mapWithEmptyMaps));
     const decoded2 = expectOk(decode(encoded2)) as ReadonlyMap<string, ReadonlyMap<string, number>>;
@@ -1067,25 +1087,21 @@ describe("Edge cases roundtrip", () => {
       new Map<number, RelishValue>([
         [0, Str("deep")],
         [1, U32(42)],
-      ])
+      ]),
     );
 
     // Level 3: array of structs
     const level3 = Array_(TypeCode.Struct, [innermost, innermost]);
 
     // Level 2: map with array values
-    const level2 = Map_(
-      TypeCode.String,
-      TypeCode.Array,
-      new Map([["items", level3]])
-    );
+    const level2 = Map_(TypeCode.String, TypeCode.Array, new Map([["items", level3]]));
 
     // Level 1: struct with map field
     const level1 = Struct(
       new Map<number, RelishValue>([
         [0, Str("container")],
         [1, level2],
-      ])
+      ]),
     );
 
     const encoded = expectOk(encode(level1));

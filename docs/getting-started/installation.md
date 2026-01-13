@@ -25,6 +25,7 @@ pnpm add @grounds/schema @sinclair/typebox luxon
 The schema package includes `@grounds/core` as a dependency.
 
 **Peer dependencies:**
+
 - `@sinclair/typebox` - TypeBox for schema definitions
 - `luxon` - DateTime handling for timestamps
 

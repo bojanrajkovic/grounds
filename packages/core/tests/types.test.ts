@@ -27,9 +27,7 @@ describe("TypeCode", () => {
   });
 
   it("has exactly 20 type codes", () => {
-    const values = Object.values(TypeCode).filter(
-      (v) => typeof v === "number"
-    );
+    const values = Object.values(TypeCode).filter((v) => typeof v === "number");
     expect(values.length).toBe(20);
   });
 });
@@ -99,7 +97,7 @@ describe("RelishValue", () => {
     const u32Array: RelishValue = {
       type: "array",
       elementType: TypeCode.U32,
-      elements: [1, 2, 3],  // Raw numbers, not { type: "u32", value: 1 }
+      elements: [1, 2, 3], // Raw numbers, not { type: "u32", value: 1 }
     };
     expect(u32Array.elementType).toBe(TypeCode.U32);
     expect(u32Array.elements).toEqual([1, 2, 3]);
@@ -107,7 +105,7 @@ describe("RelishValue", () => {
     const stringArray: RelishValue = {
       type: "array",
       elementType: TypeCode.String,
-      elements: ["hello", "world"],  // Raw strings
+      elements: ["hello", "world"], // Raw strings
     };
     expect(stringArray.elements).toEqual(["hello", "world"]);
   });
@@ -133,7 +131,7 @@ describe("RelishValue", () => {
       keyType: TypeCode.String,
       valueType: TypeCode.U32,
       entries: new Map([
-        ["a", 1],  // Raw [string, number], not [RelishValue, RelishValue]
+        ["a", 1], // Raw [string, number], not [RelishValue, RelishValue]
         ["b", 2],
       ]),
     };

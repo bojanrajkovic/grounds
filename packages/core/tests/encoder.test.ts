@@ -35,16 +35,12 @@ describe("encode primitives (Rust test vectors)", () => {
     // From Rust: true = 0xFF, false = 0x00
     it("encodes true as type byte + 0xFF", () => {
       const result = expectOk(encode(Bool(true)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.Bool, 0xff])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.Bool, 0xff]));
     });
 
     it("encodes false as type byte + 0x00", () => {
       const result = expectOk(encode(Bool(false)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.Bool, 0x00])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.Bool, 0x00]));
     });
   });
 
@@ -52,26 +48,19 @@ describe("encode primitives (Rust test vectors)", () => {
     // From Rust: u8(42) = [0x02, 0x2A]
     it("encodes u8(42)", () => {
       const result = expectOk(encode(U8(42)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.U8, 0x2a])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.U8, 0x2a]));
     });
 
     // From Rust: u32(42) = [0x04, 0x2A, 0x00, 0x00, 0x00]
     it("encodes u32(42) little-endian", () => {
       const result = expectOk(encode(U32(42)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.U32, 0x2a, 0x00, 0x00, 0x00])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.U32, 0x2a, 0x00, 0x00, 0x00]));
     });
 
     it("encodes u64 little-endian", () => {
       const result = expectOk(encode(U64(0x123456789abcdef0n)));
       expect(result).toEqual(
-        new Uint8Array([
-          TypeCode.U64,
-          0xf0, 0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12,
-        ])
+        new Uint8Array([TypeCode.U64, 0xf0, 0xde, 0xbc, 0x9a, 0x78, 0x56, 0x34, 0x12]),
       );
     });
 
@@ -91,18 +80,13 @@ describe("encode primitives (Rust test vectors)", () => {
     // From Rust: i32(-42) = [0x09, 0xD6, 0xFF, 0xFF, 0xFF]
     it("encodes i32(-42)", () => {
       const result = expectOk(encode(I32(-42)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.I32, 0xd6, 0xff, 0xff, 0xff])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.I32, 0xd6, 0xff, 0xff, 0xff]));
     });
 
     it("encodes i64(-1)", () => {
       const result = expectOk(encode(I64(-1n)));
       expect(result).toEqual(
-        new Uint8Array([
-          TypeCode.I64,
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        ])
+        new Uint8Array([TypeCode.I64, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
       );
     });
   });
@@ -115,16 +99,12 @@ describe("encode primitives (Rust test vectors)", () => {
 
     it("encodes F32 positive infinity", () => {
       const result = expectOk(encode(F32(Infinity)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0x7f])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0x7f]));
     });
 
     it("encodes F32 negative infinity", () => {
       const result = expectOk(encode(F32(-Infinity)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0xff])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x80, 0xff]));
     });
 
     it("encodes F32 NaN", () => {
@@ -146,14 +126,14 @@ describe("encode primitives (Rust test vectors)", () => {
     it("encodes F64 positive infinity", () => {
       const result = expectOk(encode(F64(Infinity)));
       expect(result).toEqual(
-        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f])
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f]),
       );
     });
 
     it("encodes F64 negative infinity", () => {
       const result = expectOk(encode(F64(-Infinity)));
       expect(result).toEqual(
-        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff])
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xff]),
       );
     });
 
@@ -170,31 +150,27 @@ describe("encode primitives (Rust test vectors)", () => {
 
     it("encodes F32 zero", () => {
       const result = expectOk(encode(F32(0)));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x00])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x00]));
     });
 
     it("encodes F64 zero", () => {
       const result = expectOk(encode(F64(0)));
       expect(result).toEqual(
-        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
       );
     });
 
     it("encodes F32 negative zero", () => {
       const result = expectOk(encode(F32(-0)));
       // Negative zero: 0x80000000 -> [0x00, 0x00, 0x00, 0x80]
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x80])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.F32, 0x00, 0x00, 0x00, 0x80]));
     });
 
     it("encodes F64 negative zero", () => {
       const result = expectOk(encode(F64(-0)));
       // Negative zero: 0x8000000000000000 -> [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
       expect(result).toEqual(
-        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80])
+        new Uint8Array([TypeCode.F64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]),
       );
     });
   });
@@ -206,16 +182,12 @@ describe("encode primitives (Rust test vectors)", () => {
       const bytes = expectOk(encode(String_("Hello, Relish!")));
       expect(bytes[0]).toBe(TypeCode.String);
       expect(bytes[1]).toBe(0x1c); // length 14 << 1
-      expect(bytes.slice(2)).toEqual(
-        new TextEncoder().encode("Hello, Relish!")
-      );
+      expect(bytes.slice(2)).toEqual(new TextEncoder().encode("Hello, Relish!"));
     });
 
     it("encodes empty string", () => {
       const result = expectOk(encode(String_("")));
-      expect(result).toEqual(
-        new Uint8Array([TypeCode.String, 0x00])
-      );
+      expect(result).toEqual(new Uint8Array([TypeCode.String, 0x00]));
     });
   });
 
@@ -232,9 +204,7 @@ describe("encode structs (Rust test vectors)", () => {
   // From Rust: Empty struct = [0x11, 0x00]
   it("encodes empty struct", () => {
     const result = expectOk(encode(Struct(new Map())));
-    expect(result).toEqual(
-      new Uint8Array([TypeCode.Struct, 0x00])
-    );
+    expect(result).toEqual(new Uint8Array([TypeCode.Struct, 0x00]));
   });
 
   // From Rust: Simple { value: 42 } where field_id=0
@@ -244,7 +214,7 @@ describe("encode structs (Rust test vectors)", () => {
     const fields = new Map<number, RelishValue>([[0, U32(42)]]);
     const result = expectOk(encode(Struct(fields)));
     expect(result).toEqual(
-      new Uint8Array([TypeCode.Struct, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00])
+      new Uint8Array([TypeCode.Struct, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00]),
     );
   });
 
@@ -274,10 +244,21 @@ describe("encode structs (Rust test vectors)", () => {
 
     expect(result).toEqual(
       new Uint8Array([
-        0x11, 0x18,                              // Struct, length=12 bytes
-        0x00, 0x0e, 0x06, 0x45, 0x76, 0x65,      // Field 0: String "Eve"
-        0x01, 0x04, 0x2a, 0x00, 0x00, 0x00,      // Field 1: U32 42
-      ])
+        0x11,
+        0x18, // Struct, length=12 bytes
+        0x00,
+        0x0e,
+        0x06,
+        0x45,
+        0x76,
+        0x65, // Field 0: String "Eve"
+        0x01,
+        0x04,
+        0x2a,
+        0x00,
+        0x00,
+        0x00, // Field 1: U32 42
+      ]),
     );
   });
 });
@@ -288,7 +269,7 @@ describe("encode enums (Rust test vectors)", () => {
   it("encodes enum variant with u32", () => {
     const result = expectOk(encode(Enum(0, U32(42))));
     expect(result).toEqual(
-      new Uint8Array([TypeCode.Enum, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00])
+      new Uint8Array([TypeCode.Enum, 0x0c, 0x00, TypeCode.U32, 0x2a, 0x00, 0x00, 0x00]),
     );
   });
 
@@ -313,12 +294,26 @@ describe("encode arrays (Rust test vectors)", () => {
     const result = expectOk(encode(Array_(TypeCode.U32, [1, 2, 3, 4])));
     expect(result).toEqual(
       new Uint8Array([
-        TypeCode.Array, 0x22, TypeCode.U32,
-        0x01, 0x00, 0x00, 0x00,
-        0x02, 0x00, 0x00, 0x00,
-        0x03, 0x00, 0x00, 0x00,
-        0x04, 0x00, 0x00, 0x00,
-      ])
+        TypeCode.Array,
+        0x22,
+        TypeCode.U32,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+        0x02,
+        0x00,
+        0x00,
+        0x00,
+        0x03,
+        0x00,
+        0x00,
+        0x00,
+        0x04,
+        0x00,
+        0x00,
+        0x00,
+      ]),
     );
   });
 
@@ -330,9 +325,7 @@ describe("encode arrays (Rust test vectors)", () => {
 
   it("encodes empty array", () => {
     const result = expectOk(encode(Array_(TypeCode.U8, [])));
-    expect(result).toEqual(
-      new Uint8Array([TypeCode.Array, 0x02, TypeCode.U8])
-    );
+    expect(result).toEqual(new Uint8Array([TypeCode.Array, 0x02, TypeCode.U8]));
   });
 
   it("encodes nested array without repeating type codes for composite elements", () => {
@@ -350,10 +343,18 @@ describe("encode arrays (Rust test vectors)", () => {
     // Inner2: 0x06, 0x02, 0x03, 0x04 (length=3 bytes, type=U8, values 3,4)
     expect(result).toEqual(
       new Uint8Array([
-        TypeCode.Array, 0x12, TypeCode.Array,
-        0x06, TypeCode.U8, 0x01, 0x02,
-        0x06, TypeCode.U8, 0x03, 0x04,
-      ])
+        TypeCode.Array,
+        0x12,
+        TypeCode.Array,
+        0x06,
+        TypeCode.U8,
+        0x01,
+        0x02,
+        0x06,
+        TypeCode.U8,
+        0x03,
+        0x04,
+      ]),
     );
   });
 
@@ -364,10 +365,18 @@ describe("encode arrays (Rust test vectors)", () => {
 
     expect(result).toEqual(
       new Uint8Array([
-        0x0f, 0x12, 0x0f,           // Outer: Array, length=9, element type=Array
-        0x06, 0x02, 0x09, 0x0a,     // Inner1: length=3, U8, [9, 10]
-        0x06, 0x02, 0x01, 0x02,     // Inner2: length=3, U8, [1, 2]
-      ])
+        0x0f,
+        0x12,
+        0x0f, // Outer: Array, length=9, element type=Array
+        0x06,
+        0x02,
+        0x09,
+        0x0a, // Inner1: length=3, U8, [9, 10]
+        0x06,
+        0x02,
+        0x01,
+        0x02, // Inner2: length=3, U8, [1, 2]
+      ]),
     );
   });
 });
@@ -382,34 +391,48 @@ describe("encode maps (Rust test vectors)", () => {
     const result = expectOk(encode(Map_(TypeCode.U32, TypeCode.U32, entries)));
     expect(result).toEqual(
       new Uint8Array([
-        TypeCode.Map, 0x14, TypeCode.U32, TypeCode.U32,
-        0x01, 0x00, 0x00, 0x00,
-        0x0a, 0x00, 0x00, 0x00,
-      ])
+        TypeCode.Map,
+        0x14,
+        TypeCode.U32,
+        TypeCode.U32,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+        0x0a,
+        0x00,
+        0x00,
+        0x00,
+      ]),
     );
   });
 
   it("encodes map with string keys and u32 values", () => {
-    const bytes = expectOk(encode(Map_(TypeCode.String, TypeCode.U32, {"key": 42})));
+    const bytes = expectOk(encode(Map_(TypeCode.String, TypeCode.U32, { key: 42 })));
     expect(bytes[0]).toBe(TypeCode.Map);
   });
 
   it("encodes empty map", () => {
     const result = expectOk(encode(Map_(TypeCode.String, TypeCode.U32, {})));
-    expect(result).toEqual(
-      new Uint8Array([TypeCode.Map, 0x04, TypeCode.String, TypeCode.U32])
-    );
+    expect(result).toEqual(new Uint8Array([TypeCode.Map, 0x04, TypeCode.String, TypeCode.U32]));
   });
 
   it('encodes {"a": 1, "b": 2} correctly', () => {
-    const result = expectOk(encode(Map_(TypeCode.String, TypeCode.U8, {"a": 1, "b": 2})));
+    const result = expectOk(encode(Map_(TypeCode.String, TypeCode.U8, { a: 1, b: 2 })));
 
     expect(result).toEqual(
       new Uint8Array([
-        0x10, 0x10, 0x0e, 0x02,  // Map, length=8, key type=String, value type=U8
-        0x02, 0x61, 0x01,        // "a" (length=1 as 0x02, char 'a'=0x61), value=1
-        0x02, 0x62, 0x02,        // "b" (length=1 as 0x02, char 'b'=0x62), value=2
-      ])
+        0x10,
+        0x10,
+        0x0e,
+        0x02, // Map, length=8, key type=String, value type=U8
+        0x02,
+        0x61,
+        0x01, // "a" (length=1 as 0x02, char 'a'=0x61), value=1
+        0x02,
+        0x62,
+        0x02, // "b" (length=1 as 0x02, char 'b'=0x62), value=2
+      ]),
     );
   });
 });
@@ -505,7 +528,10 @@ describe("encoder validation (defense in depth)", () => {
 
   describe("u128 range validation", () => {
     it("rejects value above u128 max", () => {
-      const invalidValue = { type: "u128", value: 340282366920938463463374607431768211456n } as unknown as RelishValue;
+      const invalidValue = {
+        type: "u128",
+        value: 340282366920938463463374607431768211456n,
+      } as unknown as RelishValue;
       const result = encode(invalidValue);
       expectErr(result);
       expect(result._unsafeUnwrapErr().message).toContain("out of range");
@@ -606,14 +632,20 @@ describe("encoder validation (defense in depth)", () => {
 
   describe("i128 range validation", () => {
     it("rejects value above i128 max", () => {
-      const invalidValue = { type: "i128", value: 170141183460469231731687303715884105728n } as unknown as RelishValue;
+      const invalidValue = {
+        type: "i128",
+        value: 170141183460469231731687303715884105728n,
+      } as unknown as RelishValue;
       const result = encode(invalidValue);
       expectErr(result);
       expect(result._unsafeUnwrapErr().message).toContain("out of range");
     });
 
     it("rejects value below i128 min", () => {
-      const invalidValue = { type: "i128", value: -170141183460469231731687303715884105729n } as unknown as RelishValue;
+      const invalidValue = {
+        type: "i128",
+        value: -170141183460469231731687303715884105729n,
+      } as unknown as RelishValue;
       const result = encode(invalidValue);
       expectErr(result);
       expect(result._unsafeUnwrapErr().message).toContain("out of range");

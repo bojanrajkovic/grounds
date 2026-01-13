@@ -31,7 +31,8 @@ const minimalProfile: Profile = {
 
 // Encode and decode both
 console.log("Full profile:");
-codec.encode(fullProfile)
+codec
+  .encode(fullProfile)
   .andThen((bytes) => codec.decode(bytes))
   .match(
     (decoded) => console.log("  Decoded:", decoded),
@@ -39,7 +40,8 @@ codec.encode(fullProfile)
   );
 
 console.log("\nMinimal profile:");
-codec.encode(minimalProfile)
+codec
+  .encode(minimalProfile)
   .andThen((bytes) => codec.decode(bytes))
   .match(
     (decoded) => console.log("  Decoded:", decoded),

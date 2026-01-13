@@ -22,7 +22,7 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
   - `DecodedValue` - Union type for decoder output (raw JS values: number | bigint | boolean | null | string | DateTime | ReadonlyArray | ReadonlyMap | object)
 - **Guarantees**:
   - All RelishValue types are readonly/immutable and branded (cannot be constructed with object literals)
-  - RelishValue must be created through value constructor functions (U8(), String_(), etc.)
+  - RelishValue must be created through value constructor functions (U8(), String\_(), etc.)
   - Integer value constructors (U8-U128, I8-I128) validate range at runtime, throw `Error` on invalid input
   - Encoder validates integer values (defense in depth), returns `EncodeError` for invalid values
   - Array/Map constructors validate element types at runtime
@@ -51,7 +51,7 @@ Low-level Relish wire format implementation. Provides type-safe value constructi
 - Discriminated union over classes: Enables exhaustive pattern matching, smaller bundle
 - Branded types via `RELISH_BRAND` symbol: Prevents object literal construction, enforces use of constructor functions
 - Defense-in-depth validation: Encoder re-validates integers even with branded types (catches bypasses at runtime)
-- Runtime validation in Array_/Map_: Catches type mismatches early despite TypeScript erasure
+- Runtime validation in Array*/Map*: Catches type mismatches early despite TypeScript erasure
 - Separate DecodedValue type: Decoder returns raw JS values, not wrapped RelishValue
 - Encoder class with reusable buffer: Avoids allocation overhead for repeated encoding
 - Decoder class with cursor: Tracks position for streaming decoding capability

@@ -50,8 +50,13 @@ wss.on("connection", (ws) => {
         for (const client of clients) {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             // Create an encoder stream and encode this message
-            const { readable: encoderOutput, writable: encoderInput } = new TransformStream<ChatMessage, ChatMessage>();
-            const encodedStream = encoderOutput.pipeThrough(createSchemaEncoderStream(ChatMessageSchema));
+            const { readable: encoderOutput, writable: encoderInput } = new TransformStream<
+              ChatMessage,
+              ChatMessage
+            >();
+            const encodedStream = encoderOutput.pipeThrough(
+              createSchemaEncoderStream(ChatMessageSchema),
+            );
 
             // Write message to encoder
             const encoderInputWriter = encoderInput.getWriter();
@@ -83,7 +88,10 @@ wss.on("connection", (ws) => {
     // Write to decoder stream
     if (decoderWriter) {
       decoderWriter.write(bytes).catch((error) => {
-        console.error("Failed to write to decoder stream:", error instanceof Error ? error.message : String(error));
+        console.error(
+          "Failed to write to decoder stream:",
+          error instanceof Error ? error.message : String(error),
+        );
       });
     }
   });

@@ -114,7 +114,9 @@ describe("Value constructors", () => {
     });
 
     it("throws on U64 overflow", () => {
-      expect(() => U64(18446744073709551616n)).toThrow("U64 value out of range: 18446744073709551616");
+      expect(() => U64(18446744073709551616n)).toThrow(
+        "U64 value out of range: 18446744073709551616",
+      );
     });
 
     it("throws on U64 underflow", () => {
@@ -232,11 +234,15 @@ describe("Value constructors", () => {
     });
 
     it("throws on I64 overflow", () => {
-      expect(() => I64(9223372036854775808n)).toThrow("I64 value out of range: 9223372036854775808");
+      expect(() => I64(9223372036854775808n)).toThrow(
+        "I64 value out of range: 9223372036854775808",
+      );
     });
 
     it("throws on I64 underflow", () => {
-      expect(() => I64(-9223372036854775809n)).toThrow("I64 value out of range: -9223372036854775809");
+      expect(() => I64(-9223372036854775809n)).toThrow(
+        "I64 value out of range: -9223372036854775809",
+      );
     });
 
     it("creates I128 value at min", () => {
@@ -334,21 +340,21 @@ describe("Value constructors", () => {
 
     it("throws on type mismatch (number in string array)", () => {
       // Runtime validation catches mismatched types even if TypeScript is bypassed
-      expect(() =>
-        Array_(TypeCode.String, [42 as unknown as string])
-      ).toThrow("array element at index 0 does not match expected type");
+      expect(() => Array_(TypeCode.String, [42 as unknown as string])).toThrow(
+        "array element at index 0 does not match expected type",
+      );
     });
 
     it("throws on type mismatch (string in u32 array)", () => {
-      expect(() =>
-        Array_(TypeCode.U32, ["not a number" as unknown as number])
-      ).toThrow("array element at index 0 does not match expected type");
+      expect(() => Array_(TypeCode.U32, ["not a number" as unknown as number])).toThrow(
+        "array element at index 0 does not match expected type",
+      );
     });
 
     it("throws on type mismatch (number in bigint array)", () => {
-      expect(() =>
-        Array_(TypeCode.U64, [42 as unknown as bigint])
-      ).toThrow("array element at index 0 does not match expected type");
+      expect(() => Array_(TypeCode.U64, [42 as unknown as bigint])).toThrow(
+        "array element at index 0 does not match expected type",
+      );
     });
   });
 
@@ -365,14 +371,28 @@ describe("Value constructors", () => {
 
     it("creates map from Map object (universal)", () => {
       // Any key type: accept Map
-      const map = Map_(TypeCode.String, TypeCode.U32, new Map([["a", 1], ["b", 2]]));
+      const map = Map_(
+        TypeCode.String,
+        TypeCode.U32,
+        new Map([
+          ["a", 1],
+          ["b", 2],
+        ]),
+      );
       expect(map.entries.get("a")).toBe(1);
       expect(map.entries.get("b")).toBe(2);
     });
 
     it("creates map with bigint keys (requires Map)", () => {
       // Non-string keys: only accepts Map, not Record
-      const map = Map_(TypeCode.U64, TypeCode.String, new Map([[1n, "one"], [2n, "two"]]));
+      const map = Map_(
+        TypeCode.U64,
+        TypeCode.String,
+        new Map([
+          [1n, "one"],
+          [2n, "two"],
+        ]),
+      );
       expect(map.keyType).toBe(TypeCode.U64);
       expect(map.valueType).toBe(TypeCode.String);
       expect(map.entries.get(1n)).toBe("one");
@@ -392,14 +412,14 @@ describe("Value constructors", () => {
     it("throws on key type mismatch", () => {
       // Using Map directly to bypass JavaScript's automatic string conversion
       const badMap = new Map([[42 as unknown as string, 1]]);
-      expect(() =>
-        Map_(TypeCode.String, TypeCode.U32, badMap)
-      ).toThrow("map key does not match expected type");
+      expect(() => Map_(TypeCode.String, TypeCode.U32, badMap)).toThrow(
+        "map key does not match expected type",
+      );
     });
 
     it("throws on value type mismatch", () => {
       expect(() =>
-        Map_(TypeCode.String, TypeCode.U32, { key: "not a number" as unknown as number })
+        Map_(TypeCode.String, TypeCode.U32, { key: "not a number" as unknown as number }),
       ).toThrow("map value does not match expected type");
     });
   });

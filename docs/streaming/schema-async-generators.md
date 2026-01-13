@@ -29,6 +29,7 @@ const codec = createCodec(MessageSchema);
 ```
 
 The codec provides:
+
 - `codec.encode(value)`: Encodes typed values to `Uint8Array`
 - `codec.decode(bytes)`: Decodes bytes to typed values
 - Full TypeScript type inference from the schema

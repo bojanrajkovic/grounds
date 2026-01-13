@@ -36,11 +36,10 @@ const UserSchema = RStruct({
 const codec = createCodec(UserSchema);
 
 // Encode
-codec.encode({ name: "Alice", age: 30 })
-  .match(
-    (bytes) => console.log("Encoded:", bytes.length, "bytes"),
-    (err) => console.error("Failed:", err.message),
-  );
+codec.encode({ name: "Alice", age: 30 }).match(
+  (bytes) => console.log("Encoded:", bytes.length, "bytes"),
+  (err) => console.error("Failed:", err.message),
+);
 ```
 
 ## Getting Started

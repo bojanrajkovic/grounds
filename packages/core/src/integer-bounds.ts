@@ -42,10 +42,7 @@ export type IntegerValidationError =
  * Validate an unsigned number (u8, u16, u32) is an integer within range.
  * @returns null if valid, or error details if invalid
  */
-export function validateUnsignedNumber(
-  value: number,
-  max: number
-): IntegerValidationError | null {
+export function validateUnsignedNumber(value: number, max: number): IntegerValidationError | null {
   if (!Number.isInteger(value)) {
     return { kind: "not_integer", value };
   }
@@ -62,7 +59,7 @@ export function validateUnsignedNumber(
 export function validateSignedNumber(
   value: number,
   min: number,
-  max: number
+  max: number,
 ): IntegerValidationError | null {
   if (!Number.isInteger(value)) {
     return { kind: "not_integer", value };
@@ -77,10 +74,7 @@ export function validateSignedNumber(
  * Validate an unsigned bigint (u64, u128) is within range.
  * @returns null if valid, or error details if invalid
  */
-export function validateUnsignedBigInt(
-  value: bigint,
-  max: bigint
-): IntegerValidationError | null {
+export function validateUnsignedBigInt(value: bigint, max: bigint): IntegerValidationError | null {
   if (value < 0n || value > max) {
     return { kind: "out_of_range", value, min: 0n, max };
   }
@@ -94,7 +88,7 @@ export function validateUnsignedBigInt(
 export function validateSignedBigInt(
   value: bigint,
   min: bigint,
-  max: bigint
+  max: bigint,
 ): IntegerValidationError | null {
   if (value < min || value > max) {
     return { kind: "out_of_range", value, min, max };

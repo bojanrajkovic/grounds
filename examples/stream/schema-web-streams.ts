@@ -1,10 +1,7 @@
 // examples/stream/schema-web-streams.ts
 // Demonstrates: Schema-aware Web Streams with automatic type conversion
 
-import {
-  createSchemaEncoderStream,
-  createSchemaDecoderStream,
-} from "@grounds/stream";
+import { createSchemaEncoderStream, createSchemaDecoderStream } from "@grounds/stream";
 import { RStruct, RString, field } from "@grounds/schema";
 import { type Static } from "@sinclair/typebox";
 
@@ -44,9 +41,7 @@ async function example(): Promise<void> {
 
   // Step 2: Pipe through schema encoder (accepts Message, outputs Uint8Array)
   console.log("Encoding messages through schema encoder stream...");
-  const encodedStream = messageStream.pipeThrough(
-    createSchemaEncoderStream(MessageSchema),
-  );
+  const encodedStream = messageStream.pipeThrough(createSchemaEncoderStream(MessageSchema));
 
   // Collect encoded chunks
   const chunks: Array<Uint8Array> = [];
@@ -73,9 +68,7 @@ async function example(): Promise<void> {
 
   // Step 4: Pipe through schema decoder (accepts Uint8Array, outputs typed Message)
   console.log("Decoding messages through schema decoder stream...");
-  const decodedStream = chunkStream.pipeThrough(
-    createSchemaDecoderStream(MessageSchema),
-  );
+  const decodedStream = chunkStream.pipeThrough(createSchemaDecoderStream(MessageSchema));
 
   // Collect decoded typed values
   const decodedMessages: Array<Message> = [];

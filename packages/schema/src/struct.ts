@@ -42,10 +42,7 @@ export type TStructField<T extends TSchema = TSchema> = T & {
  *
  * @see {@link RStruct} for combining fields into a struct schema
  */
-export function field<T extends TSchema>(
-  fieldId: number,
-  schema: T,
-): TStructField<T> {
+export function field<T extends TSchema>(fieldId: number, schema: T): TStructField<T> {
   return {
     ...schema,
     fieldId,
@@ -55,14 +52,13 @@ export function field<T extends TSchema>(
 /**
  * Schema type for a Relish struct.
  */
-export type TRStruct<
-  T extends Record<string, TStructField> = Record<string, TStructField>,
-> = TRelishSchema<{
-  readonly [K in keyof T]: T[K] extends { static: infer S } ? S : unknown;
-}> & {
-  [RelishKind]: "RStruct";
-  fields: T;
-};
+export type TRStruct<T extends Record<string, TStructField> = Record<string, TStructField>> =
+  TRelishSchema<{
+    readonly [K in keyof T]: T[K] extends { static: infer S } ? S : unknown;
+  }> & {
+    [RelishKind]: "RStruct";
+    fields: T;
+  };
 
 /**
  * Creates a struct schema from tagged field definitions.
@@ -117,9 +113,7 @@ export type TRStruct<
  *
  * @see {@link field} for creating individual field schemas
  */
-export function RStruct<T extends Record<string, TStructField>>(
-  fields: T,
-): TRStruct<T> {
+export function RStruct<T extends Record<string, TStructField>>(fields: T): TRStruct<T> {
   // Build a TypeBox object schema from field definitions
   const properties: Record<string, TSchema> = {};
   for (const [key, fieldSchema] of Object.entries(fields)) {

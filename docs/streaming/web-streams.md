@@ -17,9 +17,7 @@ Creates a `TransformStream` that encodes `RelishValue` to `Uint8Array`:
 ```typescript
 const encoderStream = createEncoderStream();
 
-valueStream
-  .pipeThrough(encoderStream)
-  .pipeTo(networkSink);
+valueStream.pipeThrough(encoderStream).pipeTo(networkSink);
 ```
 
 ## createDecoderStream
@@ -29,9 +27,7 @@ Creates a `TransformStream` that decodes `Uint8Array` to `RelishValue`:
 ```typescript
 const decoderStream = createDecoderStream();
 
-networkSource
-  .pipeThrough(decoderStream)
-  .pipeTo(valueHandler);
+networkSource.pipeThrough(decoderStream).pipeTo(valueHandler);
 ```
 
 ## Pipeline Composition
@@ -39,10 +35,7 @@ networkSource
 Chain multiple transforms:
 
 ```typescript
-sourceStream
-  .pipeThrough(createEncoderStream())
-  .pipeThrough(compressionStream)
-  .pipeTo(networkSink);
+sourceStream.pipeThrough(createEncoderStream()).pipeThrough(compressionStream).pipeTo(networkSink);
 ```
 
 ## Browser Compatibility

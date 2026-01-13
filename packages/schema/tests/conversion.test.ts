@@ -18,10 +18,7 @@ import {
 } from "../src/types.js";
 import { RStruct, field } from "../src/struct.js";
 import { REnum, variant } from "../src/enum.js";
-import {
-  EncodeError,
-  DecodeError,
-} from "@grounds/core";
+import { EncodeError, DecodeError } from "@grounds/core";
 import { DateTime } from "luxon";
 import { expectOk, expectDateTime, expectMap } from "@grounds/test-utils";
 
@@ -95,10 +92,7 @@ describe("toRelish primitives", () => {
 
 describe("toRelish Timestamp", () => {
   it("converts DateTime to timestamp bytes and round-trips", () => {
-    const dt = DateTime.fromObject(
-      { year: 2024, month: 1, day: 1 },
-      { zone: "UTC" },
-    );
+    const dt = DateTime.fromObject({ year: 2024, month: 1, day: 1 }, { zone: "UTC" });
     const encoded = expectOk(toRelish(dt, RTimestamp()));
     expect(encoded).toBeInstanceOf(Uint8Array);
 
@@ -149,7 +143,10 @@ describe("toRelish Array", () => {
 describe("toRelish Map", () => {
   it("converts Map<number, string> to bytes and round-trips", () => {
     const schema = RMap(RU32(), RString());
-    const original = new Map([[1, "one"], [2, "two"]]);
+    const original = new Map([
+      [1, "one"],
+      [2, "two"],
+    ]);
     const encoded = expectOk(toRelish(original, schema));
     expect(encoded).toBeInstanceOf(Uint8Array);
 
@@ -330,7 +327,10 @@ describe("fromRelish", () => {
   it("converts Map<number, string> from bytes", () => {
     const schema = RMap(RU32(), RString());
     const codec = createCodec(schema);
-    const map = new Map([[1, "one"], [2, "two"]]);
+    const map = new Map([
+      [1, "one"],
+      [2, "two"],
+    ]);
     const encoded = expectOk(codec.encode(map));
 
     const jsMap = expectOk(fromRelish(encoded, schema));

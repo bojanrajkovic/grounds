@@ -81,9 +81,7 @@ export async function generateChangeset({
 function findLastVersionTag(): string | null {
   try {
     // Try to find the most recent tag reachable from HEAD
-    const tag = execSync("git describe --tags --abbrev=0 2>/dev/null")
-      .toString()
-      .trim();
+    const tag = execSync("git describe --tags --abbrev=0 2>/dev/null").toString().trim();
     return tag || null;
   } catch {
     // No tags found
@@ -118,9 +116,7 @@ function getVersionBumpCommitsSinceMain({
       console.log(`Generating changesets for commits since tag: ${lastTag}`);
     } else {
       // No tags yet - get all commits on the production branch
-      console.log(
-        "No version tags found. Generating changesets for recent commits.",
-      );
+      console.log("No version tags found. Generating changesets for recent commits.");
       // Just get the last 10 commits to avoid processing entire history
       commitRange = `${productionBranch}~10..${productionBranch}`;
     }
@@ -129,9 +125,7 @@ function getVersionBumpCommitsSinceMain({
     commitRange = `${productionBranch}..${integrationBranch}`;
   }
 
-  const output = execSync(`git log --format="%H %B${delimiter}" ${commitRange}`)
-    .toString()
-    .trim();
+  const output = execSync(`git log --format="%H %B${delimiter}" ${commitRange}`).toString().trim();
 
   if (!output) {
     console.log("No commits found in range.");
@@ -143,8 +137,7 @@ function getVersionBumpCommitsSinceMain({
     .slice(0, -1)
     .map((commitText) => parseCommit({ commitText, packageFolders }))
     .filter(
-      ({ upgradeType, changedPackages }) =>
-        upgradeType !== null && changedPackages.length > 0,
+      ({ upgradeType, changedPackages }) => upgradeType !== null && changedPackages.length > 0,
     );
 }
 
@@ -167,11 +160,9 @@ function parseCommit({
   const commitMessage = commitParser.sync(message);
   const isBreakingChange = Boolean(
     commitMessage.body?.includes(BREAKING_PATTERN) ??
-      commitMessage.footer?.includes(BREAKING_PATTERN),
+    commitMessage.footer?.includes(BREAKING_PATTERN),
   );
-  const upgradeType = isBreakingChange
-    ? "major"
-    : bumpMap[commitMessage.type ?? ""] || "none";
+  const upgradeType = isBreakingChange ? "major" : bumpMap[commitMessage.type ?? ""] || "none";
   const changedPackages = getChangedPackagesForCommit({ sha, packageFolders });
   return {
     changedPackages,
@@ -195,9 +186,7 @@ function getChangedPackagesForCommit({
   packageFolders: Array<string>;
 }): string[] {
   // Get the list of changed files in the commit using git diff
-  const changedFiles = execSync(
-    `git diff --name-only --diff-filter=d ${sha}^ ${sha}`,
-  )
+  const changedFiles = execSync(`git diff --name-only --diff-filter=d ${sha}^ ${sha}`)
     .toString()
     .trim()
     .split("\n")
@@ -234,9 +223,7 @@ function getChangedPackagesForCommit({
 async function createChangesets(commits: CommitInfo[]): Promise<void> {
   const changesetDir = join(process.cwd(), ".changeset");
   await mkdir(changesetDir, { recursive: true });
-  await Promise.all(
-    commits.map((commit) => createChangeset(commit, changesetDir)),
-  );
+  await Promise.all(commits.map((commit) => createChangeset(commit, changesetDir)));
 }
 
 /**

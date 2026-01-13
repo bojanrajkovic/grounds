@@ -10,10 +10,7 @@
 //   pnpm exec tsx examples/stream/compressed-streams.ts deflate
 //   pnpm exec tsx examples/stream/compressed-streams.ts gzip 100
 
-import {
-  createSchemaEncoderStream,
-  createSchemaDecoderStream,
-} from "@grounds/stream";
+import { createSchemaEncoderStream, createSchemaDecoderStream } from "@grounds/stream";
 import { RStruct, RString, RTimestamp, RMap, field } from "@grounds/schema";
 import { type Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
@@ -80,10 +77,7 @@ function formatBytes(bytes: number): string {
 
 // Verify that decoded entries match the originals
 // Note: Relish timestamps are Unix seconds, so millisecond precision is lost
-function verifyRoundtrip(
-  originals: Array<LogEntry>,
-  decoded: Array<LogEntry>,
-): boolean {
+function verifyRoundtrip(originals: Array<LogEntry>, decoded: Array<LogEntry>): boolean {
   if (originals.length !== decoded.length) {
     return false;
   }
@@ -170,9 +164,10 @@ async function main(): Promise<void> {
   const compressedStream = sourceStream
     .pipeThrough(createSchemaEncoderStream(LogEntrySchema))
     .pipeThrough(
-      new CompressionStream(
-        algorithm as CompressionFormat,
-      ) as unknown as TransformStream<Uint8Array, Uint8Array>,
+      new CompressionStream(algorithm as CompressionFormat) as unknown as TransformStream<
+        Uint8Array,
+        Uint8Array
+      >,
     );
 
   // Step 3: Collect compressed bytes to measure size
@@ -201,9 +196,10 @@ async function main(): Promise<void> {
   // Note: Type assertions for same reasons as CompressionStream above
   const decodedStream = compressedDataStream
     .pipeThrough(
-      new DecompressionStream(
-        algorithm as CompressionFormat,
-      ) as unknown as TransformStream<Uint8Array, Uint8Array>,
+      new DecompressionStream(algorithm as CompressionFormat) as unknown as TransformStream<
+        Uint8Array,
+        Uint8Array
+      >,
     )
     .pipeThrough(createSchemaDecoderStream(LogEntrySchema));
 
@@ -222,9 +218,7 @@ async function main(): Promise<void> {
     },
   });
 
-  const measureEncodedStream = measureStream.pipeThrough(
-    createSchemaEncoderStream(LogEntrySchema),
-  );
+  const measureEncodedStream = measureStream.pipeThrough(createSchemaEncoderStream(LogEntrySchema));
   const measureReader = measureEncodedStream.getReader();
 
   while (true) {

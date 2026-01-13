@@ -1,7 +1,16 @@
 // pattern: Imperative Shell
 import { describe, it, expect } from "vitest";
 import { createSchemaEncoderStream, createSchemaDecoderStream } from "../src/schema-streams.js";
-import { RStruct, RString, RU32, RArray, REnum, field, variant, createCodec } from "@grounds/schema";
+import {
+  RStruct,
+  RString,
+  RU32,
+  RArray,
+  REnum,
+  field,
+  variant,
+  createCodec,
+} from "@grounds/schema";
 import { expectOk } from "@grounds/test-utils";
 
 describe("createSchemaEncoderStream", () => {

@@ -37,7 +37,9 @@ encode(value)
     context: "Failed while encoding user profile",
   }))
   .match(
-    (bytes) => { /* success */ },
+    (bytes) => {
+      /* success */
+    },
     (err) => console.error(err.context, "-", err.message),
   );
 ```
@@ -48,7 +50,7 @@ When chaining operations, errors propagate automatically:
 
 ```typescript
 encode(value)
-  .andThen((bytes) => decode(bytes))  // skipped if encode fails
+  .andThen((bytes) => decode(bytes)) // skipped if encode fails
   .match(
     (decoded) => console.log("Success:", decoded),
     (err) => console.error("Failed:", err.message),
