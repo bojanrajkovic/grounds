@@ -17,6 +17,7 @@ import {
 import { RStruct, RString, RTimestamp, RMap, field } from "@grounds/schema";
 import { type Static } from "@sinclair/typebox";
 import { DateTime } from "luxon";
+import { faker } from "@faker-js/faker";
 
 // Define a LogEntry schema - realistic for streaming + compression scenarios
 const LogEntrySchema = RStruct({
@@ -29,49 +30,42 @@ const LogEntrySchema = RStruct({
 
 type LogEntry = Static<typeof LogEntrySchema>;
 
-// Supported compression algorithms (standard Web Streams API)
+// Supported compression algorithms
+// gzip, deflate, deflate-raw: Standard Web Streams API (all runtimes)
+// zstd: Bun only (not available in browsers or Node.js)
 type CompressionAlgorithm = "gzip" | "deflate" | "deflate-raw" | "zstd";
 
 const VALID_ALGORITHMS: ReadonlyArray<CompressionAlgorithm> = [
   "gzip",
   "deflate",
   "deflate-raw",
-  "zstd"
+  "zstd",
 ];
 
 function isValidAlgorithm(value: string): value is CompressionAlgorithm {
   return VALID_ALGORITHMS.includes(value as CompressionAlgorithm);
 }
 
-// Generate sample log entries with varied data for realistic compression
+// Generate sample log entries with varied data using faker
 function generateLogEntries(count: number): Array<LogEntry> {
-  const levels = ["info", "warn", "error", "debug"];
-  const sources = ["api", "auth", "db", "cache", "worker"];
-  const messages = [
-    "Request completed successfully",
-    "Connection timeout occurred",
-    "Cache miss for key",
-    "User authentication failed",
-    "Database query executed",
-    "Background job started",
-    "Rate limit exceeded",
-    "Session expired",
-  ];
+  const levels = ["info", "warn", "error", "debug"] as const;
+  const sources = ["api", "auth", "db", "cache", "worker"] as const;
 
   const entries: Array<LogEntry> = [];
   const baseTime = DateTime.now().toUTC();
 
   for (let i = 0; i < count; i++) {
-    // Using non-null assertions since we're always within bounds
     entries.push({
       timestamp: baseTime.plus({ seconds: i }),
-      level: levels[i % levels.length]!,
-      message: messages[i % messages.length]!,
-      source: sources[i % sources.length]!,
+      level: faker.helpers.arrayElement(levels),
+      message: faker.hacker.phrase(),
+      source: faker.helpers.arrayElement(sources),
       attributes: new Map([
-        ["requestId", `req-${String(i).padStart(4, "0")}`],
-        ["userId", `user-${(i % 10) + 1}`],
-        ["duration", `${Math.floor(Math.random() * 1000)}ms`],
+        ["requestId", faker.string.uuid()],
+        ["userId", faker.string.nanoid(10)],
+        ["duration", `${faker.number.int({ min: 1, max: 5000 })}ms`],
+        ["ip", faker.internet.ipv4()],
+        ["userAgent", faker.internet.userAgent()],
       ]),
     });
   }
@@ -170,14 +164,15 @@ async function main(): Promise<void> {
 
   // Step 2: Encode → Compress pipeline
   // Schema encoder outputs Uint8Array, which feeds directly into CompressionStream
-  // Note: Type assertion needed due to TypeScript DOM type definitions mismatch
+  // Note: Type assertions needed because:
+  // 1. DOM types don't include "zstd" (Bun-only algorithm)
+  // 2. CompressionStream types don't perfectly align with Web Streams generics
   const compressedStream = sourceStream
     .pipeThrough(createSchemaEncoderStream(LogEntrySchema))
     .pipeThrough(
-      new CompressionStream(algorithm) as unknown as TransformStream<
-        Uint8Array,
-        Uint8Array
-      >,
+      new CompressionStream(
+        algorithm as CompressionFormat,
+      ) as unknown as TransformStream<Uint8Array, Uint8Array>,
     );
 
   // Step 3: Collect compressed bytes to measure size
@@ -203,13 +198,12 @@ async function main(): Promise<void> {
     },
   });
 
-  // Note: Type assertion needed due to TypeScript DOM type definitions mismatch
+  // Note: Type assertions for same reasons as CompressionStream above
   const decodedStream = compressedDataStream
     .pipeThrough(
-      new DecompressionStream(algorithm) as unknown as TransformStream<
-        Uint8Array,
-        Uint8Array
-      >,
+      new DecompressionStream(
+        algorithm as CompressionFormat,
+      ) as unknown as TransformStream<Uint8Array, Uint8Array>,
     )
     .pipeThrough(createSchemaDecoderStream(LogEntrySchema));
 

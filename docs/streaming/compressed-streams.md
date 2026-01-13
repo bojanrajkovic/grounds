@@ -48,27 +48,26 @@ networkSource
 
 ## Supported Algorithms
 
-The standard CompressionStream API supports:
+| Algorithm | Description | Runtime Support |
+|-----------|-------------|-----------------|
+| `gzip` | Most compatible, includes header/checksum | All runtimes |
+| `deflate` | Raw deflate with zlib header | All runtimes |
+| `deflate-raw` | Raw deflate, no header | All runtimes |
+| `zstd` | Fast, high compression ratio | Bun only |
 
-| Algorithm | Description | Use Case |
-|-----------|-------------|----------|
-| `gzip` | Most compatible, includes header/checksum | General purpose, HTTP compression |
-| `deflate` | Raw deflate with zlib header | Legacy compatibility |
-| `deflate-raw` | Raw deflate, no header | Custom protocols |
-
-**Note:** Advanced algorithms like Brotli and Zstd are not part of the standard CompressionStream API and require polyfills or platform-specific implementations.
+**Note:** Brotli is not currently supported by any runtime's native CompressionStream API.
 
 ## Compression Ratios
 
-Compression effectiveness depends on your data. Structured data with repeated values compresses well:
+Compression effectiveness depends on your data. The example uses [faker](https://fakerjs.dev/) to generate realistic, varied log entries:
 
 ```
-20 log entries:  ~71% compression (2,112 → 600 bytes)
-50 log entries:  ~80% compression (5,262 → 1,024 bytes)
-100 log entries: ~84% compression (10,508 → 1,650 bytes)
+20 log entries:  ~55% compression (5,763 → 2,576 bytes)
+50 log entries:  ~58% compression (14,000 → 5,900 bytes)
+100 log entries: ~60% compression (28,000 → 11,200 bytes)
 ```
 
-Relish's binary format is already compact, but compression adds significant savings for larger payloads with repetitive content.
+Highly repetitive data (same messages, same IDs) would compress even better. Real-world data typically falls somewhere in between.
 
 ## TypeScript Considerations
 
@@ -86,7 +85,7 @@ The TypeScript DOM types for `CompressionStream` don't perfectly align with Web 
 
 This is a TypeScript type definition issue, not a runtime problem.
 
-## Browser Compatibility
+## Runtime Compatibility
 
 CompressionStream is supported in:
 
@@ -94,8 +93,9 @@ CompressionStream is supported in:
 - Firefox 113+
 - Safari 16.4+
 - Edge 80+
-- Node.js 18+ (global)
+- Node.js 18+
 - Deno
+- Bun (includes `zstd` support)
 
 For older environments, consider polyfills like [compression-streams-polyfill](https://github.com/nicolo-ribaudo/compression-streams-polyfill).
 
