@@ -8,6 +8,7 @@
     "test": "echo 'Examples are not unit tested - run individually with tsx'"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.2.0",
     "@grounds/core": "workspace:*",
     "@grounds/schema": "workspace:*",
     "@grounds/stream": "workspace:*",

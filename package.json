@@ -21,6 +21,7 @@
     "@changesets/cli": "^2.27.0",
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
+    "@faker-js/faker": "^10.2.0",
     "@tsconfig/strictest": "^2.0.5",
     "@types/conventional-commits-parser": "^5.0.2",
     "@types/node": "^20.10.5",
