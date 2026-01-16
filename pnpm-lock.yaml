@@ -73,7 +73,7 @@ importers:
         version: link:../packages/stream
       '@sinclair/typebox':
         specifier: ^0.34.12
-        version: 0.34.46
+        version: 0.34.47
       luxon:
         specifier: ^3.5.0
         version: 3.7.2
@@ -121,7 +121,7 @@ importers:
         version: link:../test-utils
       '@sinclair/typebox':
         specifier: ^0.34.12
-        version: 0.34.46
+        version: 0.34.47
       '@types/luxon':
         specifier: ^3.4.2
         version: 3.7.1
@@ -146,7 +146,7 @@ importers:
         version: link:../test-utils
       '@sinclair/typebox':
         specifier: ^0.34.12
-        version: 0.34.46
+        version: 0.34.47
 
   packages/test-utils:
     dependencies:
@@ -841,8 +841,8 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@sinclair/typebox@0.34.46':
-    resolution: {integrity: sha512-kiW7CtS/NkdvTUjkjUJo7d5JsFfbJ14YjdhDk9KoEgK6nFjKNXZPrX0jfLA8ZlET4cFLHxOZ/0vFKOP+bOxIOQ==}
+  '@sinclair/typebox@0.34.47':
+    resolution: {integrity: sha512-ZGIBQ+XDvO5JQku9wmwtabcVTHJsgSWAHYtVuM9pBNNR5E88v6Jcj/llpmsjivig5X8A8HHOb4/mbEKPS5EvAw==}
 
   '@tsconfig/strictest@2.0.8':
     resolution: {integrity: sha512-XnQ7vNz5HRN0r88GYf1J9JJjqtZPiHt2woGJOo2dYqyHGGcd6OLGqSlBB6p1j9mpzja6Oe5BoPqWmeDx6X9rLw==}
@@ -2564,7 +2564,7 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@sinclair/typebox@0.34.46': {}
+  '@sinclair/typebox@0.34.47': {}
 
   '@tsconfig/strictest@2.0.8': {}
 
