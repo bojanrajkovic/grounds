@@ -100,6 +100,14 @@ pnpm add @grounds/core@alpha
 
 **All three packages** (@grounds/core, @grounds/schema, @grounds/stream) publish together with the same alpha version.
 
+**PR notifications:** When alpha packages publish, a comment is automatically posted to the associated PR with:
+
+- Package versions in a table format
+- Installation commands for each package
+- Commit SHA and branch info
+
+The comment is updated on subsequent pushes rather than creating duplicates. Commit statuses (`alpha-publish`) show pending/success/failure state.
+
 ### Production Releases
 
 **Automated workflow:**
