@@ -19,6 +19,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
+      statuses: write
     secrets: inherit
 
   publish-release:
