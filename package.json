@@ -27,7 +27,7 @@
     "@tsconfig/strictest": "^2.0.5",
     "@types/conventional-commits-parser": "^5.0.2",
     "@types/node": "^24.0.0",
-    "conventional-commits-parser": "^5.0.0",
+    "conventional-commits-parser": "^6.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "oxfmt": "^0.24.0",

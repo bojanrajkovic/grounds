@@ -28,7 +28,7 @@ import { execSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import commitParser, { type Commit } from "conventional-commits-parser";
+import { CommitParser, type Commit } from "conventional-commits-parser";
 
 type UpgradeType = "major" | "minor" | "patch" | "none";
 
@@ -42,8 +42,14 @@ type CommitInfo = {
 
 // https://github.com/changesets/changesets/issues/862
 
-// Pattern to identify breaking changes in commit messages
-const BREAKING_PATTERN = "BREAKING CHANGE";
+// Parser options for conventional-commits-parser
+// Handles both "feat!:" notation and "BREAKING CHANGE:" footer
+const PARSER_OPTIONS = {
+  headerPattern: /^(\w*)(?:\(([\w$.\-* ]*)\))?: (.*)$/,
+  breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+  headerCorrespondence: ["type", "scope", "subject"] as Array<string>,
+  noteKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
+};
 
 // Mapping of commit types to corresponding upgrade types
 const bumpMap: Record<string, UpgradeType> = {
@@ -157,12 +163,14 @@ function parseCommit({
   const commit = commitText.trim();
   const sha = commit.substring(0, 40);
   const message = commit.substring(40).trim();
-  const commitMessage = commitParser.sync(message);
-  const isBreakingChange = Boolean(
-    commitMessage.body?.includes(BREAKING_PATTERN) ??
-    commitMessage.footer?.includes(BREAKING_PATTERN),
+  const parser = new CommitParser(PARSER_OPTIONS);
+  const commitMessage = parser.parse(message);
+
+  // Check for breaking changes via notes array (handles both "feat!:" and "BREAKING CHANGE:" footer)
+  const isBreakingChange = commitMessage.notes.some(
+    (note) => note.title === "BREAKING CHANGE" || note.title === "BREAKING-CHANGE",
   );
-  const upgradeType = isBreakingChange ? "major" : bumpMap[commitMessage.type ?? ""] || "none";
+  const upgradeType = isBreakingChange ? "major" : bumpMap[commitMessage["type"] ?? ""] || "none";
   const changedPackages = getChangedPackagesForCommit({ sha, packageFolders });
   return {
     changedPackages,
