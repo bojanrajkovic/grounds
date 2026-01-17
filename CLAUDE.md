@@ -1,6 +1,6 @@
 # Grounds - Relish Serialization in TypeScript
 
-Last verified: 2026-01-10
+Last verified: 2026-01-17
 
 ## Project Overview
 
@@ -52,6 +52,22 @@ All commits MUST follow conventional commit format (enforced via hooks and PR ti
 | `docs:`, `chore:`, `test:`, `ci:`    | None         | No version bump                           |
 
 **Scope determines affected packages.** Breaking changes (`!` or `BREAKING CHANGE:`) trigger major bumps. During 0.x phase, breaking changes may occur in minor versions.
+
+### Breaking Changes
+
+Breaking changes trigger a major version bump. You MUST mark them explicitly for the `generate-changeset.ts` script to detect them:
+
+- **Option 1:** Add `!` after the type: `feat!: change API to return Result types`
+- **Option 2:** Include `BREAKING CHANGE:` in the commit footer:
+
+  ```
+  feat: change API to return Result types
+
+  BREAKING CHANGE: All factory functions now return Result<T, ValidationError[]>
+  instead of throwing exceptions. Callers must handle the Result type.
+  ```
+
+**Why this matters:** The `generate-changeset.ts` script parses conventional commits to determine version bumps. Without explicit breaking change markers, API-breaking changes will only trigger a minor bump instead of a major bump, violating semver.
 
 ### Linked Versioning
 
