@@ -84,3 +84,104 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+
+      - name: Notify PR and set success status
+        uses: actions/github-script@v7
+        env:
+          CORE_VERSION: ${{ steps.extract-versions.outputs.core_version }}
+          SCHEMA_VERSION: ${{ steps.extract-versions.outputs.schema_version }}
+          STREAM_VERSION: ${{ steps.extract-versions.outputs.stream_version }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        with:
+          script: |
+            const marker = '<!-- alpha-publish-comment -->';
+            const coreVersion = process.env.CORE_VERSION;
+            const schemaVersion = process.env.SCHEMA_VERSION;
+            const streamVersion = process.env.STREAM_VERSION;
+            const headSha = process.env.HEAD_SHA;
+            const headBranch = process.env.HEAD_BRANCH;
+
+            // Build comment body (no leading indentation to avoid markdown issues)
+            const commentBody = [
+              marker,
+              '## Alpha Packages Published',
+              '',
+              '| Package | Version |',
+              '|---------|---------|',
+              `| \`@grounds/core\` | \`${coreVersion}\` |`,
+              `| \`@grounds/schema\` | \`${schemaVersion}\` |`,
+              `| \`@grounds/stream\` | \`${streamVersion}\` |`,
+              '',
+              '**Install specific version:**',
+              '```bash',
+              `pnpm add @grounds/core@${coreVersion}`,
+              `pnpm add @grounds/schema@${schemaVersion}`,
+              `pnpm add @grounds/stream@${streamVersion}`,
+              '```',
+              '',
+              '**Or use the alpha tag (latest alpha):**',
+              '```bash',
+              'pnpm add @grounds/core@alpha',
+              '```',
+              '',
+              `<sub>Published from commit ${headSha.substring(0, 7)} on branch \`${headBranch}\`</sub>`
+            ].join('\n');
+
+            // Find PR for this branch
+            // Format: owner:branch for head parameter
+            const headFilter = `${context.repo.owner}:${headBranch}`;
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: headFilter,
+              state: 'open'
+            });
+
+            if (prs.length === 0) {
+              console.log(`No open PR found for branch ${headBranch}. Skipping PR comment.`);
+            } else {
+              const prNumber = prs[0].number;
+              console.log(`Found PR #${prNumber} for branch ${headBranch}`);
+
+              // Find existing comment with marker
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber
+              });
+
+              const existingComment = comments.find(comment =>
+                comment.body && comment.body.includes(marker)
+              );
+
+              if (existingComment) {
+                console.log(`Updating existing comment ${existingComment.id}`);
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: commentBody
+                });
+              } else {
+                console.log(`Creating new comment on PR #${prNumber}`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: commentBody
+                });
+              }
+            }
+
+            // Always set success status (even if no PR)
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: headSha,
+              state: 'success',
+              description: 'Alpha packages published successfully',
+              context: 'alpha-publish',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            });
+            console.log('Set commit status to success');
