@@ -68,6 +68,17 @@ jobs:
       - name: Create snapshot version
         run: pnpm exec changeset version --snapshot ${{ env.SNAPSHOT_TAG }}
 
+      - name: Extract package versions
+        id: extract-versions
+        run: |
+          CORE_VERSION=$(jq -r '.version' packages/core/package.json)
+          SCHEMA_VERSION=$(jq -r '.version' packages/schema/package.json)
+          STREAM_VERSION=$(jq -r '.version' packages/stream/package.json)
+          echo "core_version=${CORE_VERSION}" >> $GITHUB_OUTPUT
+          echo "schema_version=${SCHEMA_VERSION}" >> $GITHUB_OUTPUT
+          echo "stream_version=${STREAM_VERSION}" >> $GITHUB_OUTPUT
+          echo "Extracted versions: core=${CORE_VERSION}, schema=${SCHEMA_VERSION}, stream=${STREAM_VERSION}"
+
       - name: Publish alpha packages
         run: pnpm exec changeset publish --tag alpha
         env:
