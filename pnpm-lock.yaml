@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@changesets/get-dependents-graph@2.1.3':
+    hash: c2024124b2ffc61b15783eade47dd4415862028749dcc551a81911ea24c12e76
+    path: patches/@changesets__get-dependents-graph@2.1.3.patch
+
 importers:
 
   .:
@@ -1753,7 +1758,7 @@ snapshots:
   '@changesets/assemble-release-plan@6.0.9':
     dependencies:
       '@changesets/errors': 0.2.0
-      '@changesets/get-dependents-graph': 2.1.3
+      '@changesets/get-dependents-graph': 2.1.3(patch_hash=c2024124b2ffc61b15783eade47dd4415862028749dcc551a81911ea24c12e76)
       '@changesets/should-skip-package': 0.1.2
       '@changesets/types': 6.1.0
       '@manypkg/get-packages': 1.1.3
@@ -1770,7 +1775,7 @@ snapshots:
       '@changesets/changelog-git': 0.2.1
       '@changesets/config': 3.1.2
       '@changesets/errors': 0.2.0
-      '@changesets/get-dependents-graph': 2.1.3
+      '@changesets/get-dependents-graph': 2.1.3(patch_hash=c2024124b2ffc61b15783eade47dd4415862028749dcc551a81911ea24c12e76)
       '@changesets/get-release-plan': 4.0.14
       '@changesets/git': 3.0.4
       '@changesets/logger': 0.1.1
@@ -1799,7 +1804,7 @@ snapshots:
   '@changesets/config@3.1.2':
     dependencies:
       '@changesets/errors': 0.2.0
-      '@changesets/get-dependents-graph': 2.1.3
+      '@changesets/get-dependents-graph': 2.1.3(patch_hash=c2024124b2ffc61b15783eade47dd4415862028749dcc551a81911ea24c12e76)
       '@changesets/logger': 0.1.1
       '@changesets/types': 6.1.0
       '@manypkg/get-packages': 1.1.3
@@ -1810,7 +1815,7 @@ snapshots:
     dependencies:
       extendable-error: 0.1.7
 
-  '@changesets/get-dependents-graph@2.1.3':
+  '@changesets/get-dependents-graph@2.1.3(patch_hash=c2024124b2ffc61b15783eade47dd4415862028749dcc551a81911ea24c12e76)':
     dependencies:
       '@changesets/types': 6.1.0
       '@manypkg/get-packages': 1.1.3
