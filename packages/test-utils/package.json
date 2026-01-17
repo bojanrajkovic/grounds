@@ -20,7 +20,7 @@
   "dependencies": {
     "luxon": "^3.5.0",
     "neverthrow": "^8.1.1",
-    "vitest": "^2.1.9"
+    "vitest": "^4.0.0"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2"
