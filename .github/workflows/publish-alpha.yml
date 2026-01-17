@@ -15,6 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Setup mise
@@ -44,6 +45,9 @@ jobs:
           SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/^feat\///' | sed 's/^fix\///' | sed 's/\//-/g')
           SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
           echo "SNAPSHOT_TAG=${SANITIZED_BRANCH}-${SHORT_SHA}" >> $GITHUB_ENV
+
+      - name: Generate changesets from commits
+        run: pnpm exec tsx scripts/generate-changeset.ts -p origin/main -i HEAD
 
       - name: Create snapshot version
         run: pnpm exec changeset version --snapshot ${{ env.SNAPSHOT_TAG }}
