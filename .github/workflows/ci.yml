@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
 
       # Cache pnpm store manually instead of using setup-node's built-in cache.
       # Rationale: mise-action already installs Node from mise.toml. Adding
@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
 
       # Cache pnpm store manually instead of using setup-node's built-in cache.
       # Rationale: mise-action already installs Node from mise.toml. Adding
