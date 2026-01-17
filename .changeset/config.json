@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@grounds/examples"]
+  "ignore": ["@grounds/examples", "@grounds/test-utils"]
 }
