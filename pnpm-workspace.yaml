@@ -3,4 +3,4 @@ packages:
   - examples
 
 patchedDependencies:
-  '@changesets/get-dependents-graph@2.1.3': patches/@changesets__get-dependents-graph@2.1.3.patch
+  "@changesets/get-dependents-graph@2.1.3": patches/@changesets__get-dependents-graph@2.1.3.patch
