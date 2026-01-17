@@ -60,6 +60,23 @@ const bumpMap: Record<string, UpgradeType> = {
 };
 
 /**
+ * Reads the changeset config and returns the list of ignored packages.
+ * @returns Array of package names to ignore, or empty array if none configured.
+ */
+function getIgnoredPackages(): Array<string> {
+  const configPath = join(process.cwd(), ".changeset", "config.json");
+  if (!existsSync(configPath)) {
+    return [];
+  }
+  try {
+    const config = JSON.parse(readFileSync(configPath, "utf8"));
+    return Array.isArray(config.ignore) ? config.ignore : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Main function to generate changesets based on version bump commits.
  */
 export async function generateChangeset({
@@ -111,6 +128,7 @@ function getVersionBumpCommitsSinceMain({
   packageFolders: Array<string>;
 }): CommitInfo[] {
   const delimiter = "<!--|COMMIT|-->";
+  const ignoredPackages = getIgnoredPackages();
 
   // Determine the commit range based on the integration branch setting
   let commitRange: string;
@@ -141,7 +159,7 @@ function getVersionBumpCommitsSinceMain({
   return output
     .split(delimiter)
     .slice(0, -1)
-    .map((commitText) => parseCommit({ commitText, packageFolders }))
+    .map((commitText) => parseCommit({ commitText, packageFolders, ignoredPackages }))
     .filter(
       ({ upgradeType, changedPackages }) => upgradeType !== null && changedPackages.length > 0,
     );
@@ -150,15 +168,18 @@ function getVersionBumpCommitsSinceMain({
 /**
  * Parses a commit message and extracts relevant information.
  * @param commitText The commit message text.
- * @param packagePaths
+ * @param packageFolders The folders to search for packages.
+ * @param ignoredPackages Packages to exclude from changesets.
  * @returns A CommitInfo object containing parsed commit information.
  */
 function parseCommit({
   commitText,
   packageFolders,
+  ignoredPackages,
 }: {
   commitText: string;
   packageFolders: Array<string>;
+  ignoredPackages: Array<string>;
 }): CommitInfo {
   const commit = commitText.trim();
   const sha = commit.substring(0, 40);
@@ -171,7 +192,7 @@ function parseCommit({
     (note) => note.title === "BREAKING CHANGE" || note.title === "BREAKING-CHANGE",
   );
   const upgradeType = isBreakingChange ? "major" : bumpMap[commitMessage["type"] ?? ""] || "none";
-  const changedPackages = getChangedPackagesForCommit({ sha, packageFolders });
+  const changedPackages = getChangedPackagesForCommit({ sha, packageFolders, ignoredPackages });
   return {
     changedPackages,
     sha,
@@ -183,15 +204,18 @@ function parseCommit({
 
 /**
  * Retrieves the list of changed packages for a given commit.
+ * Excludes packages that are in the changeset ignore list.
  * @param commitSha The SHA of the commit.
  * @returns An array of changed package names.
  */
 function getChangedPackagesForCommit({
   sha,
   packageFolders,
+  ignoredPackages,
 }: {
   sha: string;
   packageFolders: Array<string>;
+  ignoredPackages: Array<string>;
 }): string[] {
   // Get the list of changed files in the commit using git diff
   const changedFiles = execSync(`git diff --name-only --diff-filter=d ${sha}^ ${sha}`)
@@ -213,7 +237,11 @@ function getChangedPackagesForCommit({
       const packageJsonPath = join(dir, "package.json");
       if (existsSync(packageJsonPath)) {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
-        changedPackages.add(packageJson.name);
+        const packageName = packageJson.name as string;
+        // Skip packages that are in the changeset ignore list
+        if (!ignoredPackages.includes(packageName)) {
+          changedPackages.add(packageName);
+        }
         processedPaths.add(dir);
         break;
       }
