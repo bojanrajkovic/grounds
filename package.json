@@ -20,22 +20,22 @@
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
-    "@faker-js/faker": "^10.2.0",
-    "@tsconfig/strictest": "^2.0.5",
-    "@types/conventional-commits-parser": "^5.0.2",
-    "@types/node": "^24.0.0",
-    "conventional-commits-parser": "^6.0.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "oxfmt": "^0.24.0",
-    "oxlint": "^1.0.0",
-    "tsx": "^4.21.0",
+    "@changesets/cli": "2.29.8",
+    "@commitlint/cli": "20.3.1",
+    "@commitlint/config-conventional": "20.3.1",
+    "@faker-js/faker": "10.2.0",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/conventional-commits-parser": "5.0.2",
+    "@types/node": "24.10.9",
+    "conventional-commits-parser": "6.2.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "oxfmt": "0.24.0",
+    "oxlint": "1.39.0",
+    "tsx": "4.21.0",
     "typedoc": "0.28.16",
-    "typescript": "^5.7.2",
-    "vitest": "^4.0.0"
+    "typescript": "5.9.3",
+    "vitest": "4.0.17"
   },
   "packageManager": "pnpm@10.28.0"
 }
