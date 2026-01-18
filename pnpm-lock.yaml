@@ -14,52 +14,52 @@ importers:
   .:
     devDependencies:
       '@changesets/cli':
-        specifier: ^2.27.0
+        specifier: 2.29.8
         version: 2.29.8(@types/node@24.10.9)
       '@commitlint/cli':
-        specifier: ^20.3.1
+        specifier: 20.3.1
         version: 20.3.1(@types/node@24.10.9)(typescript@5.9.3)
       '@commitlint/config-conventional':
-        specifier: ^20.3.1
+        specifier: 20.3.1
         version: 20.3.1
       '@faker-js/faker':
-        specifier: ^10.2.0
+        specifier: 10.2.0
         version: 10.2.0
       '@tsconfig/strictest':
-        specifier: ^2.0.5
+        specifier: 2.0.8
         version: 2.0.8
       '@types/conventional-commits-parser':
-        specifier: ^5.0.2
+        specifier: 5.0.2
         version: 5.0.2
       '@types/node':
-        specifier: ^24.0.0
+        specifier: 24.10.9
         version: 24.10.9
       conventional-commits-parser:
-        specifier: ^6.0.0
+        specifier: 6.2.1
         version: 6.2.1
       husky:
-        specifier: ^9.1.7
+        specifier: 9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^16.2.7
+        specifier: 16.2.7
         version: 16.2.7
       oxfmt:
-        specifier: ^0.24.0
+        specifier: 0.24.0
         version: 0.24.0
       oxlint:
-        specifier: ^1.0.0
+        specifier: 1.39.0
         version: 1.39.0
       tsx:
-        specifier: ^4.21.0
+        specifier: 4.21.0
         version: 4.21.0
       typedoc:
         specifier: 0.28.16
         version: 0.28.16(typescript@5.9.3)
       typescript:
-        specifier: ^5.7.2
+        specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^4.0.0
+        specifier: 4.0.17
         version: 4.0.17(@types/node@24.10.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
   examples:
@@ -106,10 +106,10 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
       '@types/luxon':
-        specifier: ^3.4.2
+        specifier: 3.7.1
         version: 3.7.1
       fast-check:
-        specifier: ^4.5.3
+        specifier: 4.5.3
         version: 4.5.3
 
   packages/schema:
@@ -125,13 +125,13 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
       '@sinclair/typebox':
-        specifier: ^0.34.12
+        specifier: 0.34.47
         version: 0.34.47
       '@types/luxon':
-        specifier: ^3.4.2
+        specifier: 3.7.1
         version: 3.7.1
       luxon:
-        specifier: ^3.5.0
+        specifier: 3.7.2
         version: 3.7.2
 
   packages/stream:
@@ -150,7 +150,7 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
       '@sinclair/typebox':
-        specifier: ^0.34.12
+        specifier: 0.34.47
         version: 0.34.47
 
   packages/test-utils:
@@ -166,7 +166,7 @@ importers:
         version: 4.0.17(@types/node@25.0.9)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
     devDependencies:
       '@types/luxon':
-        specifier: ^3.4.2
+        specifier: 3.7.1
         version: 3.7.1
 
 packages:

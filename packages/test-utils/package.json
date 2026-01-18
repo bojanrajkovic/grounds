@@ -23,6 +23,6 @@
     "vitest": "^4.0.0"
   },
   "devDependencies": {
-    "@types/luxon": "^3.4.2"
+    "@types/luxon": "3.7.1"
   }
 }
