@@ -24,23 +24,17 @@
   ],
   "packageRules": [
     {
-      "matchDepTypes": [
-        "devDependencies"
-      ],
+      "matchDepTypes": ["devDependencies"],
       "semanticCommitType": "chore",
       "semanticCommitScope": "deps"
     },
     {
-      "matchDepTypes": [
-        "dependencies"
-      ],
+      "matchDepTypes": ["dependencies"],
       "semanticCommitType": "fix",
       "semanticCommitScope": "deps"
     },
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "matchUpdateTypes": ["major"],
       "automerge": false
     }
   ]
