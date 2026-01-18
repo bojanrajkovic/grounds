@@ -68,7 +68,7 @@ jobs:
           fi
 
       - name: Create Release Pull Request or Publish
-        if: steps.check-changesets.outputs.has_changesets == 'true'
+        if: steps.check-changesets.outputs.has_changesets == 'true' || steps.check-release.outputs.is_release == 'true'
         uses: changesets/action@v1
         with:
           version: pnpm run changeset-version
