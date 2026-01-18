@@ -1,6 +1,6 @@
 # Grounds - Relish Serialization in TypeScript
 
-Last verified: 2026-01-17
+Last verified: 2026-01-18
 
 ## Project Overview
 
@@ -32,7 +32,7 @@ Branches should be prefixed with username and conventional commit type:
 
 - `<username>/<type>/<feature-name>`
 - Example: `brajkovic/feat/encoder-implementation`
-- Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
+- Types: `feat`, `fix`, `chore`, `ci`, `docs`, `perf`, `refactor`, `style`, `test`
 
 ## Changesets & Release Workflow
 
@@ -189,10 +189,49 @@ The repository uses Husky git hooks that enforce quality gates:
 
 - Format: `<type>(<scope>): <description>`
 - Example: `feat(schema): add TypeBox-based schema types`
-- Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`
 - Scope: package name without @grounds/ prefix (e.g., `core`, `schema`, `stream`, `test-utils`)
+- Non-package scopes: `ci`, `docs`, `release`, `deps` (for cross-cutting changes)
 
 Commits that don't follow this format will be rejected by the hook.
+
+#### Types That Trigger Version Bumps
+
+These types change library behavior and trigger releases via `generate-changeset.ts`:
+
+| Type       | Version Bump | When to Use                                                                                                |
+| ---------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `feat`     | Minor        | New functionality users can consume. If you add/remove `src` code and tests need updating, it's a feature. |
+| `fix`      | Patch        | Corrects incorrect behavior. A test reproducing the bug would fail before this commit and pass after.      |
+| `perf`     | Patch        | Performance improvements. Like refactor, but measurably improves speed or resource usage.                  |
+| `refactor` | Patch        | Restructures code without changing behavior. No tests break, no coverage lost—just cleaner internals.      |
+
+#### Types That Don't Trigger Version Bumps
+
+These types don't affect published library behavior:
+
+| Type     | When to Use                                                                            |
+| -------- | -------------------------------------------------------------------------------------- |
+| `docs`   | Documentation only (README, CLAUDE.md, markdown files, TSDoc comments).                |
+| `test`   | Adding or improving tests without changing `src` code.                                 |
+| `ci`     | CI/CD workflow changes (GitHub Actions, pipelines).                                    |
+| `build`  | Build system or external dependency changes (package.json scripts, tsconfig, tooling). |
+| `style`  | Formatting-only changes (whitespace, semicolons, linter auto-fixes). No logic changes. |
+| `chore`  | Maintenance tasks that don't fit elsewhere (.gitignore, editor configs, housekeeping). |
+| `revert` | Reverts a previous commit.                                                             |
+
+#### Decision Guide
+
+**fix vs feat**: Does it correct existing broken behavior (fix) or add new capability (feat)?
+
+**fix vs refactor**: Would a bug-reproducing test fail before this change? If yes → `fix`. If no behavior changes → `refactor`.
+
+**refactor vs perf**: Does it measurably improve performance metrics? If yes → `perf`. If it's just cleaner code → `refactor`.
+
+**refactor vs style**: Does it change code structure or logic organization? If yes → `refactor`. If only formatting → `style`.
+
+**ci vs build**: CI/CD pipeline configuration (workflows, actions) → `ci`. Local build tooling (package.json scripts, tsconfig) → `build`.
+
+**chore**: Catch-all for tasks that don't change src, tests, docs, or build. Use sparingly.
 
 ### Pull Request Requirements
 
