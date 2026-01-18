@@ -6,7 +6,7 @@
     "replacements:all",
     "workarounds:all",
     "group:definitelyTyped",
-    "github>whitesource/merge-confidence:beta"
+    "mergeConfidence:all-badges"
   ],
   "semanticCommits": "enabled",
   "automerge": true,
@@ -24,17 +24,23 @@
   ],
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "semanticCommitType": "chore",
       "semanticCommitScope": "deps"
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "matchDepTypes": [
+        "dependencies"
+      ],
       "semanticCommitType": "fix",
       "semanticCommitScope": "deps"
     },
     {
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false
     }
   ]
