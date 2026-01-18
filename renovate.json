@@ -6,7 +6,7 @@
     "replacements:all",
     "workarounds:all",
     "group:definitelyTyped",
-    "github>whitesource/merge-confidence:beta"
+    "mergeConfidence:all-badges"
   ],
   "semanticCommits": "enabled",
   "automerge": true,
