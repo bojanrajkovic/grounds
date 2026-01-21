@@ -43,6 +43,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Check unused dependencies and exports
+        run: pnpm knip
+
       - name: Type check
         run: pnpm exec tsc --build
 
