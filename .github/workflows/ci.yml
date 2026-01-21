@@ -59,6 +59,15 @@ jobs:
           files: ./coverage/lcov.info
           fail_ci_if_error: true
 
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./test-results/junit.xml
+          report_type: test_results
+          disable_search: true
+
   validate-docs:
     name: Validate Documentation Build
     runs-on: ubuntu-latest
