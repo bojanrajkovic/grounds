@@ -1,0 +1,26 @@
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: down
+  status:
+    project:
+      default:
+        # Don't fail PR if coverage drops, just report
+        informational: true
+    patch:
+      default:
+        # Require new code to have at least 70% coverage
+        target: 70%
+
+comment:
+  layout: "header,reach,diff,flags,files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+ignore:
+  - "packages/*/src/index.ts"
+  - "packages/test-utils/**"

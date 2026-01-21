@@ -49,8 +49,22 @@ jobs:
       - name: Type check
         run: pnpm exec tsc --build
 
-      - name: Test
-        run: pnpm test
+      - name: Test with coverage
+        run: pnpm vitest run --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@f2dba722c67b86c6caa034178c6e4d35335f6706 # v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./test-results/junit.xml
 
   validate-docs:
     name: Validate Documentation Build
