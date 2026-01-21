@@ -6,6 +6,10 @@ export default defineConfig({
   test: {
     include: ["packages/*/tests/**/*.test.ts"],
     passWithNoTests: true,
+    reporters: ["default", "junit"],
+    outputFile: {
+      junit: "./test-results/junit.xml",
+    },
     coverage: {
       provider: "v8",
       include: ["packages/*/src/**/*.ts"],
