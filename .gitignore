@@ -15,8 +15,9 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Test coverage
+# Test coverage and results
 coverage/
+test-results/
 
 # Worktrees
 .worktrees/
