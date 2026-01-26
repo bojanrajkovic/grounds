@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@grounds/test-utils": "workspace:*",
-    "@sinclair/typebox": "0.34.47"
+    "@sinclair/typebox": "0.34.48"
   },
   "peerDependencies": {
     "@sinclair/typebox": ">=0.34.0"
