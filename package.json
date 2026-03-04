@@ -28,7 +28,7 @@
     "@types/conventional-commits-parser": "5.0.2",
     "@types/node": "24.11.0",
     "@vitest/coverage-v8": "4.0.18",
-    "conventional-commits-parser": "6.2.1",
+    "conventional-commits-parser": "6.3.0",
     "husky": "9.1.7",
     "knip": "5.85.0",
     "lint-staged": "16.3.1",
