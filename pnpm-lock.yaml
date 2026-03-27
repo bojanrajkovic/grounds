@@ -41,8 +41,8 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       knip:
-        specifier: 6.0.4
-        version: 6.0.4
+        specifier: 6.0.5
+        version: 6.0.5
       lint-staged:
         specifier: 16.4.0
         version: 16.4.0
@@ -1653,8 +1653,8 @@ packages:
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
 
-  knip@6.0.4:
-    resolution: {integrity: sha512-r/9F7wcxiFM71WgDFQiToE2hQHwZ/UkGmr74o8eiNFPIg80f7rlQHVrZiRX46Tj2yE3s96wUVNGMnsDMylgInw==}
+  knip@6.0.5:
+    resolution: {integrity: sha512-+i9e/ZKuYlECB5iIK82NQwnYso4oNLBhzsTbXhSqCG1qfGi6D84GNtRENafmS3C0lABX8Wf3BKM434nPXi2AbQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -3520,7 +3520,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  knip@6.0.4:
+  knip@6.0.5:
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       fast-glob: 3.3.3
@@ -3531,7 +3531,7 @@ snapshots:
       oxc-parser: 0.120.0
       oxc-resolver: 11.19.1
       picocolors: 1.1.1
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       smol-toml: 1.6.0
       strip-json-comments: 5.0.3
       unbash: 2.2.0
