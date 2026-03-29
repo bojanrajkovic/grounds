@@ -30,7 +30,7 @@
     "@vitest/coverage-v8": "4.1.1",
     "conventional-commits-parser": "6.3.0",
     "husky": "9.1.7",
-    "knip": "6.0.5",
+    "knip": "6.0.6",
     "lint-staged": "16.4.0",
     "oxfmt": "0.42.0",
     "oxlint": "1.57.0",
