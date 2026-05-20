@@ -2,7 +2,7 @@
 # IMPORTANT: Node version must match mise.toml
 
 # Build stage - install all dependencies
-FROM node:24-slim@sha256:b809ce06df0b8f49f8a3015e23a38f47fabfa1052d4d6916655eaae0d9950ff9 AS builder
+FROM node:24-slim@sha256:4e6b70dd6cbfc88c8157ba19aa3d9f9cce6ba4703576d55459e45efcbc9c5f5d AS builder
 
 WORKDIR /validator
 
@@ -22,7 +22,7 @@ RUN for pkg in core schema stream; do \
     done
 
 # Final stage - copy only what we need
-FROM node:24-slim@sha256:b809ce06df0b8f49f8a3015e23a38f47fabfa1052d4d6916655eaae0d9950ff9
+FROM node:24-slim@sha256:4e6b70dd6cbfc88c8157ba19aa3d9f9cce6ba4703576d55459e45efcbc9c5f5d
 
 WORKDIR /example
 
