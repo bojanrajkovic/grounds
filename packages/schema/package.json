@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@grounds/test-utils": "workspace:*",
-    "@sinclair/typebox": "0.34.51",
+    "@sinclair/typebox": "0.34.52",
     "@types/luxon": "3.7.2",
     "luxon": "3.7.2"
   },
