@@ -1,7 +1,7 @@
 [tools]
 node = "24"
 pnpm = "11.12.0"
-rust = "1.97.0"
+rust = "1.97.1"
 "cargo:mdbook" = "latest"
 "cargo:mdbook-validator" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
