@@ -29,7 +29,7 @@ Changesets manages versioning and publishing with two distinct workflows:
 - Merging Version Packages PR triggers publish to npm via OIDC
 - Linked versioning: packages bump based on dependency chain (core → schema → stream)
 
-**Alpha releases (feat/_ and fix/_ branches):**
+**Alpha releases (feat/\_ and fix/\_ branches):**
 
 - Triggered via `workflow_run` after CI passes
 - Snapshot versioning generates unique versions: `{version}-{branch-name}-{shortSha}`
