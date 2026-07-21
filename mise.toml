@@ -1,6 +1,6 @@
 [tools]
 node = "24"
-pnpm = "11.13.1"
+pnpm = "11.14.0"
 rust = "1.97.1"
 "cargo:mdbook" = "latest"
 "cargo:mdbook-validator" = "latest"
