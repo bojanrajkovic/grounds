@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@grounds/test-utils": "workspace:*",
-    "@types/luxon": "3.7.2",
+    "@types/luxon": "3.7.3",
     "fast-check": "4.9.0"
   },
   "engines": {
