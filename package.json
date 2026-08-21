@@ -27,7 +27,7 @@
     "@tsconfig/strictest": "2.0.8",
     "@types/conventional-commits-parser": "5.0.2",
     "@types/node": "24.13.3",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.11",
     "conventional-commits-parser": "7.1.2",
     "husky": "9.1.7",
     "knip": "6.32.2",
@@ -37,7 +37,7 @@
     "tsx": "4.23.12",
     "typedoc": "0.28.20",
     "typescript": "6.0.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "packageManager": "pnpm@11.22.0"
 }
