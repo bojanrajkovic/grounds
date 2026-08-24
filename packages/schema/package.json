@@ -43,7 +43,7 @@
   "devDependencies": {
     "@grounds/test-utils": "workspace:*",
     "@sinclair/typebox": "0.34.52",
-    "@types/luxon": "3.7.4",
+    "@types/luxon": "3.7.5",
     "luxon": "3.7.2"
   },
   "peerDependencies": {
