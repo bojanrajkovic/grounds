@@ -149,7 +149,13 @@ function getVersionBumpCommitsSinceMain({
     commitRange = `${productionBranch}..${integrationBranch}`;
   }
 
-  const output = execSync(`git log --format="%H %B${delimiter}" ${commitRange}`).toString().trim();
+  // Commit bodies since the last tag can exceed execSync's 1 MiB default
+  // (Renovate bodies are long), which fails the release job with ENOBUFS.
+  const output = execSync(`git log --format="%H %B${delimiter}" ${commitRange}`, {
+    maxBuffer: 256 * 1024 * 1024,
+  })
+    .toString()
+    .trim();
 
   if (!output) {
     console.log("No commits found in range.");
