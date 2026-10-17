@@ -295,7 +295,7 @@ function getChangesetMarkdown(commit: CommitInfo): string {
   }
 
   const headerContent = Object.entries(packageUpgrades)
-    .filter(([_, upgradeType]) => upgradeType !== null)
+    .filter(([, upgradeType]) => upgradeType !== null)
     .map(([packageName, upgradeType]) => `"${packageName}": ${upgradeType}`)
     .join("\n");
 
