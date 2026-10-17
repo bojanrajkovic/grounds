@@ -71,11 +71,11 @@ jobs:
         if: steps.check-changesets.outputs.has_changesets == 'true' || steps.check-release.outputs.is_release == 'true'
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version: pnpm run changeset-version
-          publish: pnpm run release
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
+          version-script: pnpm run changeset-version
+          publish-script: pnpm run release
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # npm authenticates through Trusted Publishing (the job's id-token),
+          # so no NPM_TOKEN: changesets/action v2 no longer writes .npmrc.
           NPM_CONFIG_PROVENANCE: true
