@@ -121,6 +121,8 @@ The comment is updated on subsequent pushes rather than creating duplicates. Com
 4. **Review Version Packages PR** to verify versions and changelog
 5. **Merge Version Packages PR** → packages publish to npm with `@latest` tag
 
+The publish job runs in the `release` environment. It mints a token for the releaser bot GitHub App from the environment's `RELEASER_BOT_CLIENT_ID` variable and `RELEASER_BOT_PRIVATE_KEY` secret. The bot opens the Version Packages PR, commits to it, and creates the `@grounds/<pkg>@<version>` tags and GitHub Releases. It needs its own token for two reasons. The "Protect tags" ruleset only lets the bot create tags. PRs opened with `GITHUB_TOKEN` don't trigger CI. npm publishing uses Trusted Publishing (OIDC), not the bot token. The bot never merges the Version Packages PR.
+
 **No manual changeset creation needed** - conventional commits drive everything.
 
 ### Manual Changeset Creation (Optional)
