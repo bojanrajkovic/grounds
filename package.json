@@ -33,7 +33,7 @@
     "knip": "6.44.1",
     "lint-staged": "17.6.0",
     "oxfmt": "0.76.0",
-    "oxlint": "1.91.0",
+    "oxlint": "1.92.0",
     "tsx": "4.23.15",
     "typedoc": "0.28.20",
     "typescript": "6.0.3",
