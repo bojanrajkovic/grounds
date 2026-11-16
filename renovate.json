@@ -1,41 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    ":maintainLockFilesWeekly",
-    "replacements:all",
-    "workarounds:all",
-    "group:definitelyTyped",
-    "mergeConfidence:all-badges"
-  ],
-  "semanticCommits": "enabled",
-  "automerge": true,
-  "automergeType": "pr",
-  "osvVulnerabilityAlerts": true,
-  "prBodyColumns": [
-    "Package",
-    "Type",
-    "Update",
-    "Change",
-    "Age",
-    "Adoption",
-    "Passing",
-    "Confidence"
-  ],
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "semanticCommitType": "chore",
-      "semanticCommitScope": "deps"
-    },
-    {
-      "matchDepTypes": ["dependencies"],
-      "semanticCommitType": "fix",
-      "semanticCommitScope": "deps"
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "automerge": false
-    }
-  ]
+  "extends": ["github>bojanrajkovic/renovate-config:library"]
 }
